@@ -1,0 +1,74 @@
+---
+id: storage
+title: Storage Module (sdk.storage)
+sidebar_label: sdk.storage
+---
+
+# Storage Module (`sdk.storage`)
+
+The `sdk.storage` module provides persistent key-value storage isolate-sandboxed for your mini app by the platform host.
+
+---
+
+## Public Methods
+
+### `get(key)` / `getJson<T>(key)`
+
+Reads a string or parsed JSON object from host storage.
+
+- **Signature**: `get(key: string): Promise<string | null>`
+- **Signature**: `getJson<T = unknown>(key: string): Promise<T | null>`
+
+```typescript
+const draft = await sdk.storage.getJson<{ taxYear: number }>("draft_tax");
+if (draft) {
+  console.log("Draft tax year:", draft.taxYear);
+}
+```
+
+### `set(key, value, options?)` / `setJson(key, value, options?)`
+
+Stores a string or JSON-serializable object with optional time-to-live (`ttlMs`).
+
+- **Signature**: `set(key: string, value: string, options?: StorageSetOptions): Promise<void>`
+- **Signature**: `setJson(key: string, value: unknown, options?: StorageSetOptions): Promise<void>`
+
+```typescript
+// Persist for 24 hours (86,400,000 ms)
+await sdk.storage.setJson(
+  "form_cache",
+  { step: 3, values: { name: "Ram" } },
+  { ttlMs: 86400000 }
+);
+```
+
+### `remove(key)`
+
+Deletes a key from storage.
+
+- **Signature**: `remove(key: string): Promise<void>`
+
+```typescript
+await sdk.storage.remove("form_cache");
+```
+
+### `getMany(keys)` / `getManyJson<T>(keys)`
+
+Batch reads via `rpc.batch` (host `batch.execute` or parallel fallback).
+
+```typescript
+const [a, b] = await sdk.storage.getMany(["draft_tax", "user_prefs"]);
+// (string | null)[]
+const [draft, prefs] = await sdk.storage.getManyJson<unknown>(["draft_tax", "user_prefs"]);
+```
+
+### `scoped(prefix)`
+
+Creates a nested `StorageSdkModule` instance where all keys are automatically prefixed.
+
+- **Signature**: `scoped(prefix: string): StorageSdkModule`
+
+```typescript
+const userSettings = sdk.storage.scoped("settings");
+await userSettings.set("theme", "dark"); // Stored under "settings:theme"
+```

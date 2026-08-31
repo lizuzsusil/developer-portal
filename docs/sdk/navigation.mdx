@@ -1,0 +1,61 @@
+---
+id: navigation
+title: Navigation Module (sdk.navigation)
+sidebar_label: sdk.navigation
+---
+
+# Navigation Module (`sdk.navigation`)
+
+The `sdk.navigation` module manages platform route transitions and synchronizes internal mini app routers with the host shell back button.
+
+---
+
+## Public Methods
+
+### `navigate(target)`
+
+Requests the host platform to perform a navigation transition.
+
+- **Signature**: `navigate(target: NavigationTarget): Promise<void>`
+
+```typescript
+await sdk.navigation.navigate({
+  path: "/services/vehicle-tax",
+  params: { vehicleNo: "BA-2-PA-9918" },
+});
+```
+
+### `getCurrent()`
+
+Queries current navigation state from the host.
+
+- **Signature**: `getCurrent(): Promise<NavigationState>`
+
+```typescript
+const navState = await sdk.navigation.getCurrent();
+console.log("Current Route:", navState.route);
+```
+
+### `router.back(consumed)`
+
+Reports whether the mini app internal router handled a back-press or wants the host to exit the mini app container.
+
+- **Signature**: `router.back(consumed?: boolean): Promise<NavigationRouterResult>`
+
+```typescript
+sdk.on("navigation.back.requested", async () => {
+  const hasInternalHistory = window.history.length > 1;
+  // If true, mini app handles back step. If false, host shell exits mini app.
+  await sdk.navigation.router.back(hasInternalHistory);
+});
+```
+
+### `router.push(consumed)`
+
+Notifies the host shell that the mini app pushed an internal route step.
+
+- **Signature**: `router.push(consumed?: boolean): Promise<NavigationRouterResult>`
+
+```typescript
+await sdk.navigation.router.push(true);
+```

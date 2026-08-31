@@ -1,0 +1,52 @@
+---
+id: stream
+title: Streaming
+sidebar_label: Streaming
+---
+
+# Streaming
+
+Long-lived responses (HTTP `getStream`, `http.stream` chat, GIC `gicChat.stream`) use `StreamBuilder`.
+
+## `StreamBuilder`
+
+```typescript
+const builder = sdk.http.getStream({ url: "https://api.example.com/export" });
+// or: const builder = sdk.http.stream({ messages });  — chat
+// or: await sdk.gicChat.stream({ user_id, session_id, message }, { onEvent });
+
+for await (const chunk of builder.iterate()) {
+  // chunk: string | Uint8Array (auto-ordered by streamIndex)
+}
+
+await builder.waitUntilDone();
+
+builder.cancel();              // → StreamCancelledError, notifies host (http.cancel)
+builder.isDone;                // boolean
+builder.isRejected;            // boolean
+builder.receivedBytes;         // number
+builder.receivedChunks;        // number
+builder.total;                 // number | null (from streamTotal)
+```
+
+Ordering is by `streamIndex`; the host marks the final chunk with `streamLast: true`.
+
+## Cancellation
+
+Two ways to cancel:
+
+```typescript
+// AbortSignal (preferred)
+const controller = new AbortController();
+const builder = sdk.http.getStream({ url }, { signal: controller.signal });
+controller.abort();
+
+// Direct
+builder.cancel();
+```
+
+Both reject `iterate()` / `waitUntilDone()` with `StreamCancelledError` and send `http.cancel { requestId }` to the host.
+
+## Wire
+
+Stream frames are `PlatformMessage` with `type: "stream"`, `streamIndex`, `streamTotal`, and `streamLast`. See [Protocol](/docs/sdk/protocol).

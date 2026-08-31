@@ -1,0 +1,59 @@
+---
+id: plugins
+title: Plugins & Registry
+sidebar_label: Plugins & Registry
+---
+
+# Plugins & Module Registry
+
+Extend the SDK without forking it.
+
+## Plugins — `SdkPlugin`
+
+```typescript
+interface SdkPlugin {
+  name: string;
+  install(ctx: { sdk: MiniAppSdk; rpc: RpcClient; logger: Logger }): void;
+  onInitialize?(): void | Promise<void>;
+  onDestroy?(): void | Promise<void>;
+}
+
+sdk.usePlugin(myPlugin);
+// deduped by name; onInitialize runs on sdk.initialize(), onDestroy on sdk.destroy()
+```
+
+Use `ctx.rpc` to add middleware or `sdk.addEventInterceptor` inside `install`. The offline queue is a plugin — see [Offline Queue](/docs/sdk/offline).
+
+## Module Registry
+
+Register host- or vendor-specific namespaces without modifying the SDK:
+
+```typescript
+sdk.registerModule("payments", (rpc) => ({
+  charge: (amount: number) => rpc.request("payments", "charge", { amount }),
+}));
+
+const payments = sdk.getModule<{ charge: (n: number) => Promise<void> }>("payments");
+
+// Async/lazy variant
+sdk.registerLazyModule("analytics", async () => (rpc) => ({ track: (e: string) => rpc.request("analytics", "track", { e }) }));
+const analytics = await sdk.getModuleAsync("analytics");
+```
+
+`sdk.getMetrics().registeredModules` and `sdk.debug.snapshot().registeredModules` list registered names.
+
+## Instance Registry
+
+```typescript
+import { createMiniAppSdk, getMiniAppSdk } from "@lizuz/mini-app-sdk";
+
+const sdk = createMiniAppSdk({ miniAppId: "tax-calc" });
+await sdk.initialize();
+getMiniAppSdk(); // active instance
+```
+
+`getAllInstances()`, `clearInstances()`, `registerInstance()` are also available for multi-mini-app tabs.
+
+## CDN Build
+
+`src/cdn.ts` is an IIFE that reads a pre-load config from `window.__GSA_SDK__` (a `MiniAppSdkOptions` object), auto-initializes, and then overwrites the global with the live instance. Used when the host injects the SDK via a `<script>` tag.

@@ -1,0 +1,86 @@
+---
+id: protocol
+title: Protocol & Handshake
+sidebar_label: Protocol & Handshake
+---
+
+# Protocol & Handshake
+
+The SDK and host speak a versioned message protocol over the transport. Every message carries a channel, protocol version, and capability negotiation on first contact.
+
+## Constants
+
+```typescript
+import { PROTOCOL_VERSION, MESSAGE_CHANNEL, HOST_TARGET } from "@lizuz/mini-app-sdk";
+// PROTOCOL_VERSION = "1.0.0"
+// MESSAGE_CHANNEL  = "gov-platform-sdk"
+// HOST_TARGET      = "shell"
+```
+
+| Constant | Value | Purpose |
+|---|---|---|
+| `PROTOCOL_VERSION` | `1.0.0` | Wire format version. Major bumps are breaking. |
+| `MESSAGE_CHANNEL` | `gov-platform-sdk` | Filters SDK traffic from unrelated `postMessage`s. |
+| `HOST_TARGET` | `shell` | `target` of every outbound request. |
+| `SDK_GLOBAL_KEY` | `__GSA_SDK__` | `window` key the host writes and the SDK overwrites with the live instance. |
+
+## Wire Shape — `PlatformMessage`
+
+```typescript
+interface PlatformMessage<TPayload = unknown> {
+  channel: string;            // "gov-platform-sdk"
+  requestId: string;          // correlation id
+  type: "request" | "response" | "event" | "handshake" | "stream";
+  namespace: string;          // e.g. "auth", "device"
+  action: string;             // e.g. "getUser", "location"
+  source: string;             // sender miniAppId
+  target: string;             // "shell" or miniAppId
+  gsaProtocolVersion: string; // "1.0.0"
+  traceId: string;
+  timestamp: number;
+  payload?: TPayload;
+  error?: { code: string; message: string; retryable?: boolean };
+  streamIndex?: number;
+  streamTotal?: number;
+  streamLast?: boolean;
+}
+```
+
+`createMessage()` stamps `channel`, `protocolVersion`, `traceId`, and `timestamp`. `isValidPlatformMessage` / `hasCompatibleMajorVersion` guard inbound traffic.
+
+## Handshake
+
+On first `sdk.auth.getUser()` (or any capability call) the SDK sends a `handshake` message:
+
+```typescript
+interface HandshakePayload {
+  miniAppId: string;
+  sdkVersion: string;
+  protocolVersion: string;          // "1.0.0"
+  protocolVersionRange?: string;    // "^1.0.0"
+  capabilities: readonly string[];  // 14 domain namespaces
+}
+
+interface HandshakeAckPayload {
+  status?: "ok" | "rejected";
+  reason?: string;
+  protocolVersion?: string;
+  supportedVersions?: readonly string[];
+  capabilities?: readonly string[] | Record<string, string>; // version map
+}
+```
+
+- `status: "rejected"` or a major version mismatch throws `HandshakeError`.
+- The granted `capabilities` list gates every subsequent `sdk.*` call — see [Errors](/docs/sdk/errors) for `CAPABILITY_NOT_SUPPORTED`.
+- `initialize()` is idempotent; concurrent callers share the same handshake promise.
+
+## Capability Gating
+
+```typescript
+// SDK_CAPABILITIES = auth, permissions, flags, config, navigation, storage,
+//                    platform, device, api, http, gic-chat, appearance, notifications, links
+sdk.capabilities        // string[] granted by host
+sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)
+```
+
+`gicChat` is gated by `http` — the host must grant `http` for `sdk.gicChat` to be available.

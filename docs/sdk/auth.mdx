@@ -1,0 +1,54 @@
+---
+id: auth
+title: Authentication Module (sdk.auth)
+sidebar_label: sdk.auth
+---
+
+# Authentication Module (`sdk.auth`)
+
+The `sdk.auth` module allows mini apps to access citizen identity information, verify authentication state, and request session logout via the host platform.
+
+---
+
+## Public Methods
+
+### `getUser()`
+
+Fetches the profile of the authenticated citizen.
+
+- **Signature**: `getUser(): Promise<PlatformUser | null>`
+- **Returns**: `PlatformUser` object or `null` if user is unauthenticated.
+
+```typescript
+const user = await sdk.auth.getUser();
+
+if (user) {
+  console.log("Citizen Name:", user.name);
+  console.log("Email:", user.email);
+  console.log("Roles:", user.roles);
+  console.log("Permissions:", user.permissions);
+}
+```
+
+### `isAuthenticated()`
+
+Checks if there is an active authenticated user session.
+
+- **Signature**: `isAuthenticated(): Promise<boolean>`
+
+```typescript
+const isAuth = await sdk.auth.isAuthenticated();
+if (!isAuth) {
+  // Prompt user to log in via host
+}
+```
+
+### `logout()`
+
+Triggers host session logout.
+
+- **Signature**: `logout(): Promise<void>`
+
+```typescript
+await sdk.auth.logout();
+```

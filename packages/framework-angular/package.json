@@ -1,0 +1,14 @@
+{
+  "name": "@sewa/framework-angular",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Angular integration guide and adapter for the Sewa Mini App SDK",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "@angular/core": "^18.0.0",
+    "rxjs": "^7.0.0"
+  }
+}

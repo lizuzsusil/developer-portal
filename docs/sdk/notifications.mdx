@@ -1,0 +1,52 @@
+---
+id: notifications
+title: Push Notifications Module (sdk.notifications)
+sidebar_label: sdk.notifications
+---
+
+# Push Notifications Module (`sdk.notifications`)
+
+The `sdk.notifications` module handles push notification token registration and click events.
+
+---
+
+## Public Methods
+
+### `isSupported()`
+
+Checks if push notifications are supported by the host.
+
+- **Signature**: `isSupported(): boolean`
+
+### `register(options?)`
+
+Requests push token registration.
+
+- **Signature**: `register(options?: NotificationsRegisterOptions): Promise<NotificationsRegisterResult>`
+
+```typescript
+if (sdk.notifications.isSupported()) {
+  const res = await sdk.notifications.register();
+  if (res.token) {
+    console.log("Registered Push Token:", res.token);
+  }
+}
+```
+
+### `onToken(handler)`
+
+Subscribes to token rotation events.
+
+- **Signature**: `onToken(handler: (token: string) => void): () => void`
+
+### `onOpen(handler)`
+
+Subscribes to inbound notification tap/click events.
+
+- **Signature**: `onOpen(handler: (event: NotificationOpenEvent) => void): () => void`
+
+```typescript
+sdk.notifications.onOpen((event) => {
+  console.log("User tapped notification with payload:", event.data);
+});
+```

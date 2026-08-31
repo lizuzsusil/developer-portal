@@ -1,0 +1,9 @@
+{
+  "name": "@sewa/design-tokens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared design tokens — CSS custom properties for the Sewa developer portal",
+  "main": "tokens.css",
+  "files": ["tokens.css"],
+  "sideEffects": ["tokens.css"]
+}

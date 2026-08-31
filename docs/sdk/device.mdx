@@ -1,0 +1,145 @@
+---
+id: device
+title: Device Capabilities Module (sdk.device)
+sidebar_label: sdk.device
+---
+
+# Device Capabilities Module (`sdk.device`)
+
+The `sdk.device` module grants mini apps access to native hardware sensors, camera, GPS location, gallery, contacts, file system, network info, and biometric authentication via host bridge guards.
+
+---
+
+## Feature Detection
+
+### `isSupported(action)`
+
+Checks if a specific device action (e.g., `"location"`, `"biometric"`) is supported by the host shell.
+
+```typescript
+if (sdk.device.isSupported("biometric")) {
+  // Offer fingerprint authentication
+}
+```
+
+---
+
+## Device Methods
+
+### `location(options?)`
+
+Requests device location coordinates.
+
+```typescript
+const loc = await sdk.device.location({ highAccuracy: true });
+if (loc.granted) {
+  console.log("Latitude:", loc.data.latitude, "Longitude:", loc.data.longitude);
+}
+```
+
+### `camera(options?)`
+
+Triggers native camera capture.
+
+```typescript
+const result = await sdk.device.camera({ quality: 0.8 });
+if (result.granted) {
+  const photoUri = result.data.imageUri;
+}
+```
+
+### `gallery(options?)`
+
+Opens system image picker.
+
+```typescript
+const photo = await sdk.device.gallery();
+```
+
+### `files(options?)`
+
+Opens document picker.
+
+```typescript
+const file = await sdk.device.files();
+```
+
+### `download(options?)`
+
+Downloads file to device filesystem.
+
+```typescript
+const res = await sdk.device.download({
+  url: "https://sewa.gov.np/receipt.pdf",
+  fileName: "tax_receipt.pdf",
+});
+```
+
+### `contact(options?)`
+
+Opens system contact selector.
+
+```typescript
+const contact = await sdk.device.contact();
+```
+
+### `biometric(options?)`
+
+Triggers native TouchID / FaceID / Fingerprint prompt.
+
+```typescript
+const bio = await sdk.device.biometric({ reason: "Authorize payment" });
+if (bio.granted && bio.data.authenticated) {
+  // Proceed with authorized operation
+}
+```
+
+### `network()`
+
+Queries active network connection state.
+
+```typescript
+const net = await sdk.device.network();
+console.log("Connected:", net.connected, "Type:", net.type);
+```
+
+### `info()`
+
+Returns hardware, OS, and screen dimensions.
+
+```typescript
+const info = await sdk.device.info();
+console.log(info.model, info.osVersion, info.screenWidth);
+```
+
+### `share(options)`
+
+Opens the native share sheet.
+
+```typescript
+await sdk.device.share({ title: "Tax receipt", text: "Paid Rs. 1,500", url: "https://sewa.gov.np/receipt/123" });
+```
+
+### `clipboardWrite(text)` / `clipboardRead()`
+
+```typescript
+await sdk.device.clipboardWrite("Copied text");
+const text = await sdk.device.clipboardRead();
+```
+
+### `haptics(style)`
+
+Triggers haptic feedback. `style`: `light` | `medium` | `heavy` | `selection`.
+
+```typescript
+await sdk.device.haptics("light");
+```
+
+### `notifications(options?)`
+
+Requests push-notification permission / token (device-scoped). For app-level push, use [`sdk.notifications`](/docs/sdk/notifications) instead.
+
+### `review()`
+
+Prompts the system app-store review dialog (where supported).
+

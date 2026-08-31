@@ -1,0 +1,65 @@
+---
+id: rpc
+title: RPC
+sidebar_label: RPC
+---
+
+# RPC
+
+Every `sdk.*` method is an RPC call (`requestId` correlation, timeout, retry) routed through the transport to the host.
+
+## Request
+
+```typescript
+// Low-level — most apps use the typed sdk.* wrappers instead
+await sdk.request<T>("auth", "getUser", payload, {
+  signal?: AbortSignal,
+  mapPayload?: (payload) => unknown,
+  dedupe?: boolean,
+});
+await sdk.requestSafe<T>(...); // never throws on transport error, returns { ok, value|error }
+await sdk.batch([{ namespace, action, payload }]); // batch via host or parallel fallback
+```
+
+| Option | Default | Effect |
+|---|---|---|
+| `signal` | — | `AbortSignal` → `RequestCancelledError` |
+| `mapPayload` | — | Transform success payload; used by `http` to map `HttpResult` → `HttpClientError` / `HttpServerError` |
+| `dedupe` | `false` | 50 ms window coalesces identical reads |
+
+**Dedup allowlist** (11 idempotent reads): `auth.getUser`, `permissions.has`, `flags.isEnabled`, `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
+
+## Retry
+
+```typescript
+// Configured via MiniAppSdkOptions (or rely on defaults)
+{
+  retryAttempts: 2,
+  retryDelayMs: 500,
+  maxRetryDelayMs: 8000,
+}
+```
+
+Retryable = `TimeoutError` or `SdkError` with `retryable: true` (5xx via `HttpServerError`). 4xx (`HttpClientError`) fast-fails. Backoff is exponential with jitter (`utils/backoff.ts`).
+
+## Middleware
+
+```typescript
+import type { RpcMiddleware } from "@lizuz/mini-app-sdk";
+
+const logging: RpcMiddleware = async (ctx, next) => {
+  console.log("→", ctx.namespace, ctx.action);
+  const result = await next();
+  console.log("←", result);
+  return result;
+};
+
+sdk.use(logging);
+```
+
+Koa-style `composeMiddleware` — wraps the retry loop. Also used by the offline queue plugin.
+
+## See Also
+
+- [Reliability](/docs/sdk/reliability) — circuit breaker and adaptive timeout
+- [Errors](/docs/sdk/errors) — error hierarchy and guards

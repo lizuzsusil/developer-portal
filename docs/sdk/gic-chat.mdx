@@ -1,0 +1,187 @@
+---
+id: gic-chat
+title: GIC Chat Module (sdk.gicChat)
+sidebar_label: sdk.gicChat
+---
+
+# GIC Chat Module (`sdk.gicChat`)
+
+The `sdk.gicChat` module streams responses from the **GIC Chat Agent** using Server-Sent Events (SSE). It supports knowledge-base tool calls, structured event types, and session-based conversation management.
+
+GIC Chat is gated by the **`http`** capability — the host must negotiate `http` for `sdk.gicChat` to be available.
+
+---
+
+## Session Management
+
+Every conversation starts with `startSession()`, which returns the identifiers required for all subsequent `stream` calls.
+
+### `startSession()`
+
+Initializes a new GIC chat session.
+
+```typescript
+const session = await sdk.gicChat.startSession();
+console.log(session.user_id);   // "8a9f1653-..."
+console.log(session.session_id); // "9d58028d-..."
+```
+
+**Returns:** `Promise<GicChatSession>`
+
+```typescript
+interface GicChatSession {
+  status?: string;     // "success"
+  user_id: string;     // Unique user identifier
+  session_id: string;  // Unique session identifier
+}
+```
+
+:::warning Session Expiry
+Sessions expire after a period of inactivity. If a stream call fails with a "session not found" error, call `startSession()` again to obtain fresh identifiers.
+:::
+
+---
+
+## Streaming Responses
+
+### `stream(request, options?)`
+
+Sends a user message and streams back typed `GicChatEvent` objects via the `onEvent` callback.
+
+```typescript
+const { invocation_id } = await sdk.gicChat.stream(
+  {
+    user_id: session.user_id,
+    session_id: session.session_id,
+    message: "How do I apply for a National Identity Card?",
+  },
+  {
+    onEvent: (event) => {
+      console.log(event.type, event);
+    },
+  }
+);
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `request.user_id` | `string` | Yes | From `startSession()` |
+| `request.session_id` | `string` | Yes | From `startSession()` |
+| `request.message` | `string` | Yes | User message (max 200 chars, non-blank) |
+| `options.signal` | `AbortSignal` | No | Cancel the stream mid-flight |
+| `options.onEvent` | `(event) => void` | No | Called for each SSE event |
+
+**Returns:** `Promise<{ invocation_id?: string }>`
+
+---
+
+### `streamText(request, options?)`
+
+Convenience wrapper that collects all `token` events and returns the full response text.
+
+```typescript
+const session = await sdk.gicChat.startSession();
+const { text, invocation_id } = await sdk.gicChat.streamText(
+  {
+    user_id: session.user_id,
+    session_id: session.session_id,
+    message: "What are the GIC office hours?",
+  }
+);
+console.log(text);
+// "GIC office hours are 9 AM to 5 PM, Sunday through Thursday."
+```
+
+**Returns:** `Promise<{ text: string; invocation_id?: string }>`
+
+---
+
+## SSE Event Reference
+
+The GIC Chat stream delivers responses as named Server-Sent Events. Each event is delivered as a typed `GicChatEvent` object via the `onEvent` callback.
+
+| Event Type | Payload | Description |
+|---|---|---|
+| `tool_call` | `{}` | Agent is invoking a knowledge-base search. Show a "searching" indicator. |
+| `tool_result` | `{}` | Knowledge-base search completed. Switch to "composing" indicator. |
+| `keep_alive` | `{}` | Periodic heartbeat while the model composes. Keep the connection alive. |
+| `token` | `{ text: string }` | A chunk of the response text. Append to the UI incrementally. |
+| `meta` | `{ invocation_id: string }` | Carries the unique ID for this completed exchange. |
+| `done` | `{}` | Stream complete. Finalize the message and stop listening. |
+| `error` | `{ detail: string }` | Unrecoverable error. Surface a failure state to the user. |
+
+---
+
+### Example: Full Event Handling
+
+```typescript
+const { invocation_id } = await sdk.gicChat.stream(
+  { user_id: session.user_id, session_id: session.session_id, message: "How do I apply for a NIC?" },
+  {
+    onEvent: (event) => {
+      switch (event.type) {
+        case "tool_call":
+          setStatus("Searching knowledge base...");
+          break;
+        case "tool_result":
+          setStatus("Composing response...");
+          break;
+        case "token":
+          appendText(event.text);
+          break;
+        case "meta":
+          console.log("Invocation ID:", event.invocation_id);
+          break;
+        case "done":
+          finalize();
+          break;
+        case "error":
+          showError(event.detail);
+          break;
+        // keep_alive — no action needed
+      }
+    },
+  }
+);
+```
+
+---
+
+## Cancellation
+
+Pass an `AbortSignal` to cancel the stream mid-flight:
+
+```typescript
+const controller = new AbortController();
+
+sdk.gicChat.stream(
+  { user_id: session.user_id, session_id: session.session_id, message: "..." },
+  { signal: controller.signal }
+);
+
+// Cancel after 5 seconds
+setTimeout(() => controller.abort(), 5000);
+```
+
+---
+
+## Error Handling
+
+GIC Chat errors are delivered in two ways:
+
+1. **Transport-level errors** — The `stream()` promise rejects with an `SdkError` (code: `HOST_ERROR`) if the host cannot establish the stream.
+2. **Mid-stream errors** — The `error` SSE event is delivered with `type: "error"` and a `detail` string describing the failure. The `onEvent` callback receives this event, and the `stream()` promise rejects after the event.
+
+```typescript
+try {
+  await sdk.gicChat.stream(request, { onEvent: handleEvent });
+} catch (err) {
+  if (err.code === "CAPABILITY_NOT_SUPPORTED") {
+    console.error("Host does not support HTTP capability");
+  } else {
+    console.error("GIC chat error:", err.message);
+  }
+}
+```

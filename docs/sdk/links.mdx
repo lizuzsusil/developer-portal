@@ -1,0 +1,41 @@
+---
+id: links
+title: Deep Links Module (sdk.links)
+sidebar_label: sdk.links
+---
+
+# Deep Links Module (`sdk.links`)
+
+The `sdk.links` module allows mini apps to request the host to open external URLs and handle incoming deep links.
+
+---
+
+## Public Methods
+
+### `isSupported()`
+
+Checks if deep link capabilities are enabled on the host.
+
+- **Signature**: `isSupported(): boolean`
+
+### `open(url, options?)`
+
+Requests the host shell to open an external web URL or deep link.
+
+- **Signature**: `open(url: string, options?: LinksOpenOptions): Promise<void>`
+
+```typescript
+await sdk.links.open("https://nagarikapp.gov.np/help", { external: true });
+```
+
+### `onOpen(handler)`
+
+Subscribes to inbound deep link resolution events targeted at your mini app.
+
+- **Signature**: `onOpen(handler: (event: LinksOpenedEvent) => void): () => void`
+
+```typescript
+sdk.links.onOpen((event) => {
+  console.log("Inbound deep link opened:", event.url);
+});
+```

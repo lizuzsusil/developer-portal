@@ -1,0 +1,55 @@
+---
+id: transport
+title: Transport
+sidebar_label: Transport
+---
+
+# Transport
+
+The SDK is transport-agnostic. The default is `postMessage` + `CustomEvent`; other transports can be supplied at construction.
+
+## Interface
+
+```typescript
+interface Transport {
+  start(onMessage: (msg: PlatformMessage) => void): void;
+  stop(): void;
+  send(message: PlatformMessage): void;
+  getDebugInfo?(): { started: boolean; pinnedOrigin?: string | null };
+}
+```
+
+## Built-in Transports
+
+| Transport | Source | Use case |
+|---|---|---|
+| `DefaultTransport` | `transport/default-transport.ts` | Browser iframe / WebView. `postMessage` + `CustomEvent (gov-platform-event)` with origin pinning. |
+| `WebSocketTransport` | `transport/websocket-transport.ts` | `new WebSocketTransport({ url, protocols, socket })` — remote host. |
+| `BroadcastTransport` | `transport/broadcast-transport.ts` | `BroadcastChannel("gov-platform-sdk")` — multi-tab. |
+| `MessagePortTransport` | `transport/message-port-transport.ts` | `MessagePort` / Web Worker. |
+| `SsrTransport` | `transport/ssr-transport.ts` | No-op for SSR / static rendering. |
+
+## Origin Pinning
+
+`DefaultTransport` learns the host origin on the first valid message and pins it (`allowedOrigin`). Subsequent messages from other origins are dropped. Options:
+
+```typescript
+import { DefaultTransport } from "@lizuz/mini-app-sdk";
+
+const transport = new DefaultTransport({
+  allowedOrigin: "https://shell.sewa.gov.np", // pin upfront, or leave undefined to learn
+  allowCustomEvent: true,   // accept CustomEvent fallback (Flutter WebView)
+  warnOnBroadcast: true,
+});
+```
+
+## Custom Transport
+
+Pass any `Transport` via the SDK options (advanced):
+
+```typescript
+// Handled internally by PlatformSDKProvider in test-mini-app;
+// normal mini apps never construct the transport directly.
+```
+
+See `transport/transport.types.ts` for `TransportDebugInfo` and `DefaultTransportOptions`.

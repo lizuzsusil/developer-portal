@@ -1,0 +1,14 @@
+{
+  "name": "@sewa/framework-react",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React integration guide and adapter for the Sewa Mini App SDK",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

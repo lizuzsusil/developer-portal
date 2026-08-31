@@ -1,0 +1,67 @@
+---
+id: observability
+title: Observability
+sidebar_label: Observability
+---
+
+# Observability
+
+In-memory metrics, diagnostics, and pluggable tracing for production debugging. The SDK does **not** send telemetry to a hosted backend — there is no analytics, no OpenTelemetry exporter, no network call. Collection is local and privacy-safe; shipping is your decision.
+
+## Metrics — local, bounded, zero-config
+
+Every `sdk.*` call is recorded automatically into `MetricsRecorder` (capped at 100 duration samples, optionally age-windowed).
+
+```typescript
+const s = sdk.getMetrics();
+// s.totalRequests, s.totalSuccesses, s.totalFailures, s.totalTimeouts, s.totalRetries
+// s.averageDurationMs, s.percentiles: { p50Ms, p95Ms, p99Ms }
+// s.byAction["auth.getUser"]: { count, successes, failures, timeouts, retries, totalDurationMs, averageDurationMs, percentiles }
+```
+
+Optional tuning and export hook:
+
+```typescript
+// test apps rarely need this — defaults are fine
+createMiniAppSdk({
+  miniAppId: "tax-calc",
+  metrics: {
+    maxDurationEntries: 100,
+    durationsWindowMs: 60_000,
+    onSnapshot: (snapshot) => { /* ship to your backend */ },
+  },
+});
+```
+
+`onSnapshot` is called on every `sdk.getMetrics()` read; the recorder itself never does `fetch`. `AdaptiveTimeout` (see [Reliability](/docs/sdk/reliability)) can optionally consume `onSnapshot` to tune per-action timeouts.
+
+## `sdk.debug.snapshot()` & `diagnose()`
+
+```typescript
+const snap: SdkDebugSnapshot = sdk.debug.snapshot();
+// { sdkVersion, protocolVersion, miniAppId, traceId, platformType,
+//   capabilities, status: "initializing"|"ready"|"destroyed",
+//   transport: { started, pinnedOrigin },
+//   metrics, pendingRequests: PendingRequestInfo[], registeredModules }
+
+const diags: Diagnostic[] = sdk.debug.diagnose();
+// [{ code, severity: "info"|"warn"|"error", message, details }]
+// Codes: NOT_INITIALIZED, DESTROYED, NO_CAPABILITIES, PENDING_BACKLOG,
+//        TRANSPORT_NOT_STARTED, HIGH_FAILURE_RATE, APPEARANCE_INCOMPLETE, PLUGINS_ACTIVE
+```
+
+Call `diagnose()` when `sdk.getMetrics().totalFailures` spikes or the host reports issues — it points at the likely cause.
+
+## Tracing — opt-in `Tracer`
+
+```typescript
+import { noopTracer } from "@lizuz/mini-app-sdk";
+
+const sdk = createMiniAppSdk({ miniAppId, tracer: noopTracer /* or custom */ });
+// Spans: rpc.handshake, rpc.request, rpc.stream
+// Attrs: namespace, action, traceId, retryCount, error, bytes
+```
+
+Default is `noopTracer` (no allocation, no behavior change). Inject a `Tracer` via `MiniAppSdkDependencies` when bridging to OpenTelemetry/Datadog. Each RPC or handshake creates one span; `span.setAttribute` carries `namespace`, `action`, `traceId`, `retryCount`, and `bytes` for streams.
+
+`traceId` is also stamped on every wire message (`PlatformMessage.traceId`) for host-side correlation — see [Protocol](/docs/sdk/protocol).

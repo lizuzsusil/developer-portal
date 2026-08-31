@@ -1,0 +1,45 @@
+---
+id: errors
+title: Errors
+sidebar_label: Errors
+---
+
+# Errors
+
+All SDK failures are `SdkError` subclasses with a `code` and optional `retryable` flag.
+
+## Hierarchy
+
+```
+SdkError
+├── HandshakeError        — handshake rejected / timeout / version mismatch
+├── TransportError        — transport send/start failure
+├── ProtocolError         — malformed wire message
+├── TimeoutError          — per-request timeout (retryable)
+├── RequestCancelledError — AbortSignal aborted
+├── StreamCancelledError  — StreamBuilder.cancel()
+├── HttpClientError       — 4xx (not retryable)
+└── HttpServerError       — 5xx (retryable)
+```
+
+## Codes
+
+Common `SdkError.code` values: `HANDSHAKE_FAILED`, `CAPABILITY_NOT_SUPPORTED`, `SDK_NOT_INITIALIZED`, `SDK_ALREADY_DESTROYED`, `CIRCUIT_OPEN`, `REQUEST_CANCELLED`, `STREAM_CANCELLED`.
+
+## Guards
+
+```typescript
+import { isSdkError, isTimeout, isRetryable, isHandshakeError, isTransportError, getErrorCode } from "@lizuz/mini-app-sdk";
+
+try {
+  await sdk.auth.getUser();
+} catch (err) {
+  if (isTimeout(err)) { /* retry or show spinner */ }
+  if (isRetryable(err)) { /* safe to retry */ }
+  console.log(getErrorCode(err)); // string | undefined
+}
+```
+
+`isAuthError` covers `AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`.
+
+`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake.

@@ -1,0 +1,39 @@
+---
+id: logging
+title: Logging & Dev Mode
+sidebar_label: Logging & Dev Mode
+---
+
+# Logging & Dev Mode
+
+Control SDK verbosity and dev-time warnings.
+
+## Logger
+
+```typescript
+import { ConsoleLogger, NoopLogger } from "@lizuz/mini-app-sdk";
+
+const logger = new ConsoleLogger({ minLevel: "warn" }); // debug | info | warn | error
+```
+
+`Logger` is an interface; `NoopLogger` silences all output. Pass via `MiniAppSdkOptions.logger` or construct the SDK through `PlatformSDKProvider` which wires it internally.
+
+## Dev Mode
+
+```typescript
+createMiniAppSdk({ miniAppId, devMode: true, logLevel: "debug" });
+```
+
+- `devMode: true` enables warnings for unavailable capabilities (`"[dev] ... requires http capability"`) deduped via `warnedUnavailableCapabilities`.
+- When `devMode` is unset, it defaults to `process.env.NODE_ENV !== "production"`.
+- `logLevel` overrides `minLevel` on the logger.
+
+Handler-leak warning: >20 handlers on a single event emits a dev warning.
+
+## `validateSdkOptions`
+
+```typescript
+import { validateSdkOptions } from "@lizuz/mini-app-sdk";
+
+validateSdkOptions({ miniAppId: "" }); // throws with details
+```

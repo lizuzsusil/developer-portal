@@ -1,0 +1,35 @@
+---
+id: config
+title: Configuration Module (sdk.config)
+sidebar_label: sdk.config
+---
+
+# Configuration Module (`sdk.config`)
+
+The `sdk.config` module allows mini apps to read configuration parameters dynamically set by the platform operator.
+
+---
+
+## Public Methods
+
+### `get<T>(key)`
+
+Reads a single configuration entry by key.
+
+- **Signature**: `get<T = unknown>(key: string): Promise<T | undefined>`
+
+```typescript
+const apiEndpoint = await sdk.config.get<string>("payment_gateway_url");
+console.log("Gateway Endpoint:", apiEndpoint);
+```
+
+### `getAll()`
+
+Fetches all key-value configuration pairs assigned to this mini app.
+
+- **Signature**: `getAll(): Promise<Record<string, unknown>>`
+
+```typescript
+const configMap = await sdk.config.getAll();
+console.log("Config keys:", Object.keys(configMap));
+```

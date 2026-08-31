@@ -1,0 +1,107 @@
+---
+id: vue
+title: Vue 3 Integration Guide
+sidebar_label: Vue Integration [Upcoming]
+---
+
+import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
+
+# Vue 3 Integration Guide
+
+<FrameworkBadge framework="vue" status="upcoming" />
+
+> **Package:** `@sewa/framework-vue` — internal workspace package at `packages/framework-vue`. Preview pattern; not a separately published package.
+
+> [!NOTE]
+> **Roadmap Feature**: Official Vue 3 Composition API plugin support is currently on the platform roadmap. Below is the recommended integration preview pattern.
+
+---
+
+## 1. SDK Plugin & `provide / inject` Pattern
+
+In Vue 3, initialize the SDK inside your main entry point and provide it globally:
+
+```typescript
+// src/main.ts (Vue 3 Preview)
+import { createApp, ref, shallowRef } from 'vue';
+import App from './App.vue';
+import { initMiniAppSdk, type MiniAppSdkInterface } from '@lizuz/mini-app-sdk';
+
+const app = createApp(App);
+
+const sdkRef = shallowRef<MiniAppSdkInterface | null>(null);
+const isReady = ref(false);
+
+initMiniAppSdk({ miniAppId: 'utility-bill-vue' }).then((instance) => {
+  sdkRef.value = instance;
+  isReady.value = true;
+});
+
+app.provide('miniAppSdk', sdkRef);
+app.provide('miniAppSdkReady', isReady);
+app.mount('#app');
+```
+
+---
+
+## 2. Vue Composable (`useMiniAppSdk`)
+
+Create a reusable composable for components:
+
+```typescript
+// src/composables/useMiniAppSdk.ts
+import { inject, ref, onMounted, onUnmounted, type ShallowRef } from 'vue';
+import type { MiniAppSdkInterface, AppearanceState } from '@lizuz/mini-app-sdk';
+
+export function useMiniAppSdk() {
+  const sdk = inject<ShallowRef<MiniAppSdkInterface | null>>('miniAppSdk');
+  const isReady = inject<ShallowRef<boolean>>('miniAppSdkReady');
+  const appearance = ref<AppearanceState | null>(null);
+
+  let unsubscribe: (() => void) | null = null;
+
+  onMounted(() => {
+    if (sdk?.value) {
+      appearance.value = sdk.value.appearance.state();
+      unsubscribe = sdk.value.appearance.subscribe((next) => {
+        appearance.value = next;
+      });
+    }
+  });
+
+  onUnmounted(() => {
+    unsubscribe?.();
+  });
+
+  return { sdk, isReady, appearance };
+}
+```
+
+---
+
+## 3. Vue Router Integration Preview
+
+```typescript
+// src/router/index.ts
+import { createRouter, createWebHistory } from 'vue-router';
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [...],
+});
+
+export function setupHostRouterSync(sdk: MiniAppSdkInterface) {
+  router.afterEach(() => {
+    sdk.navigation.router.push(true);
+  });
+
+  sdk.on('navigation.back.requested', async () => {
+    if (window.history.length > 1) {
+      router.back();
+      await sdk.navigation.router.back(true);
+    } else {
+      await sdk.navigation.router.back(false);
+    }
+  });
+}
+```

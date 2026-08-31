@@ -1,0 +1,56 @@
+---
+id: appearance
+title: Appearance Module (sdk.appearance)
+sidebar_label: sdk.appearance
+---
+
+# Appearance Module (`sdk.appearance`)
+
+The `sdk.appearance` module tracks platform theme preferences (`light` | `dark`) and active locale state (`language`, `region`, `direction`), enabling automatic dark-mode and localization sync across shells.
+
+---
+
+## Public Methods
+
+### `getTheme()`
+
+Fetches the active theme state.
+
+- **Signature**: `getTheme(): Promise<ThemeState>`
+
+```typescript
+const themeState = await sdk.appearance.getTheme();
+console.log("Preference:", themeState.preference); // "system" | "light" | "dark"
+console.log("Active Mode:", themeState.mode);       // "light" | "dark"
+```
+
+### `getLocale()`
+
+Fetches the active locale state.
+
+- **Signature**: `getLocale(): Promise<LocaleState>`
+
+```typescript
+const localeState = await sdk.appearance.getLocale();
+console.log("Locale Tag:", localeState.locale);   // e.g. "ne-NP"
+console.log("Language:", localeState.language);     // e.g. "ne"
+console.log("Direction:", localeState.direction);   // "ltr" | "rtl"
+```
+
+### `state()`
+
+Returns a synchronous snapshot of the appearance store.
+
+- **Signature**: `state(): AppearanceState`
+
+### `subscribe(listener)`
+
+Subscribes to host appearance state updates.
+
+- **Signature**: `subscribe(listener: (next: AppearanceState) => void): () => void`
+
+```typescript
+const unsubscribe = sdk.appearance.subscribe((nextState) => {
+  document.documentElement.classList.toggle("dark", nextState.theme.mode === "dark");
+});
+```

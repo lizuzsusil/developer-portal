@@ -1,0 +1,47 @@
+---
+id: platform
+title: Platform Module (sdk.platform)
+sidebar_label: sdk.platform
+---
+
+# Platform Module (`sdk.platform`)
+
+The `sdk.platform` module allows mini apps to inspect the host container runtime (Web browser iframe vs Flutter mobile native container).
+
+---
+
+## Public Properties & Methods
+
+### `type`
+
+Read-only getter returning `"web"` or `"flutter"`.
+
+- **Type**: `"web" | "flutter"`
+
+```typescript
+console.log("Current platform container:", sdk.platform.type);
+```
+
+### `isWeb()`
+
+Returns `true` if running inside a Web host container.
+
+- **Signature**: `isWeb(): boolean`
+
+### `isFlutter()`
+
+Returns `true` if running inside a Flutter mobile host container.
+
+- **Signature**: `isFlutter(): boolean`
+
+### `isMobile()`
+
+Alias for `isFlutter()`.
+
+- **Signature**: `isMobile(): boolean`
+
+```typescript
+if (sdk.platform.isFlutter()) {
+  // Mobile container specific UI styling or behavior
+}
+```

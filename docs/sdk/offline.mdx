@@ -1,0 +1,36 @@
+---
+id: offline
+title: Offline Queue
+sidebar_label: Offline Queue
+---
+
+# Offline Queue
+
+Queue capability-gated requests while the host is unreachable and replay them when connectivity returns.
+
+## Plugin
+
+```typescript
+import { createOfflineQueuePlugin } from "@lizuz/mini-app-sdk";
+
+const offline = createOfflineQueuePlugin({
+  allowlist: ["storage", "api", "navigation"], // default
+  maxEntries: 50,
+  ttlMs: 5 * 60 * 1000, // 5 min
+});
+
+sdk.usePlugin(offline);
+```
+
+Install before `initialize`. The plugin registers middleware that, on `connection.lost` / `navigator.onLine === false`, enqueues matching requests instead of failing. On `connection.established` / `online`, entries are flushed in order. Expired or overflowed entries are pruned.
+
+## Options
+
+| Option | Default | Meaning |
+|---|---|---|
+| `allowlist` | `["storage","api","navigation"]` | Namespaces to queue |
+| `maxEntries` | `50` | Drop oldest beyond this |
+| `ttlMs` | `300000` | Drop entries older than this |
+
+The plugin is a normal `SdkPlugin` — see [Plugins](/docs/sdk/plugins).
+

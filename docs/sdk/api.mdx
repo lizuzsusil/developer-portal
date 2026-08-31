@@ -1,0 +1,30 @@
+---
+id: api
+title: Backend API Gateway Module (sdk.api)
+sidebar_label: sdk.api
+---
+
+# Backend API Gateway Module (`sdk.api`)
+
+The `sdk.api` module routes authenticated requests through the Sewa Platform API Gateway proxy.
+
+---
+
+## Public Methods
+
+### `request(params)`
+
+Executes an authenticated API request through the host gateway.
+
+- **Signature**: `request<T = unknown, B = unknown>(params?: ApiRequestParams<B>): Promise<ApiResult<T>>`
+
+```typescript
+const response = await sdk.api.request<{ taxDue: number }>({
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: { citizenId: "9921-0012" },
+});
+
+console.log("Status:", response.status);
+console.log("Tax Due:", response.data.taxDue);
+```

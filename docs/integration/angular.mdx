@@ -1,0 +1,111 @@
+---
+id: angular
+title: Angular (NG) Integration Guide
+sidebar_label: Angular Integration [Upcoming]
+---
+
+import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
+
+# Angular (NG) Integration Guide
+
+<FrameworkBadge framework="angular" status="upcoming" />
+
+> **Package:** `@sewa/framework-angular` — internal workspace package at `packages/framework-angular`. Preview pattern; not a separately published package.
+
+> [!NOTE]
+> **Roadmap Feature**: Official Angular (NG) injectable service integration is currently on the platform roadmap. Below is the recommended RxJS service architecture pattern.
+
+---
+
+## 1. Injectable Singleton Service (`MiniAppSdkService`)
+
+Wrap the SDK instance inside an Angular `@Injectable({ providedIn: 'root' })` service:
+
+```typescript
+// src/app/services/mini-app-sdk.service.ts (Angular Preview)
+import { Injectable, OnDestroy } from '@angular/core';
+import { BehaviorSubject, Observable, from } from 'rxjs';
+import { initMiniAppSdk, type MiniAppSdkInterface, type PlatformUser, type AppearanceState } from '@lizuz/mini-app-sdk';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class MiniAppSdkService implements OnDestroy {
+  private sdkInstance: MiniAppSdkInterface | null = null;
+  private isReadySubject = new BehaviorSubject<boolean>(false);
+  private userSubject = new BehaviorSubject<PlatformUser | null>(null);
+  private appearanceSubject = new BehaviorSubject<AppearanceState | null>(null);
+
+  isReady$: Observable<boolean> = this.isReadySubject.asObservable();
+  user$: Observable<PlatformUser | null> = this.userSubject.asObservable();
+  appearance$: Observable<AppearanceState | null> = this.appearanceSubject.asObservable();
+
+  private appearanceUnsub: (() => void) | null = null;
+
+  constructor() {
+    this.initSdk();
+  }
+
+  private async initSdk() {
+    try {
+      this.sdkInstance = await initMiniAppSdk({ miniAppId: 'ng-tax-app' });
+      this.isReadySubject.next(true);
+
+      const user = await this.sdkInstance.auth.getUser();
+      this.userSubject.next(user);
+
+      this.appearanceSubject.next(this.sdkInstance.appearance.state());
+      this.appearanceUnsub = this.sdkInstance.appearance.subscribe((state) => {
+        this.appearanceSubject.next(state);
+      });
+    } catch (err) {
+      console.error('Failed to initialize MiniAppSdk in Angular:', err);
+    }
+  }
+
+  getUser(): Observable<PlatformUser | null> {
+    return this.user$;
+  }
+
+  getLocation() {
+    if (!this.sdkInstance) throw new Error('SDK not initialized');
+    return from(this.sdkInstance.device.location());
+  }
+
+  ngOnDestroy() {
+    this.appearanceUnsub?.();
+    this.sdkInstance?.destroy();
+  }
+}
+```
+
+---
+
+## 2. Consuming Service in Angular Component
+
+```typescript
+// src/app/components/home/home.component.ts
+import { Component, OnInit } from '@angular/core';
+import { MiniAppSdkService } from '../../services/mini-app-sdk.service';
+import { Observable } from 'rxjs';
+import { PlatformUser } from '@lizuz/mini-app-sdk';
+
+@Component({
+  selector: 'app-home',
+  template: `
+    <div *ngIf="user$ | async as user" class="user-card">
+      <h2>Welcome, {{ user.name }}</h2>
+      <p>Email: {{ user.email }}</p>
+    </div>
+  `,
+})
+export class HomeComponent implements OnInit {
+  user$: Observable<PlatformUser | null>;
+
+  constructor(private sdkService: MiniAppSdkService) {
+    this.user$ = this.sdkService.user$;
+  }
+
+  ngOnInit() {}
+}
+```

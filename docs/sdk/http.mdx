@@ -1,0 +1,145 @@
+---
+id: http
+title: HTTP Module (sdk.http)
+sidebar_label: sdk.http
+---
+
+# HTTP Module (`sdk.http`)
+
+The `sdk.http` module provides typed HTTP methods routed safely through the host network proxy. All requests avoid CORS issues and automatically inject host authorization headers.
+
+---
+
+## REST Methods
+
+### `get(params)`
+
+Performs an HTTP GET request.
+
+```typescript
+const res = await sdk.http.get<{ taxDue: number }>({
+  url: "https://api.sewa.gov.np/v1/taxes",
+  headers: { "X-App": "tax-calc" },
+});
+console.log(res.data.taxDue);
+```
+
+**Signature:** `get<T>(params: HttpGetParams): Promise<HttpResult<T>>`
+
+### `post(params, options?)`
+
+Performs an HTTP POST request with optional upload progress tracking.
+
+```typescript
+const res = await sdk.http.post<{ id: string }, FormData>(
+  {
+    url: "https://api.sewa.gov.np/v1/upload",
+    body: formData,
+  },
+  {
+    onProgress: (progress) => {
+      console.log(`Upload: ${progress.percent}%`);
+    },
+  }
+);
+```
+
+**Signature:** `post<T, B>(params: HttpPostParams<B>, options?: HttpUploadOptions): Promise<HttpResult<T>>`
+
+### `put(params, options?)` / `patch(params, options?)` / `delete(params)`
+
+Same pattern as `post` / `get` respectively.
+
+---
+
+## Streaming Methods
+
+### `getStream(params)`
+
+Requests a streaming binary/HTTP response.
+
+```typescript
+const builder = sdk.http.getStream({
+  url: "https://api.sewa.gov.np/v1/export/csv",
+});
+for await (const chunk of builder.iterate()) {
+  // chunk is Uint8Array
+}
+```
+
+**Signature:** `getStream(params: HttpGetParams): StreamBuilder`
+
+### `stream(params)` (Chat Streaming)
+
+Streams a generic LLM chat completion through the host proxy. Each chunk contains a `text` fragment.
+
+```typescript
+import { ChatMessages } from "@lizuz/mini-app-sdk";
+
+const stream = sdk.http.stream({
+  messages: [
+    ChatMessages.system("You are a helpful government assistant."),
+    ChatMessages.user("How do I renew my vehicle tax?"),
+  ],
+});
+
+for await (const chunk of stream.iterate()) {
+  appendToUI(chunk);
+}
+```
+
+**Signature:** `stream(params: { messages: ChatMessage[] }): StreamBuilder`
+
+:::tip
+This is the **generic chat** endpoint. For GIC-specific chat with tool calls and SSE events, use [`sdk.gicChat`](/docs/sdk/gic-chat) instead.
+:::
+
+---
+
+## Response Shape
+
+All REST methods return an `HttpResult<T>`:
+
+```typescript
+interface HttpResult<T> {
+  status: number;       // HTTP status code
+  data: T;              // Parsed response body
+  headers: Record<string, string>;
+  url: string;          // Final URL (after redirects)
+}
+```
+
+---
+
+## Upload Progress
+
+`post`, `put`, and `patch` accept an `onProgress` callback:
+
+```typescript
+const res = await sdk.http.post(
+  { url: "...", body: fileData },
+  {
+    onProgress: ({ loaded, total, percent }) => {
+      setProgress(percent);
+    },
+  }
+);
+```
+
+Subscribes internally to `http.uploadProgress` — see [Events](/docs/sdk/events).
+
+## Error Mapping
+
+Success payloads are mapped via `mapPayload`: 4xx throws `HttpClientError` (not retried), 5xx throws `HttpServerError` (retryable). See [Errors](/docs/sdk/errors) and [RPC](/docs/sdk/rpc).
+
+## Helpers
+
+```typescript
+import { ChatMessages } from "@lizuz/mini-app-sdk";
+
+ChatMessages.system("You are a helpful assistant.");
+ChatMessages.user("How do I renew my license?");
+ChatMessages.assistant("Here is how...");
+```
+
+`ModelCompletionOptions` / `ChatRequestOptions` are documented in `types/chat.types.ts`.

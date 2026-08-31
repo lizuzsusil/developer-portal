@@ -1,0 +1,39 @@
+---
+id: permissions
+title: Permissions Module (sdk.permissions)
+sidebar_label: sdk.permissions
+---
+
+# Permissions Module (`sdk.permissions`)
+
+The `sdk.permissions` module enables mini apps to query permissions granted to the mini app by the platform host shell.
+
+---
+
+## Public Methods
+
+### `has(permission)`
+
+Checks if a specific permission has been granted.
+
+- **Signature**: `has(permission: string): Promise<boolean>`
+- **Example**:
+
+```typescript
+const locationAllowed = await sdk.permissions.has("location");
+if (locationAllowed) {
+  // Access location API
+}
+```
+
+### `list()`
+
+Retrieves a list of all permissions currently granted to this mini app.
+
+- **Signature**: `list(): Promise<string[]>`
+
+```typescript
+const permissions = await sdk.permissions.list();
+console.log("Granted permissions:", permissions);
+// Output: ["camera", "location", "storage"]
+```

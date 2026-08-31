@@ -1,0 +1,38 @@
+---
+id: flags
+title: Feature Flags Module (sdk.flags)
+sidebar_label: sdk.flags
+---
+
+# Feature Flags Module (`sdk.flags`)
+
+The `sdk.flags` module provides remote feature flag toggling managed by the Sewa platform.
+
+---
+
+## Public Methods
+
+### `isEnabled(flag)`
+
+Evaluates whether a feature flag is enabled for the current mini app instance.
+
+- **Signature**: `isEnabled(flag: string): Promise<boolean>`
+
+```typescript
+const isNewCheckoutEnabled = await sdk.flags.isEnabled("new_checkout_flow");
+if (isNewCheckoutEnabled) {
+  // Render v2 checkout UI
+}
+```
+
+### `getAll()`
+
+Fetches all feature flags and their current boolean states.
+
+- **Signature**: `getAll(): Promise<Record<string, boolean>>`
+
+```typescript
+const allFlags = await sdk.flags.getAll();
+console.log(allFlags);
+// { "new_checkout_flow": true, "beta_biometrics": false }
+```
