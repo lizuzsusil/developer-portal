@@ -8,8 +8,13 @@
   --ifm-color-primary-light: var(--blue-300);
   --ifm-color-primary-lighter: var(--blue-100);
   --ifm-color-primary-lightest: var(--blue-100);
-  --ifm-code-font-size: 92%;
+  --ifm-font-size-base: 16px;
+  --ifm-font-size-lg: 18px;
+  --ifm-font-size-xl: 20px;
+  --ifm-font-size-xxl: 24px;
+  --ifm-code-font-size: 95%;
   --ifm-font-family-base: var(--font-family-base);
+  --ifm-line-height-base: 1.7;
   --docusaurus-highlighted-code-line-bg: rgba(26, 86, 214, 0.08);
   --ifm-hero-background-color: var(--neutral-900);
   --ifm-background-color: var(--color-surface-page);
@@ -48,6 +53,11 @@
   --ifm-color-primary-light: var(--blue-100);
   --ifm-color-primary-lighter: var(--blue-100);
   --ifm-color-primary-lightest: var(--blue-50, #e3edff);
+  --ifm-font-size-base: 16px;
+  --ifm-font-size-lg: 18px;
+  --ifm-font-size-xl: 20px;
+  --ifm-font-size-xxl: 24px;
+  --ifm-line-height-base: 1.7;
   --docusaurus-highlighted-code-line-bg: rgba(26, 86, 214, 0.1);
   --ifm-hero-background-color: var(--neutral-950);
   --ifm-background-color: var(--color-surface-page);
@@ -144,7 +154,7 @@ html.plugin-pages .container {
 
 .navbar__title {
   font-weight: 700 !important;
-  font-size: 0.95rem !important;
+  font-size: 1rem !important;
   letter-spacing: -0.01em;
 }
 
@@ -153,13 +163,13 @@ html.plugin-pages .container {
 }
 
 .navbar__item {
-  font-size: 0.875rem !important;
+  font-size: 0.95rem !important;
   font-weight: 500 !important;
   padding: 4px 10px !important;
 }
 
 .navbar__link {
-  font-size: 0.875rem !important;
+  font-size: 0.95rem !important;
   font-weight: 500 !important;
 }
 
@@ -221,7 +231,7 @@ html.plugin-pages .footer .container {
 .menu__list-item-collapsible > div,
 .menu__list-item-collapsible > a {
   font-weight: 700 !important;
-  font-size: 0.8rem !important;
+  font-size: 0.9rem !important;
   text-transform: uppercase !important;
   letter-spacing: 0.04em !important;
   color: var(--color-text-secondary) !important;
@@ -238,6 +248,7 @@ html.plugin-pages .footer .container {
 
 /* Table of Contents */
 .table-of-contents__link {
+  padding-left: 8px;
   border-left: 2px solid transparent !important;
   transition: all var(--duration-fast) var(--easing-standard) !important;
 }
@@ -256,6 +267,8 @@ html.plugin-pages .footer .container {
 .prism-code {
   border-radius: var(--radius-lg) !important;
   border: 1px solid var(--color-border-decorative) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
 }
 
 /* Admonitions / callouts */
@@ -267,16 +280,62 @@ html.plugin-pages .footer .container {
 /* Markdown content */
 .markdown h1 {
   font-weight: 800 !important;
+  font-size: 2.25rem !important;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
 }
 
 .markdown h2 {
   font-weight: 700 !important;
+  font-size: 1.875rem !important;
   border-bottom: 1px solid var(--color-border-decorative);
   padding-bottom: var(--space-8);
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
 }
 
 .markdown h3 {
   font-weight: 700 !important;
+  font-size: 1.5rem !important;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.markdown h4 {
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.markdown h5 {
+  font-weight: 600 !important;
+  font-size: 1.1rem !important;
+  margin-top: 0.875rem;
+  line-height: 1.4;
+}
+
+.markdown h6 {
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  margin-top: 0.875rem;
+  line-height: 1.4;
+}
+
+.markdown p {
+  font-size: 1rem !important;
+  line-height: 1.7 !important;
+  margin-bottom: 1rem;
+}
+
+.markdown li {
+  font-size: 1rem !important;
+  line-height: 1.7 !important;
+  margin-bottom: 0.5rem;
 }
 
 .markdown a {
@@ -302,8 +361,9 @@ html.plugin-pages .footer .container {
   background: var(--color-surface-sunken) !important;
   border: 1px solid var(--color-border-decorative) !important;
   border-radius: var(--radius-sm) !important;
-  padding: 1px 5px !important;
-  font-size: 0.9em !important;
+  padding: 2px 6px !important;
+  font-size: 0.95em !important;
+  line-height: 1.5 !important;
 }
 
 /* Footer */
@@ -327,7 +387,7 @@ html.plugin-pages .footer .container {
   padding: 2px 10px;
   border-radius: var(--radius-full);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 
 [data-theme="dark"] .badge-active {
@@ -343,7 +403,7 @@ html.plugin-pages .footer .container {
   padding: 2px 10px;
   border-radius: var(--radius-full);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
 }
 
 [data-theme="dark"] .badge-upcoming {
@@ -386,7 +446,7 @@ html.plugin-pages .footer .container {
 .portal-card h3 {
   margin-top: 0;
   margin-bottom: var(--space-8);
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -395,7 +455,7 @@ html.plugin-pages .footer .container {
 
 .portal-card p {
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
+  font-size: 1rem;
   margin: 0;
   line-height: 1.6;
 }
@@ -421,7 +481,7 @@ html.plugin-pages .footer .container {
   border-radius: 9999px;
   background: rgba(255, 199, 0, 0.12);
   border: 1px solid rgba(255, 199, 0, 0.22);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #b38a00;
   margin-bottom: 16px;
@@ -455,4 +515,130 @@ html.plugin-pages .footer .container {
   flex-shrink: 0;
   background: var(--color-surface-sunken);
   border: 1px solid var(--color-border-decorative);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tables and lists - improved readability for all languages          */
+/* ------------------------------------------------------------------ */
+
+.markdown table {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.markdown table td,
+.markdown table th {
+  padding: 10px 12px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.markdown table th {
+  font-weight: 700;
+  background-color: var(--color-surface-sunken);
+}
+
+/* Blockquotes */
+.markdown blockquote {
+  border-left: 4px solid var(--blue-500);
+  padding-left: 1rem;
+  margin-left: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* Definition lists */
+.markdown dt {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.markdown dd {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Unordered and ordered lists */
+.markdown ul,
+.markdown ol {
+  margin-bottom: 1rem;
+}
+
+.markdown ul li,
+.markdown ol li {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.markdown ul li > ul,
+.markdown ul li > ol,
+.markdown ol li > ul,
+.markdown ol li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* Admonitions typography */
+.admonition p {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.admonition h5 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+/* Tabs */
+.tabs {
+  margin-bottom: 1.5rem;
+}
+
+.tabs__item {
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 10px 16px;
+}
+
+/* Menu link sizing for better multilingual support */
+.menu__link {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.menu__list-item-collapsible .menu__link {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Pagination */
+.pagination__item {
+  font-size: 1rem;
+}
+
+/* DocSidebar */
+.doc-sidebar-container {
+  font-size: 1rem;
+}
+
+/* Improve button sizing */
+button,
+.button {
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 600;
 }
