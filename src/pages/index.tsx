@@ -3,6 +3,7 @@ import React from "react";
 import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
+import Translate, { translate } from "@docusaurus/Translate";
 import styles from "./index.module.css";
 import { useTypesPackage } from "../components/TypesPackage";
 
@@ -48,7 +49,7 @@ function Hero() {
                   display: "inline-block",
                 }}
               />
-              Sewa Developer Portal · Government of Sri Lanka
+              <Translate id="homepage.hero.kicker" description="Hero kicker">Sewa Developer Portal · Government of Sri Lanka</Translate>
             </div>
 
             <Heading
@@ -62,9 +63,9 @@ function Hero() {
                 letterSpacing: "-0.02em",
               }}
             >
-              Build mini apps
+              <Translate id="homepage.hero.title.line1" description="Hero title line 1">Build mini apps</Translate>
               <br />
-              <span style={{ color: "var(--hero-text-accent)" }}>for the Sewa platform.</span>
+              <span style={{ color: "var(--hero-text-accent)" }}><Translate id="homepage.hero.title.line2" description="Hero title line 2">for the Sewa platform.</Translate></span>
             </Heading>
 
             <p
@@ -76,9 +77,8 @@ function Hero() {
                 maxWidth: "520px",
               }}
             >
-              Ship lightweight ES modules that run inside the Sewa Citizen shell.
-              The host injects the SDK at runtime - you just declare types and
-              export <code style={{ color: "var(--hero-inline-code-text)", background: "var(--hero-inline-code-bg)", padding: "1px 6px", borderRadius: 4, fontSize: "0.9em" }}>mount(container, runtime)</code>.
+              <Translate id="homepage.hero.subtitle" description="Hero subtitle">Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime — you just declare types and export</Translate>{" "}
+              <code style={{ color: "var(--hero-inline-code-text)", background: "var(--hero-inline-code-bg)", padding: "1px 6px", borderRadius: 4, fontSize: "0.9em" }}>mount(container, runtime)</code>.
             </p>
 
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
@@ -87,7 +87,7 @@ function Hero() {
                 to="/docs/getting-started"
                 style={{ padding: "10px 22px", borderRadius: 10 }}
               >
-                Get started
+                <Translate id="homepage.hero.cta.getStarted" description="Hero CTA">Get started</Translate>
               </Link>
               <Link
                 className="button button--secondary button--lg"
@@ -101,7 +101,7 @@ function Hero() {
                   border: "1px solid var(--hero-secondary-btn-border)",
                 }}
               >
-                API reference
+                <Translate id="homepage.hero.cta.apiReference" description="Hero CTA">API reference</Translate>
               </Link>
             </div>
 
@@ -124,10 +124,10 @@ function Hero() {
                 }}
               >
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399" }} />
-                Host-injected · zero runtime install
+                <Translate id="homepage.hero.badge1" description="Hero badge">Host-injected · zero runtime install</Translate>
               </span>
               <span>·</span>
-              <span>Type-safe with {typesPackage}</span>
+              <span><Translate id="homepage.hero.badge2" description="Hero badge" values={{package: typesPackage}}>{'Type-safe with {package}'}</Translate></span>
             </div>
           </div>
 
@@ -192,9 +192,9 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
                 fontSize: "0.78rem",
               }}
             >
-              <span style={{ color: "var(--hero-code-footer-text)", fontFamily: "monospace" }}>vite build --lib → ES module</span>
+              <span style={{ color: "var(--hero-code-footer-text)", fontFamily: "monospace" }}><Translate id="homepage.hero.code.footer" description="Hero code footer">vite build --lib → ES module</Translate></span>
               <Link to="/docs/getting-started" style={{ color: "var(--hero-code-link)", fontWeight: 600, textDecoration: "none" }}>
-                Scaffold in 4 steps →
+                <Translate id="homepage.hero.code.craft" description="Hero code craft">Scaffold in 4 steps →</Translate>
               </Link>
             </div>
           </div>
@@ -212,24 +212,24 @@ function HowItWorks() {
   const steps = [
     {
       n: "01",
-      title: "Install types",
-      desc: `Add ${typesPackage} as a devDependency for full sdk.* typings.`,
+      title: translate({ id: "homepage.howItWorks.step1.title", message: "Install types", description: "How it works step 1 title" }),
+      desc: translate({ id: "homepage.howItWorks.step1.desc", message: "Add {package} as a devDependency for full sdk.* typings.", description: "How it works step 1 desc" }, { package: typesPackage }),
       code: `pnpm add -D ${typesPackage}`,
       href: "/docs/getting-started",
     },
     {
       n: "02",
-      title: "Export mount()",
-      desc: "Your bundle exports mount(container, runtime). The host calls it when the user opens the mini app.",
+      title: translate({ id: "homepage.howItWorks.step2.title", message: "Export mount()", description: "How it works step 2 title" }),
+      desc: translate({ id: "homepage.howItWorks.step2.desc", message: "Your bundle exports mount(container, runtime). The host calls it when the user opens the mini app.", description: "How it works step 2 desc" }),
       code: "export function mount(container, runtime) { … }",
-      href: "/docs/getting-started#2-entry-point-maintsx",
+      href: "/docs/getting-started",
     },
     {
       n: "03",
-      title: "Build as ES lib",
-      desc: "Vite lib mode outputs a single ES module the shell loads on demand. No SDK bundling.",
+      title: translate({ id: "homepage.howItWorks.step3.title", message: "Build as ES lib", description: "How it works step 3 title" }),
+      desc: translate({ id: "homepage.howItWorks.step3.desc", message: "Vite lib mode outputs a single ES module the shell loads on demand. No SDK bundling.", description: "How it works step 3 desc" }),
       code: "vite build - lib src/main.tsx",
-      href: "/docs/getting-started#3-vite-build-viteconfigts",
+      href: "/docs/getting-started",
     },
   ];
   return (
@@ -246,18 +246,18 @@ function HowItWorks() {
               marginBottom: 8,
             }}
           >
-            How it works
+            <Translate id="homepage.howItWorks.kicker" description="How it works kicker">How it works</Translate>
           </div>
           <Heading as="h2" style={{ fontSize: "1.6rem", fontWeight: 800, margin: "0 0 8px", letterSpacing: "-0.015em" }}>
-            Three steps to a shippable mini app
+            <Translate id="homepage.howItWorks.title" description="How it works title">Three steps to a shippable mini app</Translate>
           </Heading>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "0.95rem", lineHeight: 1.6, margin: 0 }}>
-            The pattern mirrors{" "}
-            <code style={{ fontSize: "0.85em" }}>test-mini-app/</code> in the{" "}
+            <Translate id="homepage.howItWorks.description" description="How it works description">The pattern mirrors</Translate>{" "}
+            <code style={{ fontSize: "0.85em" }}>test-mini-app/</code> <Translate id="homepage.howItWorks.description2" description="How it works description 2">in the</Translate>{" "}
             <a href="https://github.com/anomalyco/sewa-platform" style={{ color: "var(--color-text-link)", fontWeight: 600 }}>
               sewa-platform repo
             </a>
-            . You keep your stack - the host handles auth, permissions, and device access.
+            <Translate id="homepage.howItWorks.description3" description="How it works description 3">. You keep your stack - the host handles auth, permissions, and device access.</Translate>
           </p>
         </div>
 
@@ -302,23 +302,23 @@ function HowItWorks() {
 // Capability teaser - curated 6, not exhaustive 14
 // ---------------------------------------------------------------------------
 function CapabilityTeaser() {
-  const caps: { title: string; href: string; desc: string; icon: string }[] = [
-    { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout - citizen identity", icon: "🔐" },
-    { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "📱" },
-    { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "🌐" },
-    { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "💾" },
-    { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "🎨" },
-    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText - AI chat gateway", icon: "✦" },
+  const caps: { title: string; href: string; desc: string; icon: string; descId: string }[] = [
+    { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout - citizen identity", icon: "🔐", descId: "homepage.capability.auth.desc" },
+    { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "📱", descId: "homepage.capability.device.desc" },
+    { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "🌐", descId: "homepage.capability.http.desc" },
+    { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "💾", descId: "homepage.capability.storage.desc" },
+    { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "🎨", descId: "homepage.capability.appearance.desc" },
+    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText - AI chat gateway", icon: "✦", descId: "homepage.capability.gicChat.desc" },
   ];
   return (
     <section style={{ padding: "40px 0 16px" }}>
       <div className="container">
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
           <Heading as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0, letterSpacing: "-0.015em" }}>
-            What you can build with
+            <Translate id="homepage.capability.title" description="Capability title">What you can build with</Translate>
           </Heading>
           <Link to="/docs/sdk/core" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--color-text-link)" }}>
-            Full SDK reference →
+            <Translate id="homepage.capability.cta" description="Capability CTA">Full SDK reference →</Translate>
           </Link>
         </div>
 
@@ -328,7 +328,7 @@ function CapabilityTeaser() {
               <span className="landing-feature-icon" aria-hidden>{c.icon}</span>
               <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <code style={{ fontSize: "0.92rem", fontWeight: 700, color: "var(--color-text-primary)", marginBottom: 4 }}>{c.title}</code>
-                <span style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)", lineHeight: 1.5 }}>{c.desc}</span>
+                <span style={{ fontSize: "0.85rem", color: "var(--color-text-secondary)", lineHeight: 1.5 }}>{translate({ id: c.descId, message: c.desc, description: `Capability ${c.title} description` })}</span>
               </span>
             </Link>
           ))}
@@ -349,7 +349,7 @@ function CapabilityTeaser() {
             alignItems: "center",
           }}
         >
-          <span style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>Also available:</span>
+          <span style={{ fontWeight: 600, color: "var(--color-text-primary)" }}><Translate id="homepage.capability.alsoAvailable" description="Capability also">Also available:</Translate></span>
           <Link to="/docs/sdk/permissions" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>permissions</Link>
           <span>·</span> <Link to="/docs/sdk/flags" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>flags</Link>
           <span>·</span> <Link to="/docs/sdk/navigation" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>navigation</Link>
@@ -357,7 +357,7 @@ function CapabilityTeaser() {
           <span>·</span> <Link to="/docs/sdk/links" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>links</Link>
           <span>·</span> <Link to="/docs/sdk/config" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>config</Link>
           <span style={{ marginLeft: "auto" }}>
-            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--color-text-link)" }}>Browse all 14 namespaces →</Link>
+            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--color-text-link)" }}><Translate id="homepage.capability.browseAll" description="Capability browse">Browse all 14 namespaces →</Translate></Link>
           </span>
         </div>
       </div>
@@ -369,38 +369,50 @@ function CapabilityTeaser() {
 // Integrations - reassigned header links now live here
 // ---------------------------------------------------------------------------
 function IntegrationGrid() {
-  const cards: { title: string; to: string; badge: string; badgeVariant: "active" | "upcoming"; desc: string; cta: string }[] = [
+  const cards: { title: string; to: string; badge: string; badgeId: string; badgeVariant: "active" | "upcoming"; desc: string; descId: string; cta: string; ctaId: string }[] = [
     {
       title: "React",
       to: "/docs/integration/react",
       badge: "Active · Production ready",
+      badgeId: "homepage.integrations.react.badge",
       badgeVariant: "active",
       desc: "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
+      descId: "homepage.integrations.react.desc",
       cta: "View React guide →",
+      ctaId: "homepage.integrations.react.cta",
     },
     {
       title: "Vue.js",
       to: "/docs/integration/vue",
       badge: "Upcoming · Roadmap",
+      badgeId: "homepage.integrations.vue.badge",
       badgeVariant: "upcoming",
       desc: "Composition API adapter for Vue 3. Tracks the same mount() lifecycle.",
+      descId: "homepage.integrations.vue.desc",
       cta: "View Vue guide →",
+      ctaId: "homepage.integrations.vue.cta",
     },
     {
       title: "Angular (NG)",
       to: "/docs/integration/angular",
       badge: "Upcoming · Roadmap",
+      badgeId: "homepage.integrations.angular.badge",
       badgeVariant: "upcoming",
       desc: "Standalone components & injectable SDK service - aligned with Angular 17+ patterns.",
+      descId: "homepage.integrations.angular.desc",
       cta: "View Angular guide →",
+      ctaId: "homepage.integrations.angular.cta",
     },
     {
       title: "SDK Playground",
       to: "/docs/playground",
       badge: "Interactive · Live in docs",
+      badgeId: "homepage.integrations.playground.badge",
       badgeVariant: "active",
       desc: "Try every sdk.* method against a mock transport. No local setup - runs inside the docs site.",
+      descId: "homepage.integrations.playground.desc",
       cta: "Open playground →",
+      ctaId: "homepage.integrations.playground.cta",
     },
   ];
   return (
@@ -409,14 +421,14 @@ function IntegrationGrid() {
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
           <div>
             <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-secondary)", marginBottom: 4 }}>
-              Choose your stack
+              <Translate id="homepage.integrations.kicker" description="Integrations kicker">Choose your stack</Translate>
             </div>
             <Heading as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0, letterSpacing: "-0.015em" }}>
-              Framework guides & tools
+              <Translate id="homepage.integrations.title" description="Integrations title">Framework guides & tools</Translate>
             </Heading>
           </div>
           <Link to="/docs/overview" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--color-text-link)" }}>
-            Platform overview →
+            <Translate id="homepage.integrations.cta" description="Integrations CTA">Platform overview →</Translate>
           </Link>
         </div>
 
@@ -429,11 +441,11 @@ function IntegrationGrid() {
                   className={card.badgeVariant === "active" ? "badge-active" : "badge-upcoming"}
                   style={{ fontSize: "0.68rem", padding: "2px 8px" }}
                 >
-                  {card.badge}
+                  {translate({ id: card.badgeId, message: card.badge, description: `${card.title} badge` })}
                 </span>
               </div>
-              <p style={{ fontSize: "0.88rem", color: "var(--color-text-secondary)", lineHeight: 1.55, margin: "0 0 14px", flex: 1 }}>{card.desc}</p>
-              <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--color-text-link)" }}>{card.cta}</span>
+              <p style={{ fontSize: "0.88rem", color: "var(--color-text-secondary)", lineHeight: 1.55, margin: "0 0 14px", flex: 1 }}>{translate({ id: card.descId, message: card.desc, description: `${card.title} description` })}</p>
+              <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--color-text-link)" }}>{translate({ id: card.ctaId, message: card.cta, description: `${card.title} CTA` })}</span>
             </Link>
           ))}
         </div>
@@ -477,18 +489,17 @@ function PlaygroundTeaser() {
               }}
             >
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", display: "inline-block" }} />
-              Live SDK Playground
+              <Translate id="homepage.playground.kicker" description="Playground kicker">Live SDK Playground</Translate>
             </div>
             <Heading as="h3" style={{ fontSize: "1.25rem", fontWeight: 800, margin: "0 0 8px", letterSpacing: "-0.01em" }}>
-              Try the SDK before you ship
+              <Translate id="homepage.playground.title" description="Playground title">Try the SDK before you ship</Translate>
             </Heading>
             <p style={{ color: "var(--color-text-secondary)", fontSize: "0.92rem", lineHeight: 1.6, margin: "0 0 16px" }}>
-              Call any <code>sdk.*</code> method with a mock transport, inspect request/response shapes, and copy the snippet into your mini app.
-              Built from <code>packages/sdk-playground</code> - no extra install.
+              <Translate id="homepage.playground.description" description="Playground description">Call any sdk.* method with a mock transport, inspect request/response shapes, and copy the snippet into your mini app. Built from packages/sdk-playground - no extra install.</Translate>
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <Link to="/docs/playground" className="button button--primary" style={{ fontWeight: 700, borderRadius: 10, padding: "8px 16px", background: "var(--color-action-primary)", color: "var(--color-action-primary-foreground)", border: "1px solid var(--color-border-default)" }}>
-                Open playground
+                <Translate id="homepage.playground.cta.open" description="Playground CTA">Open playground</Translate>
               </Link>
               <Link
                 to="/docs/sdk/core"
@@ -502,7 +513,7 @@ function PlaygroundTeaser() {
                   color: "var(--color-text-primary)",
                 }}
               >
-                View method catalog
+                <Translate id="homepage.playground.cta.catalog" description="Playground CTA">View method catalog</Translate>
               </Link>
             </div>
           </div>
@@ -560,15 +571,14 @@ function FinalCTA() {
     >
       <div className="container" style={{ textAlign: "center" }}>
         <Heading as="h2" style={{ color: "#fff", fontSize: "1.6rem", fontWeight: 800, marginBottom: 8, letterSpacing: "-0.015em" }}>
-          Ready to build for Sewa?
+          <Translate id="homepage.final.title" description="Final CTA title">Ready to build for Sewa?</Translate>
         </Heading>
         <p style={{ color: "#9aa0b0", maxWidth: 560, margin: "0 auto 20px", fontSize: "0.95rem", lineHeight: 1.6 }}>
-          Scaffold from <code style={{ color: "#ffd740", background: "rgba(255,199,0,0.12)", padding: "1px 6px", borderRadius: 4 }}>test-mini-app/</code>,
-          read the platform overview, or dive straight into the API reference.
+          <Translate id="homepage.final.subtitle" description="Final CTA subtitle">Scaffold from test-mini-app/, read the platform overview, or dive straight into the API reference.</Translate>
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <Link to="/docs/getting-started" className="button button--primary button--lg landing-cta-primary" style={{ borderRadius: 10, padding: "10px 22px" }}>
-            Get started
+            <Translate id="homepage.final.cta.getStarted" description="Final CTA">Get started</Translate>
           </Link>
           <Link
             to="/docs/overview"
@@ -582,7 +592,7 @@ function FinalCTA() {
               fontWeight: 600,
             }}
           >
-            Platform overview
+            <Translate id="homepage.final.cta.overview" description="Final CTA">Platform overview</Translate>
           </Link>
           <a
             href="https://github.com/anomalyco/sewa-platform"

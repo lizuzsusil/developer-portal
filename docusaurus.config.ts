@@ -25,7 +25,30 @@ const config: Config = {
 
   i18n: {
     defaultLocale: "en",
-    locales: ["en"],
+    locales: ["en", "si", "ta"],
+    localeConfigs: {
+      en: {
+        label: "English",
+        direction: "ltr",
+        htmlLang: "en-GB",
+        baseUrl: "/",
+        url: "https://developer.sewa.gov",
+      },
+      si: {
+        label: "සිංහල",
+        direction: "ltr",
+        htmlLang: "si",
+        baseUrl: "/si/",
+        url: "https://developer.sewa.gov",
+      },
+      ta: {
+        label: "தமிழ்",
+        direction: "ltr",
+        htmlLang: "ta",
+        baseUrl: "/ta/",
+        url: "https://developer.sewa.gov",
+      },
+    },
   },
 
   presets: [
@@ -78,6 +101,10 @@ const config: Config = {
         {
           href: "https://github.com/anomalyco/sewa-platform",
           label: "GitHub",
+          position: "right",
+        },
+        {
+          type: "localeDropdown",
           position: "right",
         },
       ],

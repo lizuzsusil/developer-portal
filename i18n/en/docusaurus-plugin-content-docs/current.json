@@ -1,0 +1,26 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "Getting Started",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.SDK Reference": {
+    "message": "SDK Reference",
+    "description": "The label for category 'SDK Reference' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Capability Namespaces": {
+    "message": "Capability Namespaces",
+    "description": "The label for category 'Capability Namespaces' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Framework Adapters": {
+    "message": "Framework Adapters",
+    "description": "The label for category 'Framework Adapters' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Playground": {
+    "message": "Playground",
+    "description": "The label for category 'Playground' in sidebar 'tutorialSidebar'"
+  }
+}

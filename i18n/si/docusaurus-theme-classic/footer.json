@@ -1,0 +1,46 @@
+{
+  "link.title.Documentation": {
+    "message": "ලේඛන",
+    "description": "The title of the footer links column with title=Documentation in the footer"
+  },
+  "link.title.Framework Guides": {
+    "message": "රාමු මාර්ගෝපදේශ",
+    "description": "The title of the footer links column with title=Framework Guides in the footer"
+  },
+  "link.title.Platform": {
+    "message": "වේදිකාව",
+    "description": "The title of the footer links column with title=Platform in the footer"
+  },
+  "link.item.label.Platform Overview": {
+    "message": "වේදිකා දළ විශ්ලේෂණය",
+    "description": "The label of footer link with label=Platform Overview linking to /docs/overview"
+  },
+  "link.item.label.Public SDK Reference": {
+    "message": "පොදු SDK විමර්ශනය",
+    "description": "The label of footer link with label=Public SDK Reference linking to /docs/sdk/core"
+  },
+  "link.item.label.Interactive Playground": {
+    "message": "අන්තර්ක්‍රියාකාරී ක්‍රීඩාංගනය",
+    "description": "The label of footer link with label=Interactive Playground linking to /docs/playground"
+  },
+  "link.item.label.React Integration (Active)": {
+    "message": "React ඒකාබද්ධ කිරීම (සක්‍රීය)",
+    "description": "The label of footer link with label=React Integration (Active) linking to /docs/integration/react"
+  },
+  "link.item.label.Vue.js Integration (Upcoming)": {
+    "message": "Vue.js ඒකාබද්ධ කිරීම (ඉදිරියේදී)",
+    "description": "The label of footer link with label=Vue.js Integration (Upcoming) linking to /docs/integration/vue"
+  },
+  "link.item.label.Angular NG Integration (Upcoming)": {
+    "message": "Angular NG ඒකාබද්ධ කිරීම (ඉදිරියේදී)",
+    "description": "The label of footer link with label=Angular NG Integration (Upcoming) linking to /docs/integration/angular"
+  },
+  "link.item.label.Sewa Platform GitHub": {
+    "message": "සේවා වේදිකා GitHub",
+    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/anomalyco/sewa-platform"
+  },
+  "copyright": {
+    "message": "ප්‍රකාශන හිමිකම © 2026 සේවා - ශ්‍රී ලංකා රජය.",
+    "description": "The footer copyright"
+  }
+}

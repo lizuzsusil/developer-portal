@@ -1,0 +1,549 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "இந்த பக்கம் செயலிழந்தது.",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "மேலே செல்லவும்",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.blog.archive.title": {
+    "message": "Archive",
+    "description": "The page & hero title of the blog archive page"
+  },
+  "theme.blog.archive.description": {
+    "message": "Archive",
+    "description": "The page & hero description of the blog archive page"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "Blog list page navigation",
+    "description": "The ARIA label for the blog pagination"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "Newer entries",
+    "description": "The label used to navigate to the newer blog posts page (previous page)"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "Older entries",
+    "description": "The label used to navigate to the older blog posts page (next page)"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "Blog post page navigation",
+    "description": "The ARIA label for the blog posts pagination"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "Newer post",
+    "description": "The blog post button label to navigate to the newer/previous post"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "Older post",
+    "description": "The blog post button label to navigate to the older/next post"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "View all tags",
+    "description": "The label of the link targeting the tag list page"
+  },
+  "theme.colorToggle.ariaLabel.mode.system": {
+    "message": "கணினி பயன்முறை",
+    "description": "The name for the system color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "ஒளி பயன்முறை",
+    "description": "The name for the light color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "இருள் பயன்முறை",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "இருள் மற்றும் ஒளி பயன்முறைக்கு இடையில் மாறவும் (தற்போது {mode})",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "தடம்",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "ஆவண பக்கங்கள்",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "முந்தைய",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "அடுத்து",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "One doc tagged|{count} docs tagged",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged} with \"{tagName}\"",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "Version: {versionLabel}"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "This is unreleased documentation for {siteTitle} {versionLabel} version.",
+    "description": "The label used to tell the user that he's browsing an unreleased doc version"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "This is documentation for {siteTitle} {versionLabel}, which is no longer actively maintained.",
+    "description": "The label used to tell the user that he's browsing an unmaintained doc version"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "For up-to-date documentation, see the {latestVersionLink} ({versionLabel}).",
+    "description": "The label used to tell the user to check the latest version"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "latest version",
+    "description": "The label used for the latest version suggestion link label"
+  },
+  "theme.common.editThisPage": {
+    "message": "இந்த பக்கத்தை திருத்தவும்",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "Direct link to {heading}",
+    "description": "Title for link to heading"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": " on {date}",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": " by {user}",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "கடைசியாக புதுப்பிக்கப்பட்டது{atDate}{byUser}",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "Versions",
+    "description": "The label for the navbar versions dropdown on mobile view"
+  },
+  "theme.NotFound.title": {
+    "message": "பக்கம் கிடைக்கவில்லை",
+    "description": "The title of the 404 page"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "Tags:",
+    "description": "The label alongside a tag list"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "Close",
+    "description": "The ARIA label for close button of announcement bar"
+  },
+  "theme.admonition.caution": {
+    "message": "எச்சரிக்கை",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.danger": {
+    "message": "ஆபத்து",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "தகவல்",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.note": {
+    "message": "குறிப்பு",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "குறிப்பு",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.warning": {
+    "message": "எச்சரிக்கை",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "Blog recent posts navigation",
+    "description": "The ARIA label for recent posts in the blog sidebar"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "Expand sidebar category '{label}'",
+    "description": "The ARIA label to expand the sidebar category"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "Collapse sidebar category '{label}'",
+    "description": "The ARIA label to collapse the sidebar category"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "Main",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "மொழிகள்",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.NotFound.p1": {
+    "message": "நீங்கள் தேடியதை எங்களால் கண்டுபிடிக்க முடியவில்லை.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "உங்களை அசல் URL க்கு இணைத்த தளத்தின் உரிமையாளரை தொடர்பு கொண்டு அவர்களின் இணைப்பு உடைந்துள்ளதை தெரிவிக்கவும்.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "இந்த பக்கத்தில்",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.blog.post.readMore": {
+    "message": "மேலும் படிக்க",
+    "description": "The label used in blog post item excerpts to link to full blog posts"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "Read more about {title}",
+    "description": "The ARIA label for the link to full blog posts from excerpts"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "One min read|{readingTime} min read",
+    "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "வார்த்தை மடக்கலை மாற்றவும்",
+    "description": "The title attribute for toggle word wrapping button of code block lines"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "நகலெடு",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "நகலெடுக்கப்பட்டது",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "குறியீட்டை கிளிப்போர்டுக்கு நகலெடுக்கவும்",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "Home page",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "பக்கப்பட்டையை சுருக்கு",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "பக்கப்பட்டையை சுருக்கு",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "ஆவண பக்கப்பட்டை",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "Close navigation bar",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← பிரதான மெனுவுக்கு திரும்பு",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "வழிசெலுத்தல் பட்டியை மாற்று",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
+    "message": "Expand the dropdown",
+    "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
+    "message": "Collapse the dropdown",
+    "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "பக்கப்பட்டையை விரிவாக்கு",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "பக்கப்பட்டையை விரிவாக்கு",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.blog.post.plurals": {
+    "message": "One post|{count} posts",
+    "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.tagTitle": {
+    "message": "{nPosts} tagged with \"{tagName}\"",
+    "description": "The title of the page for a blog tag"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}",
+    "description": "The title of the page for a blog author"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "Authors",
+    "description": "The title of the authors page"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "View all authors",
+    "description": "The label of the link targeting the blog authors page"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "This author has not written any posts yet.",
+    "description": "The text for authors with 0 blog post"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "Unlisted page",
+    "description": "The unlisted content banner title"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "This page is unlisted. Search engines will not index it, and only users having a direct link can access it.",
+    "description": "The unlisted content banner message"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "Draft page",
+    "description": "The draft content banner title"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "This page is a draft. It will only be visible in dev and be excluded from the production build.",
+    "description": "The draft content banner message"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "1 item|{count} items",
+    "description": "The default description for a category card in the generated index about how many items this category includes"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "Try again",
+    "description": "The label of the button to try again rendering when the React error boundary captures an error"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "முக்கிய உள்ளடக்கத்திற்கு செல்க",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "குறிச்சொற்கள்",
+    "description": "The title of the tag list page"
+  },
+  "homepage.hero.kicker": {
+    "message": "சேவா டெவலப்பர் போர்டல் · இலங்கை அரசு",
+    "description": "Hero kicker"
+  },
+  "homepage.hero.title.line1": {
+    "message": "மினி ஆப்ஸ்களை உருவாக்குங்கள்",
+    "description": "Hero title line 1"
+  },
+  "homepage.hero.title.line2": {
+    "message": "சேவா தளத்திற்காக.",
+    "description": "Hero title line 2"
+  },
+  "homepage.hero.subtitle": {
+    "message": "சேவா குடிமகன் ஷெல் உள்ளே இயங்கும் இலகுவான ES தொகுதிகளை அனுப்புங்கள். ஹோஸ்ட் SDK ஐ இயக்க நேரத்தில் செலுத்துகிறது — நீங்கள் வகைகளை அறிவித்து",
+    "description": "Hero subtitle"
+  },
+  "homepage.hero.cta.getStarted": {
+    "message": "தொடங்குங்கள்",
+    "description": "Hero CTA"
+  },
+  "homepage.hero.cta.apiReference": {
+    "message": "API குறிப்பு",
+    "description": "Hero CTA"
+  },
+  "homepage.hero.badge1": {
+    "message": "ஹோஸ்ட்-செலுத்தப்பட்டது · பூஜ்ஜிய இயக்க நிறுவல்",
+    "description": "Hero badge"
+  },
+  "homepage.hero.badge2": {
+    "message": "வகை-பாதுகாப்பானது {package} உடன்",
+    "description": "Hero badge"
+  },
+  "homepage.hero.code.footer": {
+    "message": "vite build --lib → ES தொகுதி",
+    "description": "Hero code footer"
+  },
+  "homepage.hero.code.craft": {
+    "message": "4 படிகளில் உருவாக்கவும் →",
+    "description": "Hero code craft"
+  },
+  "homepage.howItWorks.step1.title": {
+    "message": "வகைகளை நிறுவவும்",
+    "description": "How it works step 1 title"
+  },
+  "homepage.howItWorks.step2.title": {
+    "message": "mount() ஏற்றுமதி செய்யவும்",
+    "description": "How it works step 2 title"
+  },
+  "homepage.howItWorks.step2.desc": {
+    "message": "உங்கள் தொகுப்பு mount(container, runtime) ஐ ஏற்றுமதி செய்கிறது. பயனர் மினி ஆப்பைத் திறக்கும்போது ஹோஸ்ட் அதை அழைக்கிறது.",
+    "description": "How it works step 2 desc"
+  },
+  "homepage.howItWorks.step3.title": {
+    "message": "ES நூலகமாக உருவாக்கவும்",
+    "description": "How it works step 3 title"
+  },
+  "homepage.howItWorks.step3.desc": {
+    "message": "Vite lib பயன்முறை தேவைக்கேற்ப ஏற்றப்படும் ஒற்றை ES தொகுதியை வெளியிடுகிறது. SDK தொகுப்பு இல்லை.",
+    "description": "How it works step 3 desc"
+  },
+  "homepage.howItWorks.kicker": {
+    "message": "இது எவ்வாறு செயல்படுகிறது",
+    "description": "How it works kicker"
+  },
+  "homepage.howItWorks.title": {
+    "message": "அனுப்பக்கூடிய மினி ஆப்பிற்கு மூன்று படிகள்",
+    "description": "How it works title"
+  },
+  "homepage.howItWorks.description": {
+    "message": "மாதிரி பிரதிபலிக்கிறது",
+    "description": "How it works description"
+  },
+  "homepage.howItWorks.description2": {
+    "message": "இல்",
+    "description": "How it works description 2"
+  },
+  "homepage.howItWorks.description3": {
+    "message": ". நீங்கள் உங்கள் தொழில்நுட்ப அடுக்கை வைத்திருங்கள் - ஹோஸ்ட் அங்கீகாரம், அனுமதிகள் மற்றும் சாதன அணுகலைக் கையாளுகிறது.",
+    "description": "How it works description 3"
+  },
+  "homepage.capability.title": {
+    "message": "நீங்கள் எதை உருவாக்க முடியும்",
+    "description": "Capability title"
+  },
+  "homepage.capability.cta": {
+    "message": "முழு SDK குறிப்பு →",
+    "description": "Capability CTA"
+  },
+  "homepage.capability.alsoAvailable": {
+    "message": "மேலும் கிடைக்கிறது:",
+    "description": "Capability also"
+  },
+  "homepage.capability.browseAll": {
+    "message": "14 பெயர்வெளிகளையும் உலாவுக →",
+    "description": "Capability browse"
+  },
+  "homepage.integrations.kicker": {
+    "message": "உங்கள் தொழில்நுட்ப அடுக்கைத் தேர்வுசெய்க",
+    "description": "Integrations kicker"
+  },
+  "homepage.integrations.title": {
+    "message": "கட்டமைப்பு வழிகாட்டிகள் & கருவிகள்",
+    "description": "Integrations title"
+  },
+  "homepage.integrations.cta": {
+    "message": "தள மேலோட்டம் →",
+    "description": "Integrations CTA"
+  },
+  "homepage.playground.kicker": {
+    "message": "நேரடி SDK விளையாட்டு மைதானம்",
+    "description": "Playground kicker"
+  },
+  "homepage.playground.title": {
+    "message": "அனுப்புவதற்கு முன் SDK ஐ முயற்சிக்கவும்",
+    "description": "Playground title"
+  },
+  "homepage.playground.description": {
+    "message": "போலி போக்குவரத்துடன் எந்த sdk.* முறையையும் அழைக்கவும், கோரிக்கை/பதில் வடிவங்களை ஆய்வு செய்யவும், மேலும் உங்கள் மினி ஆப்பில் துணுக்கை நகலெடுக்கவும். packages/sdk-playground இலிருந்து கட்டப்பட்டது - கூடுதல் நிறுவல் இல்லை.",
+    "description": "Playground description"
+  },
+  "homepage.playground.cta.open": {
+    "message": "விளையாட்டு மைதானத்தைத் திறக்கவும்",
+    "description": "Playground CTA"
+  },
+  "homepage.playground.cta.catalog": {
+    "message": "முறை பட்டியலைக் காண்க",
+    "description": "Playground CTA"
+  },
+  "homepage.final.title": {
+    "message": "சேவாவுக்காக உருவாக்க தயாரா?",
+    "description": "Final CTA title"
+  },
+  "homepage.final.subtitle": {
+    "message": "test-mini-app/ இலிருந்து உருவாக்கவும், தள மேலோட்டத்தைப் படிக்கவும், அல்லது API குறிப்புக்கு நேரடியாகச் செல்லவும்.",
+    "description": "Final CTA subtitle"
+  },
+  "homepage.final.cta.getStarted": {
+    "message": "தொடங்குங்கள்",
+    "description": "Final CTA"
+  },
+  "homepage.final.cta.overview": {
+    "message": "தள மேலோட்டம்",
+    "description": "Final CTA"
+  },
+  "homepage.howItWorks.step1.desc": {
+    "message": "{package} ஐ முழு sdk.* வகைகளுக்கான devDependency ஆகச் சேர்க்கவும்.",
+    "description": "How it works step 1 desc"
+  },
+  "homepage.capability.auth.desc": {
+    "message": "getUser · isAuthenticated · logout - குடிமகன் அடையாளம்",
+    "description": "Capability sdk.auth description"
+  },
+  "homepage.capability.device.desc": {
+    "message": "location · camera · gallery · files · biometric",
+    "description": "Capability sdk.device description"
+  },
+  "homepage.capability.http.desc": {
+    "message": "get/post/put/patch/delete + streaming proxy",
+    "description": "Capability sdk.http description"
+  },
+  "homepage.capability.storage.desc": {
+    "message": "mini app க்கான scoped key-value & JSON உதவியாளர்கள்",
+    "description": "Capability sdk.storage description"
+  },
+  "homepage.capability.appearance.desc": {
+    "message": "getLocale · getTheme · theme/locale சந்தாக்கள்",
+    "description": "Capability sdk.appearance description"
+  },
+  "homepage.capability.gicChat.desc": {
+    "message": "startSession · streamText - AI chat நுழைவாயில்",
+    "description": "Capability sdk.gicChat description"
+  },
+  "homepage.integrations.react.badge": {
+    "message": "செயலில் · தயாரிப்பு தயார்",
+    "description": "React badge"
+  },
+  "homepage.integrations.react.desc": {
+    "message": "குறிப்பு செயல்படுத்தல். Hooks + Provider முழு வகைகளுடன் window.__GSA_SDK__ ஐ மூடுகிறது.",
+    "description": "React description"
+  },
+  "homepage.integrations.react.cta": {
+    "message": "React வழிகாட்டியைப் பார்க்கவும் →",
+    "description": "React CTA"
+  },
+  "homepage.integrations.vue.badge": {
+    "message": "வரவிருக்கிறது · சாலை வரைபடம்",
+    "description": "Vue badge"
+  },
+  "homepage.integrations.vue.desc": {
+    "message": "Vue 3 க்கான Composition API அடாப்டர். அதே mount() வாழ்க்கைச் சுழற்சியைப் பின்பற்றுகிறது.",
+    "description": "Vue description"
+  },
+  "homepage.integrations.vue.cta": {
+    "message": "Vue வழிகாட்டியைப் பார்க்கவும் →",
+    "description": "Vue CTA"
+  },
+  "homepage.integrations.angular.badge": {
+    "message": "வரவிருக்கிறது · சாலை வரைபடம்",
+    "description": "Angular badge"
+  },
+  "homepage.integrations.angular.desc": {
+    "message": "தனித்த கூறுகள் & injectable SDK சேவை - Angular 17+ வடிவங்களுடன் சீரமைக்கப்பட்டது.",
+    "description": "Angular description"
+  },
+  "homepage.integrations.angular.cta": {
+    "message": "Angular வழிகாட்டியைப் பார்க்கவும் →",
+    "description": "Angular CTA"
+  },
+  "homepage.integrations.playground.badge": {
+    "message": "ஊடாடும் · ஆவணங்களில் நேரலை",
+    "description": "Playground badge"
+  },
+  "homepage.integrations.playground.desc": {
+    "message": "mock போக்குவரத்திற்கு எதிராக ஒவ்வொரு sdk.* முறையையும் முயற்சிக்கவும். உள்ளூர் அமைப்பு இல்லை - ஆவண தளத்திற்குள் இயங்குகிறது.",
+    "description": "Playground description"
+  },
+  "homepage.integrations.playground.cta": {
+    "message": "விளையாட்டு மைதானத்தைத் திறக்கவும் →",
+    "description": "Playground CTA"
+  }
+}

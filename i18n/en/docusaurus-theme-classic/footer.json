@@ -1,0 +1,46 @@
+{
+  "link.title.Documentation": {
+    "message": "Documentation",
+    "description": "The title of the footer links column with title=Documentation in the footer"
+  },
+  "link.title.Framework Guides": {
+    "message": "Framework Guides",
+    "description": "The title of the footer links column with title=Framework Guides in the footer"
+  },
+  "link.title.Platform": {
+    "message": "Platform",
+    "description": "The title of the footer links column with title=Platform in the footer"
+  },
+  "link.item.label.Platform Overview": {
+    "message": "Platform Overview",
+    "description": "The label of footer link with label=Platform Overview linking to /docs/overview"
+  },
+  "link.item.label.Public SDK Reference": {
+    "message": "Public SDK Reference",
+    "description": "The label of footer link with label=Public SDK Reference linking to /docs/sdk/core"
+  },
+  "link.item.label.Interactive Playground": {
+    "message": "Interactive Playground",
+    "description": "The label of footer link with label=Interactive Playground linking to /docs/playground"
+  },
+  "link.item.label.React Integration (Active)": {
+    "message": "React Integration (Active)",
+    "description": "The label of footer link with label=React Integration (Active) linking to /docs/integration/react"
+  },
+  "link.item.label.Vue.js Integration (Upcoming)": {
+    "message": "Vue.js Integration (Upcoming)",
+    "description": "The label of footer link with label=Vue.js Integration (Upcoming) linking to /docs/integration/vue"
+  },
+  "link.item.label.Angular NG Integration (Upcoming)": {
+    "message": "Angular NG Integration (Upcoming)",
+    "description": "The label of footer link with label=Angular NG Integration (Upcoming) linking to /docs/integration/angular"
+  },
+  "link.item.label.Sewa Platform GitHub": {
+    "message": "Sewa Platform GitHub",
+    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/anomalyco/sewa-platform"
+  },
+  "copyright": {
+    "message": "Copyright © 2026 Sewa - Government of Sri Lanka.",
+    "description": "The footer copyright"
+  }
+}

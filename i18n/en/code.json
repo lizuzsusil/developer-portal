@@ -1,0 +1,549 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "This page crashed.",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.blog.archive.title": {
+    "message": "Archive",
+    "description": "The page & hero title of the blog archive page"
+  },
+  "theme.blog.archive.description": {
+    "message": "Archive",
+    "description": "The page & hero description of the blog archive page"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "Blog list page navigation",
+    "description": "The ARIA label for the blog pagination"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "Newer entries",
+    "description": "The label used to navigate to the newer blog posts page (previous page)"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "Older entries",
+    "description": "The label used to navigate to the older blog posts page (next page)"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "Scroll back to top",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "Blog post page navigation",
+    "description": "The ARIA label for the blog posts pagination"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "Newer post",
+    "description": "The blog post button label to navigate to the newer/previous post"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "Older post",
+    "description": "The blog post button label to navigate to the older/next post"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "View all tags",
+    "description": "The label of the link targeting the tag list page"
+  },
+  "theme.colorToggle.ariaLabel.mode.system": {
+    "message": "system mode",
+    "description": "The name for the system color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "light mode",
+    "description": "The name for the light color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "dark mode",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "Switch between dark and light mode (currently {mode})",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "Breadcrumbs",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "Docs pages",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "Previous",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "Next",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "One doc tagged|{count} docs tagged",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged} with \"{tagName}\"",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "Version: {versionLabel}"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "This is unreleased documentation for {siteTitle} {versionLabel} version.",
+    "description": "The label used to tell the user that he's browsing an unreleased doc version"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "This is documentation for {siteTitle} {versionLabel}, which is no longer actively maintained.",
+    "description": "The label used to tell the user that he's browsing an unmaintained doc version"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "For up-to-date documentation, see the {latestVersionLink} ({versionLabel}).",
+    "description": "The label used to tell the user to check the latest version"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "latest version",
+    "description": "The label used for the latest version suggestion link label"
+  },
+  "theme.common.editThisPage": {
+    "message": "Edit this page",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "Direct link to {heading}",
+    "description": "Title for link to heading"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": " on {date}",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": " by {user}",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "Last updated{atDate}{byUser}",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "theme.NotFound.title": {
+    "message": "Page Not Found",
+    "description": "The title of the 404 page"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "Versions",
+    "description": "The label for the navbar versions dropdown on mobile view"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "Tags:",
+    "description": "The label alongside a tag list"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "Close",
+    "description": "The ARIA label for close button of announcement bar"
+  },
+  "theme.admonition.caution": {
+    "message": "caution",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.danger": {
+    "message": "danger",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "info",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.note": {
+    "message": "note",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "tip",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.warning": {
+    "message": "warning",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "Blog recent posts navigation",
+    "description": "The ARIA label for recent posts in the blog sidebar"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "Expand sidebar category '{label}'",
+    "description": "The ARIA label to expand the sidebar category"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "Collapse sidebar category '{label}'",
+    "description": "The ARIA label to collapse the sidebar category"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "Main",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.NotFound.p1": {
+    "message": "We could not find what you were looking for.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "Please contact the owner of the site that linked you to the original URL and let them know their link is broken.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "Languages",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "On this page",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.blog.post.readMore": {
+    "message": "Read more",
+    "description": "The label used in blog post item excerpts to link to full blog posts"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "Read more about {title}",
+    "description": "The ARIA label for the link to full blog posts from excerpts"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "One min read|{readingTime} min read",
+    "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "Copy",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "Copied",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "Copy code to clipboard",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "Toggle word wrap",
+    "description": "The title attribute for toggle word wrapping button of code block lines"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "Home page",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "Collapse sidebar",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "Collapse sidebar",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "Docs sidebar",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "Close navigation bar",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← Back to main menu",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "Toggle navigation bar",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
+    "message": "Expand the dropdown",
+    "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
+    "message": "Collapse the dropdown",
+    "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "Expand sidebar",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "Expand sidebar",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.blog.post.plurals": {
+    "message": "One post|{count} posts",
+    "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.tagTitle": {
+    "message": "{nPosts} tagged with \"{tagName}\"",
+    "description": "The title of the page for a blog tag"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}",
+    "description": "The title of the page for a blog author"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "Authors",
+    "description": "The title of the authors page"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "View all authors",
+    "description": "The label of the link targeting the blog authors page"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "This author has not written any posts yet.",
+    "description": "The text for authors with 0 blog post"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "Unlisted page",
+    "description": "The unlisted content banner title"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "This page is unlisted. Search engines will not index it, and only users having a direct link can access it.",
+    "description": "The unlisted content banner message"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "Draft page",
+    "description": "The draft content banner title"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "This page is a draft. It will only be visible in dev and be excluded from the production build.",
+    "description": "The draft content banner message"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "1 item|{count} items",
+    "description": "The default description for a category card in the generated index about how many items this category includes"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "Try again",
+    "description": "The label of the button to try again rendering when the React error boundary captures an error"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "Skip to main content",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "Tags",
+    "description": "The title of the tag list page"
+  },
+  "homepage.hero.kicker": {
+    "message": "Sewa Developer Portal · Government of Sri Lanka",
+    "description": "Hero kicker"
+  },
+  "homepage.hero.title.line1": {
+    "message": "Build mini apps",
+    "description": "Hero title line 1"
+  },
+  "homepage.hero.title.line2": {
+    "message": "for the Sewa platform.",
+    "description": "Hero title line 2"
+  },
+  "homepage.hero.subtitle": {
+    "message": "Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime — you just declare types and export",
+    "description": "Hero subtitle"
+  },
+  "homepage.hero.cta.getStarted": {
+    "message": "Get started",
+    "description": "Hero CTA"
+  },
+  "homepage.hero.cta.apiReference": {
+    "message": "API reference",
+    "description": "Hero CTA"
+  },
+  "homepage.hero.badge1": {
+    "message": "Host-injected · zero runtime install",
+    "description": "Hero badge"
+  },
+  "homepage.hero.badge2": {
+    "message": "Type-safe with {package}",
+    "description": "Hero badge"
+  },
+  "homepage.hero.code.footer": {
+    "message": "vite build --lib → ES module",
+    "description": "Hero code footer"
+  },
+  "homepage.hero.code.craft": {
+    "message": "Scaffold in 4 steps →",
+    "description": "Hero code craft"
+  },
+  "homepage.howItWorks.step1.title": {
+    "message": "Install types",
+    "description": "How it works step 1 title"
+  },
+  "homepage.howItWorks.step2.title": {
+    "message": "Export mount()",
+    "description": "How it works step 2 title"
+  },
+  "homepage.howItWorks.step2.desc": {
+    "message": "Your bundle exports mount(container, runtime). The host calls it when the user opens the mini app.",
+    "description": "How it works step 2 desc"
+  },
+  "homepage.howItWorks.step3.title": {
+    "message": "Build as ES lib",
+    "description": "How it works step 3 title"
+  },
+  "homepage.howItWorks.step3.desc": {
+    "message": "Vite lib mode outputs a single ES module the shell loads on demand. No SDK bundling.",
+    "description": "How it works step 3 desc"
+  },
+  "homepage.howItWorks.kicker": {
+    "message": "How it works",
+    "description": "How it works kicker"
+  },
+  "homepage.howItWorks.title": {
+    "message": "Three steps to a shippable mini app",
+    "description": "How it works title"
+  },
+  "homepage.howItWorks.description": {
+    "message": "The pattern mirrors",
+    "description": "How it works description"
+  },
+  "homepage.howItWorks.description2": {
+    "message": "in the",
+    "description": "How it works description 2"
+  },
+  "homepage.howItWorks.description3": {
+    "message": ". You keep your stack - the host handles auth, permissions, and device access.",
+    "description": "How it works description 3"
+  },
+  "homepage.capability.title": {
+    "message": "What you can build with",
+    "description": "Capability title"
+  },
+  "homepage.capability.cta": {
+    "message": "Full SDK reference →",
+    "description": "Capability CTA"
+  },
+  "homepage.capability.alsoAvailable": {
+    "message": "Also available:",
+    "description": "Capability also"
+  },
+  "homepage.capability.browseAll": {
+    "message": "Browse all 14 namespaces →",
+    "description": "Capability browse"
+  },
+  "homepage.integrations.kicker": {
+    "message": "Choose your stack",
+    "description": "Integrations kicker"
+  },
+  "homepage.integrations.title": {
+    "message": "Framework guides & tools",
+    "description": "Integrations title"
+  },
+  "homepage.integrations.cta": {
+    "message": "Platform overview →",
+    "description": "Integrations CTA"
+  },
+  "homepage.playground.kicker": {
+    "message": "Live SDK Playground",
+    "description": "Playground kicker"
+  },
+  "homepage.playground.title": {
+    "message": "Try the SDK before you ship",
+    "description": "Playground title"
+  },
+  "homepage.playground.description": {
+    "message": "Call any sdk.* method with a mock transport, inspect request/response shapes, and copy the snippet into your mini app. Built from packages/sdk-playground - no extra install.",
+    "description": "Playground description"
+  },
+  "homepage.playground.cta.open": {
+    "message": "Open playground",
+    "description": "Playground CTA"
+  },
+  "homepage.playground.cta.catalog": {
+    "message": "View method catalog",
+    "description": "Playground CTA"
+  },
+  "homepage.final.title": {
+    "message": "Ready to build for Sewa?",
+    "description": "Final CTA title"
+  },
+  "homepage.final.subtitle": {
+    "message": "Scaffold from test-mini-app/, read the platform overview, or dive straight into the API reference.",
+    "description": "Final CTA subtitle"
+  },
+  "homepage.final.cta.getStarted": {
+    "message": "Get started",
+    "description": "Final CTA"
+  },
+  "homepage.final.cta.overview": {
+    "message": "Platform overview",
+    "description": "Final CTA"
+  },
+  "homepage.howItWorks.step1.desc": {
+    "message": "Add {package} as a devDependency for full sdk.* typings.",
+    "description": "How it works step 1 desc"
+  },
+  "homepage.capability.auth.desc": {
+    "message": "getUser · isAuthenticated · logout - citizen identity",
+    "description": "Capability sdk.auth description"
+  },
+  "homepage.capability.device.desc": {
+    "message": "location · camera · gallery · files · biometric",
+    "description": "Capability sdk.device description"
+  },
+  "homepage.capability.http.desc": {
+    "message": "get/post/put/patch/delete + streaming proxy",
+    "description": "Capability sdk.http description"
+  },
+  "homepage.capability.storage.desc": {
+    "message": "scoped key-value & JSON helpers per mini app",
+    "description": "Capability sdk.storage description"
+  },
+  "homepage.capability.appearance.desc": {
+    "message": "getLocale · getTheme · theme/locale subscriptions",
+    "description": "Capability sdk.appearance description"
+  },
+  "homepage.capability.gicChat.desc": {
+    "message": "startSession · streamText - AI chat gateway",
+    "description": "Capability sdk.gicChat description"
+  },
+  "homepage.integrations.react.badge": {
+    "message": "Active · Production ready",
+    "description": "React badge"
+  },
+  "homepage.integrations.react.desc": {
+    "message": "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
+    "description": "React description"
+  },
+  "homepage.integrations.react.cta": {
+    "message": "View React guide →",
+    "description": "React CTA"
+  },
+  "homepage.integrations.vue.badge": {
+    "message": "Upcoming · Roadmap",
+    "description": "Vue badge"
+  },
+  "homepage.integrations.vue.desc": {
+    "message": "Composition API adapter for Vue 3. Tracks the same mount() lifecycle.",
+    "description": "Vue description"
+  },
+  "homepage.integrations.vue.cta": {
+    "message": "View Vue guide →",
+    "description": "Vue CTA"
+  },
+  "homepage.integrations.angular.badge": {
+    "message": "Upcoming · Roadmap",
+    "description": "Angular badge"
+  },
+  "homepage.integrations.angular.desc": {
+    "message": "Standalone components & injectable SDK service - aligned with Angular 17+ patterns.",
+    "description": "Angular description"
+  },
+  "homepage.integrations.angular.cta": {
+    "message": "View Angular guide →",
+    "description": "Angular CTA"
+  },
+  "homepage.integrations.playground.badge": {
+    "message": "Interactive · Live in docs",
+    "description": "Playground badge"
+  },
+  "homepage.integrations.playground.desc": {
+    "message": "Try every sdk.* method against a mock transport. No local setup - runs inside the docs site.",
+    "description": "Playground description"
+  },
+  "homepage.integrations.playground.cta": {
+    "message": "Open playground →",
+    "description": "Playground CTA"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "version.label": {
+    "message": "ඊළඟ",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "ආරම්භ කිරීම",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.SDK Reference": {
+    "message": "SDK විමර්ශනය",
+    "description": "The label for category 'SDK Reference' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Capability Namespaces": {
+    "message": "හැකියාවන් නාම අවකාශ",
+    "description": "The label for category 'Capability Namespaces' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Framework Adapters": {
+    "message": "රාමු ඇඩැප්ටර",
+    "description": "The label for category 'Framework Adapters' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Playground": {
+    "message": "ක්‍රීඩාංගනය",
+    "description": "The label for category 'Playground' in sidebar 'tutorialSidebar'"
+  }
+}

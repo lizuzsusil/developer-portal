@@ -1,0 +1,26 @@
+{
+  "version.label": {
+    "message": "அடுத்தது",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Getting Started": {
+    "message": "தொடங்குதல்",
+    "description": "The label for category 'Getting Started' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.SDK Reference": {
+    "message": "SDK குறிப்பு",
+    "description": "The label for category 'SDK Reference' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Capability Namespaces": {
+    "message": "திறன் பெயர்வெளிகள்",
+    "description": "The label for category 'Capability Namespaces' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Framework Adapters": {
+    "message": "கட்டமைப்பு தழுவிகள்",
+    "description": "The label for category 'Framework Adapters' in sidebar 'tutorialSidebar'"
+  },
+  "sidebar.tutorialSidebar.category.Playground": {
+    "message": "விளையாட்டு மைதானம்",
+    "description": "The label for category 'Playground' in sidebar 'tutorialSidebar'"
+  }
+}

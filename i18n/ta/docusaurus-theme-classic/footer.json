@@ -1,0 +1,46 @@
+{
+  "link.title.Documentation": {
+    "message": "ஆவணங்கள்",
+    "description": "The title of the footer links column with title=Documentation in the footer"
+  },
+  "link.title.Framework Guides": {
+    "message": "கட்டமைப்பு வழிகாட்டிகள்",
+    "description": "The title of the footer links column with title=Framework Guides in the footer"
+  },
+  "link.title.Platform": {
+    "message": "தளம்",
+    "description": "The title of the footer links column with title=Platform in the footer"
+  },
+  "link.item.label.Platform Overview": {
+    "message": "தள மேலோட்டம்",
+    "description": "The label of footer link with label=Platform Overview linking to /docs/overview"
+  },
+  "link.item.label.Public SDK Reference": {
+    "message": "பொது SDK குறிப்பு",
+    "description": "The label of footer link with label=Public SDK Reference linking to /docs/sdk/core"
+  },
+  "link.item.label.Interactive Playground": {
+    "message": "ஊடாடும் விளையாட்டு மைதானம்",
+    "description": "The label of footer link with label=Interactive Playground linking to /docs/playground"
+  },
+  "link.item.label.React Integration (Active)": {
+    "message": "React ஒருங்கிணைப்பு (செயலில்)",
+    "description": "The label of footer link with label=React Integration (Active) linking to /docs/integration/react"
+  },
+  "link.item.label.Vue.js Integration (Upcoming)": {
+    "message": "Vue.js ஒருங்கிணைப்பு (விரைவில்)",
+    "description": "The label of footer link with label=Vue.js Integration (Upcoming) linking to /docs/integration/vue"
+  },
+  "link.item.label.Angular NG Integration (Upcoming)": {
+    "message": "Angular NG ஒருங்கிணைப்பு (விரைவில்)",
+    "description": "The label of footer link with label=Angular NG Integration (Upcoming) linking to /docs/integration/angular"
+  },
+  "link.item.label.Sewa Platform GitHub": {
+    "message": "சேவா தளம் GitHub",
+    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/anomalyco/sewa-platform"
+  },
+  "copyright": {
+    "message": "பதிப்புரிமை © 2026 சேவா - இலங்கை அரசு.",
+    "description": "The footer copyright"
+  }
+}
