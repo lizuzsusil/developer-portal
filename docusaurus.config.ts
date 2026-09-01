@@ -58,27 +58,7 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: "tutorialSidebar",
           position: "left",
-          label: "SDK Docs",
-        },
-        {
-          to: "/docs/integration/react",
-          label: "React Integration [Active]",
-          position: "left",
-        },
-        {
-          to: "/docs/integration/vue",
-          label: "Vue [Upcoming]",
-          position: "left",
-        },
-        {
-          to: "/docs/integration/angular",
-          label: "Angular [Upcoming]",
-          position: "left",
-        },
-        {
-          to: "/docs/playground",
-          label: "Live SDK Playground",
-          position: "left",
+          label: "Docs",
         },
         {
           href: "https://github.com/anomalyco/sewa-platform",
@@ -134,7 +114,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Sewa — Government of Nepal.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Sewa - Government of Srilanka.`,
     },
     prism: {
       theme: prismThemes.github,

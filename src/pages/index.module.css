@@ -12,13 +12,24 @@
 
 .heroGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.teaserGrid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 20px;
   align-items: center;
 }
 
 @media screen and (max-width: 900px) {
   .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .teaserGrid {
     grid-template-columns: 1fr;
   }
 }
