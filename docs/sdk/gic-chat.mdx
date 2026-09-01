@@ -8,7 +8,7 @@ sidebar_label: sdk.gicChat
 
 The `sdk.gicChat` module streams responses from the **GIC Chat Agent** using Server-Sent Events (SSE). It supports knowledge-base tool calls, structured event types, and session-based conversation management.
 
-GIC Chat is gated by the **`http`** capability — the host must negotiate `http` for `sdk.gicChat` to be available.
+GIC Chat is gated by the **`http`** capability - the host must negotiate `http` for `sdk.gicChat` to be available.
 
 ---
 
@@ -140,7 +140,7 @@ const { invocation_id } = await sdk.gicChat.stream(
         case "error":
           showError(event.detail);
           break;
-        // keep_alive — no action needed
+        // keep_alive - no action needed
       }
     },
   }
@@ -171,8 +171,8 @@ setTimeout(() => controller.abort(), 5000);
 
 GIC Chat errors are delivered in two ways:
 
-1. **Transport-level errors** — The `stream()` promise rejects with an `SdkError` (code: `HOST_ERROR`) if the host cannot establish the stream.
-2. **Mid-stream errors** — The `error` SSE event is delivered with `type: "error"` and a `detail` string describing the failure. The `onEvent` callback receives this event, and the `stream()` promise rejects after the event.
+1. **Transport-level errors** - The `stream()` promise rejects with an `SdkError` (code: `HOST_ERROR`) if the host cannot establish the stream.
+2. **Mid-stream errors** - The `error` SSE event is delivered with `type: "error"` and a `detail` string describing the failure. The `onEvent` callback receives this event, and the `stream()` promise rejects after the event.
 
 ```typescript
 try {

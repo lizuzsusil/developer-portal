@@ -42,7 +42,7 @@ export function VueFrameworkShowcase() {
           overflowX: "auto",
         }}
       >
-        <code>{`// Preview — not yet implemented
+        <code>{`// Preview - not yet implemented
 // Planned: provide/inject SDK context + reactive composables
 // See docs/integration/vue.mdx for the roadmap pattern`}</code>
       </pre>

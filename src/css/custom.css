@@ -101,9 +101,27 @@
 }
 
 /* ------------------------------------------------------------------ */
-/*  Container — strictly fixed width (never fluid)                       */
+/*  Container / Navbar - landing uses fixed container, docs uses fluid   */
+/*  Homepage <html> has `plugin-pages`, docs has `plugin-docs/docs-wrapper` */
 /* ------------------------------------------------------------------ */
-.container {
+html.plugin-pages .navbar__inner {
+  max-width: var(--ifm-container-width);
+  margin: 0 auto;
+  width: 100%;
+  padding-left: var(--ifm-spacing-horizontal);
+  padding-right: var(--ifm-spacing-horizontal);
+}
+
+/* Inner (docs) pages - navbar is fluid / full-bleed */
+html.docs-wrapper .navbar__inner,
+html.plugin-docs .navbar__inner {
+  max-width: none;
+  margin: 0;
+  width: 100%;
+}
+
+/* Landing containers stay strictly 1140px even at XL (not 1320) */
+html.plugin-pages .container {
   max-width: var(--ifm-container-width) !important;
   margin-left: auto !important;
   margin-right: auto !important;
@@ -113,21 +131,12 @@
 }
 
 @media (min-width: 1440px) {
-  .container {
+  html.plugin-pages .container {
     max-width: var(--ifm-container-width) !important;
   }
 }
 
-/* Ensure navbar inner also respects container width */
-.navbar__inner {
-  max-width: var(--ifm-container-width);
-  margin: 0 auto;
-  width: 100%;
-  padding-left: var(--ifm-spacing-horizontal);
-  padding-right: var(--ifm-spacing-horizontal);
-}
-
-/* Navbar — compact typography */
+/* Navbar - compact typography */
 .navbar {
   border-bottom: 1px solid var(--color-border-decorative) !important;
   height: 56px;
@@ -158,9 +167,33 @@
   height: 28px !important;
 }
 
-/* Footer container alignment */
-.footer .container {
+/* Footer follows same rule: contained on landing, fluid elsewhere */
+html.plugin-pages .footer .container {
   max-width: var(--ifm-container-width) !important;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Theme toggle - always visible on dark masthead                      */
+/* ------------------------------------------------------------------ */
+.navbar .colorModeToggle_JNgW,
+.navbar [class*="colorModeToggle"],
+.navbar [class*="toggle"] button {
+  color: var(--ifm-navbar-link-color) !important;
+}
+
+/* Docusaurus toggle uses currentColor for icons */
+.navbar button[class*="toggleButton"] {
+  color: var(--neutral-0) !important;
+  border-radius: var(--radius-md);
+}
+
+.navbar button[class*="toggleButton"]:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.navbar button[class*="toggleButton"] svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* Sidebar */

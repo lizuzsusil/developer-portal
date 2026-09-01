@@ -2,7 +2,7 @@
   "name": "@sewa/sdk-playground",
   "version": "1.0.0",
   "private": true,
-  "description": "Interactive SDK playground — method explorer with live mock execution",
+  "description": "Interactive SDK playground - method explorer with live mock execution",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",

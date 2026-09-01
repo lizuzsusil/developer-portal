@@ -1,9 +1,9 @@
-/* Tailwind theme + utilities only — preflight excluded to avoid clobbering Docusaurus/Infima */
+/* Tailwind theme + utilities only - preflight excluded to avoid clobbering Docusaurus/Infima */
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
-  /* Primitive — Gold */
+  /* Primitive - Gold */
   --gold-50: #fffef2;
   --gold-100: #fff8d6;
   --gold-200: #ffe880;
@@ -16,7 +16,7 @@
   --gold-900: #503d00;
   --gold-950: #2b2100;
 
-  /* Primitive — Neutral */
+  /* Primitive - Neutral */
   --neutral-0: #ffffff;
   --neutral-50: #fafafb;
   --neutral-100: #f5f6f8;
@@ -37,7 +37,7 @@
   --neutral-950: #030712;
   --neutral-1000: #000000;
 
-  /* Primitive — Green */
+  /* Primitive - Green */
   --green-100: #e0f2ec;
   --green-300: #5dc896;
   --green-400: #34d399;
@@ -47,7 +47,7 @@
   --green-800: #065f46;
   --green-900: #064e3b;
 
-  /* Primitive — Red */
+  /* Primitive - Red */
   --red-100: #fdecea;
   --red-300: #f47272;
   --red-400: #f87171;
@@ -57,7 +57,7 @@
   --red-800: #991b1b;
   --red-900: #7f1d1d;
 
-  /* Primitive — Teal */
+  /* Primitive - Teal */
   --teal-100: #d0f0f5;
   --teal-200: #7dd8e8;
   --teal-300: #67d2e1;
@@ -65,14 +65,14 @@
   --teal-600: #0d6b7b;
   --teal-800: #0f4855;
 
-  /* Primitive — Blue */
+  /* Primitive - Blue */
   --blue-100: #e3edff;
   --blue-300: #93c5fd;
   --blue-500: #1a56d6;
   --blue-700: #1041a8;
   --blue-900: #1e3a8a;
 
-  /* Primitive — Orange */
+  /* Primitive - Orange */
   --orange-100: #fef0e3;
   --orange-400: #fb923c;
   --orange-500: #f97316;
@@ -80,16 +80,16 @@
   --orange-800: #78350f;
   --orange-900: #7c2d12;
 
-  /* Primitive — Purple */
+  /* Primitive - Purple */
   --purple-100: #ede9ff;
   --purple-300: #a78bfa;
   --purple-500: #6747c7;
   --purple-900: #4c1d95;
 
-  /* Primitive — Maroon */
+  /* Primitive - Maroon */
   --maroon-700: #7a1240;
 
-  /* Primitive — Dark Subtle (dark-mode semantic fills) */
+  /* Primitive - Dark Subtle (dark-mode semantic fills) */
   --dark-subtle-gold: #2e2200;
   --dark-subtle-green: #062b1a;
   --dark-subtle-red: #330d0d;
@@ -98,7 +98,7 @@
   --dark-subtle-purple: #1a0f38;
   --dark-subtle-blue: #0a1733;
 
-  /* Semantic — Light mode (default) */
+  /* Semantic - Light mode (default) */
   --color-text-primary: var(--neutral-900);
   --color-text-secondary: var(--neutral-600);
   --color-text-tertiary: var(--neutral-400);

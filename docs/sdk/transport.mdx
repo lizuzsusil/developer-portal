@@ -24,8 +24,8 @@ interface Transport {
 | Transport | Source | Use case |
 |---|---|---|
 | `DefaultTransport` | `transport/default-transport.ts` | Browser iframe / WebView. `postMessage` + `CustomEvent (gov-platform-event)` with origin pinning. |
-| `WebSocketTransport` | `transport/websocket-transport.ts` | `new WebSocketTransport({ url, protocols, socket })` — remote host. |
-| `BroadcastTransport` | `transport/broadcast-transport.ts` | `BroadcastChannel("gov-platform-sdk")` — multi-tab. |
+| `WebSocketTransport` | `transport/websocket-transport.ts` | `new WebSocketTransport({ url, protocols, socket })` - remote host. |
+| `BroadcastTransport` | `transport/broadcast-transport.ts` | `BroadcastChannel("gov-platform-sdk")` - multi-tab. |
 | `MessagePortTransport` | `transport/message-port-transport.ts` | `MessagePort` / Web Worker. |
 | `SsrTransport` | `transport/ssr-transport.ts` | No-op for SSR / static rendering. |
 

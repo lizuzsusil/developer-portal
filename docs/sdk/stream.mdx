@@ -12,7 +12,7 @@ Long-lived responses (HTTP `getStream`, `http.stream` chat, GIC `gicChat.stream`
 
 ```typescript
 const builder = sdk.http.getStream({ url: "https://api.example.com/export" });
-// or: const builder = sdk.http.stream({ messages });  — chat
+// or: const builder = sdk.http.stream({ messages });  - chat
 // or: await sdk.gicChat.stream({ user_id, session_id, message }, { onEvent });
 
 for await (const chunk of builder.iterate()) {

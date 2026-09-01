@@ -8,7 +8,7 @@ sidebar_label: Plugins & Registry
 
 Extend the SDK without forking it.
 
-## Plugins — `SdkPlugin`
+## Plugins - `SdkPlugin`
 
 ```typescript
 interface SdkPlugin {
@@ -22,7 +22,7 @@ sdk.usePlugin(myPlugin);
 // deduped by name; onInitialize runs on sdk.initialize(), onDestroy on sdk.destroy()
 ```
 
-Use `ctx.rpc` to add middleware or `sdk.addEventInterceptor` inside `install`. The offline queue is a plugin — see [Offline Queue](/docs/sdk/offline).
+Use `ctx.rpc` to add middleware or `sdk.addEventInterceptor` inside `install`. The offline queue is a plugin - see [Offline Queue](/docs/sdk/offline).
 
 ## Module Registry
 

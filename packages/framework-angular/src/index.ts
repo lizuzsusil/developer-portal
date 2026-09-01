@@ -1,10 +1,10 @@
 /**
- * @sewa/framework-angular — Angular adapter for the Sewa Mini App SDK
+ * @sewa/framework-angular - Angular adapter for the Sewa Mini App SDK
  *
  * Provides an injectable MiniAppSdkService singleton, RxJS Observable event
  * streams, route guards, and Angular lifecycle integration.
  *
- * Internal workspace package — not published to npm.
+ * Internal workspace package - not published to npm.
  * See docs/integration/angular.mdx for the preview pattern.
  */
 

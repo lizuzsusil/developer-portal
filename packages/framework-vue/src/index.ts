@@ -1,10 +1,10 @@
 /**
- * @sewa/framework-vue — Vue 3 adapter for the Sewa Mini App SDK
+ * @sewa/framework-vue - Vue 3 adapter for the Sewa Mini App SDK
  *
  * Provides provide/inject SDK context, reactive composables (useMiniAppSdk),
  * and Vue Router navigation hooks.
  *
- * Internal workspace package — not published to npm.
+ * Internal workspace package - not published to npm.
  * See docs/integration/vue.mdx for the preview pattern.
  */
 

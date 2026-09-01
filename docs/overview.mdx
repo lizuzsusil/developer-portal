@@ -4,15 +4,17 @@ title: Platform Overview
 sidebar_label: Platform Overview
 ---
 
+import {TypesPackageName} from '@site/src/components/TypesPackage';
+
 # Platform Overview
 
 The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (web and Flutter). The host loads each mini app as an ES module, injects the SDK at `window.__GSA_SDK__`, and mediates all privileged operations over an RPC bridge.
 
 ## Runtime Model
 
-- **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime)` — see [`Getting Started`](/docs/getting-started) and [`test-mini-app/`](https://github.com/anomalyco/sewa-platform/tree/main/test-mini-app).
+- **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime)` - see [`Getting Started`](/docs/getting-started) and [`test-mini-app/`](https://github.com/anomalyco/sewa-platform/tree/main/test-mini-app).
 - **SDK injection**: The host sets `window.__GSA_SDK__` before calling `mount`. No `npm install` of the SDK.
-- **Types**: `pnpm add -D @lizuz/mini-app-types`.
+- **Types**: <code>pnpm add -D <TypesPackageName /></code>.
 
 ```mermaid
 sequenceDiagram
@@ -39,6 +41,6 @@ See [Protocol & Handshake](/docs/sdk/protocol) for the wire format.
 
 ## Next Steps
 
-- [Getting Started](/docs/getting-started) — scaffold a mini app
-- [SDK Reference](/docs/sdk/core) — all namespaces
-- [React Guide](/docs/integration/react) — reference implementation
+- [Getting Started](/docs/getting-started) - scaffold a mini app
+- [SDK Reference](/docs/sdk/core) - all namespaces
+- [React Guide](/docs/integration/react) - reference implementation

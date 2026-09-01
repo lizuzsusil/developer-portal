@@ -24,7 +24,7 @@ import { PROTOCOL_VERSION, MESSAGE_CHANNEL, HOST_TARGET } from "@lizuz/mini-app-
 | `HOST_TARGET` | `shell` | `target` of every outbound request. |
 | `SDK_GLOBAL_KEY` | `__GSA_SDK__` | `window` key the host writes and the SDK overwrites with the live instance. |
 
-## Wire Shape — `PlatformMessage`
+## Wire Shape - `PlatformMessage`
 
 ```typescript
 interface PlatformMessage<TPayload = unknown> {
@@ -71,7 +71,7 @@ interface HandshakeAckPayload {
 ```
 
 - `status: "rejected"` or a major version mismatch throws `HandshakeError`.
-- The granted `capabilities` list gates every subsequent `sdk.*` call — see [Errors](/docs/sdk/errors) for `CAPABILITY_NOT_SUPPORTED`.
+- The granted `capabilities` list gates every subsequent `sdk.*` call - see [Errors](/docs/sdk/errors) for `CAPABILITY_NOT_SUPPORTED`.
 - `initialize()` is idempotent; concurrent callers share the same handshake promise.
 
 ## Capability Gating
@@ -83,4 +83,4 @@ sdk.capabilities        // string[] granted by host
 sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)
 ```
 
-`gicChat` is gated by `http` — the host must grant `http` for `sdk.gicChat` to be available.
+`gicChat` is gated by `http` - the host must grant `http` for `sdk.gicChat` to be available.

@@ -6,9 +6,9 @@ sidebar_label: Observability
 
 # Observability
 
-In-memory metrics, diagnostics, and pluggable tracing for production debugging. The SDK does **not** send telemetry to a hosted backend — there is no analytics, no OpenTelemetry exporter, no network call. Collection is local and privacy-safe; shipping is your decision.
+In-memory metrics, diagnostics, and pluggable tracing for production debugging. The SDK does **not** send telemetry to a hosted backend - there is no analytics, no OpenTelemetry exporter, no network call. Collection is local and privacy-safe; shipping is your decision.
 
-## Metrics — local, bounded, zero-config
+## Metrics - local, bounded, zero-config
 
 Every `sdk.*` call is recorded automatically into `MetricsRecorder` (capped at 100 duration samples, optionally age-windowed).
 
@@ -22,7 +22,7 @@ const s = sdk.getMetrics();
 Optional tuning and export hook:
 
 ```typescript
-// test apps rarely need this — defaults are fine
+// test apps rarely need this - defaults are fine
 createMiniAppSdk({
   miniAppId: "tax-calc",
   metrics: {
@@ -50,9 +50,9 @@ const diags: Diagnostic[] = sdk.debug.diagnose();
 //        TRANSPORT_NOT_STARTED, HIGH_FAILURE_RATE, APPEARANCE_INCOMPLETE, PLUGINS_ACTIVE
 ```
 
-Call `diagnose()` when `sdk.getMetrics().totalFailures` spikes or the host reports issues — it points at the likely cause.
+Call `diagnose()` when `sdk.getMetrics().totalFailures` spikes or the host reports issues - it points at the likely cause.
 
-## Tracing — opt-in `Tracer`
+## Tracing - opt-in `Tracer`
 
 ```typescript
 import { noopTracer } from "@lizuz/mini-app-sdk";
@@ -64,4 +64,4 @@ const sdk = createMiniAppSdk({ miniAppId, tracer: noopTracer /* or custom */ });
 
 Default is `noopTracer` (no allocation, no behavior change). Inject a `Tracer` via `MiniAppSdkDependencies` when bridging to OpenTelemetry/Datadog. Each RPC or handshake creates one span; `span.setAttribute` carries `namespace`, `action`, `traceId`, `retryCount`, and `bytes` for streams.
 
-`traceId` is also stamped on every wire message (`PlatformMessage.traceId`) for host-side correlation — see [Protocol](/docs/sdk/protocol).
+`traceId` is also stamped on every wire message (`PlatformMessage.traceId`) for host-side correlation - see [Protocol](/docs/sdk/protocol).

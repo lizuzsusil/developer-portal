@@ -4,24 +4,25 @@ import Link from "@docusaurus/Link";
 import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 import styles from "./index.module.css";
+import { useTypesPackage } from "../components/TypesPackage";
 
 // ---------------------------------------------------------------------------
-// Hero — clean, benefit-driven, strictly within .container
+// Hero - clean, benefit-driven, strictly within .container
 // ---------------------------------------------------------------------------
 function Hero() {
+  const typesPackage = useTypesPackage();
   return (
     <header
       className={styles.heroBanner}
       style={{
-        background:
-          "linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #1a2744 100%)",
-        borderBottom: "1px solid #2a2a2a",
+        background: "var(--hero-bg)",
+        borderBottom: "1px solid var(--hero-border)",
         padding: "64px 0 56px",
       }}
     >
       <div className="container">
         <div className={styles.heroGrid}>
-          {/* Left — copy */}
+          {/* Left - copy */}
           <div>
             <div
               style={{
@@ -30,11 +31,11 @@ function Hero() {
                 gap: "8px",
                 padding: "4px 12px",
                 borderRadius: "9999px",
-                background: "rgba(255,199,0,0.12)",
-                border: "1px solid rgba(255,199,0,0.25)",
+                background: "var(--hero-kicker-bg)",
+                border: "1px solid var(--hero-kicker-border)",
                 fontSize: "0.78rem",
                 fontWeight: 600,
-                color: "#ffd740",
+                color: "var(--hero-kicker-text)",
                 marginBottom: "18px",
               }}
             >
@@ -43,11 +44,11 @@ function Hero() {
                   width: 6,
                   height: 6,
                   borderRadius: "50%",
-                  background: "#ffc700",
+                  background: "var(--hero-kicker-dot)",
                   display: "inline-block",
                 }}
               />
-              Sewa Developer Portal · Government of Nepal
+              Sewa Developer Portal · Government of Sri Lanka
             </div>
 
             <Heading
@@ -56,19 +57,19 @@ function Hero() {
                 fontSize: "2.55rem",
                 fontWeight: 800,
                 lineHeight: 1.1,
-                color: "#fff",
+                color: "var(--hero-text)",
                 marginBottom: "14px",
                 letterSpacing: "-0.02em",
               }}
             >
               Build mini apps
               <br />
-              <span style={{ color: "#ffc700" }}>for the Sewa platform.</span>
+              <span style={{ color: "var(--hero-text-accent)" }}>for the Sewa platform.</span>
             </Heading>
 
             <p
               style={{
-                color: "#9aa0b0",
+                color: "var(--hero-subtext)",
                 fontSize: "1.05rem",
                 lineHeight: 1.6,
                 marginBottom: "22px",
@@ -76,8 +77,8 @@ function Hero() {
               }}
             >
               Ship lightweight ES modules that run inside the Sewa Citizen shell.
-              The host injects the SDK at runtime — you just declare types and
-              export <code style={{ color: "#ffd740", background: "rgba(255,199,0,0.12)", padding: "1px 6px", borderRadius: 4, fontSize: "0.9em" }}>mount(container, runtime)</code>.
+              The host injects the SDK at runtime - you just declare types and
+              export <code style={{ color: "var(--hero-inline-code-text)", background: "var(--hero-inline-code-bg)", padding: "1px 6px", borderRadius: 4, fontSize: "0.9em" }}>mount(container, runtime)</code>.
             </p>
 
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
@@ -95,9 +96,9 @@ function Hero() {
                   fontWeight: 600,
                   padding: "10px 22px",
                   borderRadius: 10,
-                  background: "transparent",
-                  color: "#fff",
-                  border: "1px solid rgba(255,255,255,0.22)",
+                  background: "var(--hero-secondary-btn-bg)",
+                  color: "var(--hero-secondary-btn-text)",
+                  border: "1px solid var(--hero-secondary-btn-border)",
                 }}
               >
                 API reference
@@ -110,7 +111,7 @@ function Hero() {
                 gap: "14px",
                 marginTop: "18px",
                 fontSize: "0.78rem",
-                color: "#6b7280",
+                color: "var(--hero-subtext)",
                 flexWrap: "wrap",
                 alignItems: "center",
               }}
@@ -126,18 +127,18 @@ function Hero() {
                 Host-injected · zero runtime install
               </span>
               <span>·</span>
-              <span>Type-safe with @lizuz/mini-app-types</span>
+              <span>Type-safe with {typesPackage}</span>
             </div>
           </div>
 
-          {/* Right — minimal code preview (not a docs dump) */}
+          {/* Right - minimal code preview (not a docs dump) */}
           <div
             style={{
-              background: "#0f1115",
-              border: "1px solid #242836",
+              background: "var(--hero-code-bg)",
+              border: "1px solid var(--hero-code-border)",
               borderRadius: "14px",
               overflow: "hidden",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.35)",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
             }}
           >
             <div
@@ -146,15 +147,15 @@ function Hero() {
                 alignItems: "center",
                 gap: "6px",
                 padding: "10px 16px",
-                borderBottom: "1px solid #1f2433",
+                borderBottom: "1px solid var(--hero-code-header-border)",
                 fontSize: "0.78rem",
-                color: "#6b7280",
+                color: "var(--hero-code-header-text)",
               }}
             >
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57" }} />
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ffbd2e" }} />
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c940" }} />
-              <span style={{ marginLeft: "8px", fontFamily: "monospace", color: "#8b95a8" }}>src/main.tsx</span>
+              <span style={{ marginLeft: "8px", fontFamily: "monospace", color: "var(--hero-code-header-text)" }}>src/main.tsx</span>
             </div>
             <pre
               style={{
@@ -162,12 +163,13 @@ function Hero() {
                 padding: "18px 16px",
                 fontSize: "0.82rem",
                 lineHeight: 1.65,
-                color: "#e5e7eb",
+                color: "var(--hero-code-text)",
                 overflow: "auto",
+                background: "var(--hero-code-bg)",
               }}
             >
-              <code>{`// No SDK npm install — host injects it
-import type { MiniAppSdkInterface } from "@lizuz/mini-app-types";
+              <code>{`// No SDK npm install - host injects it
+import type { MiniAppSdkInterface } from "${typesPackage}";
 
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
   const sdk = window.__GSA_SDK__!; // injected by host shell
@@ -183,15 +185,15 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
             <div
               style={{
                 padding: "10px 16px",
-                borderTop: "1px solid #1f2433",
+                borderTop: "1px solid var(--hero-code-footer-border)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 fontSize: "0.78rem",
               }}
             >
-              <span style={{ color: "#6b7280", fontFamily: "monospace" }}>vite build --lib → ES module</span>
-              <Link to="/docs/getting-started" style={{ color: "#ffd740", fontWeight: 600, textDecoration: "none" }}>
+              <span style={{ color: "var(--hero-code-footer-text)", fontFamily: "monospace" }}>vite build --lib → ES module</span>
+              <Link to="/docs/getting-started" style={{ color: "var(--hero-code-link)", fontWeight: 600, textDecoration: "none" }}>
                 Scaffold in 4 steps →
               </Link>
             </div>
@@ -203,15 +205,16 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
 }
 
 // ---------------------------------------------------------------------------
-// How it works — 3 steps, reassuring & scannable
+// How it works - 3 steps, reassuring & scannable
 // ---------------------------------------------------------------------------
 function HowItWorks() {
+  const typesPackage = useTypesPackage();
   const steps = [
     {
       n: "01",
       title: "Install types",
-      desc: "Add @lizuz/mini-app-types as a devDependency for full sdk.* typings.",
-      code: "pnpm add -D @lizuz/mini-app-types",
+      desc: `Add ${typesPackage} as a devDependency for full sdk.* typings.`,
+      code: `pnpm add -D ${typesPackage}`,
       href: "/docs/getting-started",
     },
     {
@@ -225,7 +228,7 @@ function HowItWorks() {
       n: "03",
       title: "Build as ES lib",
       desc: "Vite lib mode outputs a single ES module the shell loads on demand. No SDK bundling.",
-      code: "vite build — lib src/main.tsx",
+      code: "vite build - lib src/main.tsx",
       href: "/docs/getting-started#3-vite-build-viteconfigts",
     },
   ];
@@ -239,7 +242,7 @@ function HowItWorks() {
               fontWeight: 700,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
-              color: "var(--color-text-tertiary)",
+              color: "var(--color-text-secondary)",
               marginBottom: 8,
             }}
           >
@@ -251,10 +254,10 @@ function HowItWorks() {
           <p style={{ color: "var(--color-text-secondary)", fontSize: "0.95rem", lineHeight: 1.6, margin: 0 }}>
             The pattern mirrors{" "}
             <code style={{ fontSize: "0.85em" }}>test-mini-app/</code> in the{" "}
-            <a href="https://github.com/anomalyco/sewa-platform" style={{ color: "var(--blue-700)", fontWeight: 600 }}>
+            <a href="https://github.com/anomalyco/sewa-platform" style={{ color: "var(--color-text-link)", fontWeight: 600 }}>
               sewa-platform repo
             </a>
-            . You keep your stack — the host handles auth, permissions, and device access.
+            . You keep your stack - the host handles auth, permissions, and device access.
           </p>
         </div>
 
@@ -266,7 +269,7 @@ function HowItWorks() {
               className="portal-card"
               style={{ padding: "20px 18px", textDecoration: "none" }}
             >
-              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--gold-700)", letterSpacing: "0.04em", marginBottom: 6 }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--landing-step-color)", letterSpacing: "0.04em", marginBottom: 6 }}>
                 STEP {s.n}
               </div>
               <div style={{ fontWeight: 700, fontSize: "1.02rem", marginBottom: 6, color: "var(--color-text-primary)" }}>{s.title}</div>
@@ -296,16 +299,16 @@ function HowItWorks() {
 }
 
 // ---------------------------------------------------------------------------
-// Capability teaser — curated 6, not exhaustive 14
+// Capability teaser - curated 6, not exhaustive 14
 // ---------------------------------------------------------------------------
 function CapabilityTeaser() {
   const caps: { title: string; href: string; desc: string; icon: string }[] = [
-    { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout — citizen identity", icon: "🔐" },
+    { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout - citizen identity", icon: "🔐" },
     { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "📱" },
     { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "🌐" },
     { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "💾" },
     { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "🎨" },
-    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText — AI chat gateway", icon: "✦" },
+    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText - AI chat gateway", icon: "✦" },
   ];
   return (
     <section style={{ padding: "40px 0 16px" }}>
@@ -314,7 +317,7 @@ function CapabilityTeaser() {
           <Heading as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0, letterSpacing: "-0.015em" }}>
             What you can build with
           </Heading>
-          <Link to="/docs/sdk/core" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--blue-700)" }}>
+          <Link to="/docs/sdk/core" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--color-text-link)" }}>
             Full SDK reference →
           </Link>
         </div>
@@ -347,14 +350,14 @@ function CapabilityTeaser() {
           }}
         >
           <span style={{ fontWeight: 600, color: "var(--color-text-primary)" }}>Also available:</span>
-          <Link to="/docs/sdk/permissions" style={{ fontWeight: 500 }}>permissions</Link>
-          <span>·</span> <Link to="/docs/sdk/flags" style={{ fontWeight: 500 }}>flags</Link>
-          <span>·</span> <Link to="/docs/sdk/navigation" style={{ fontWeight: 500 }}>navigation</Link>
-          <span>·</span> <Link to="/docs/sdk/notifications" style={{ fontWeight: 500 }}>notifications</Link>
-          <span>·</span> <Link to="/docs/sdk/links" style={{ fontWeight: 500 }}>links</Link>
-          <span>·</span> <Link to="/docs/sdk/config" style={{ fontWeight: 500 }}>config</Link>
+          <Link to="/docs/sdk/permissions" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>permissions</Link>
+          <span>·</span> <Link to="/docs/sdk/flags" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>flags</Link>
+          <span>·</span> <Link to="/docs/sdk/navigation" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>navigation</Link>
+          <span>·</span> <Link to="/docs/sdk/notifications" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>notifications</Link>
+          <span>·</span> <Link to="/docs/sdk/links" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>links</Link>
+          <span>·</span> <Link to="/docs/sdk/config" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>config</Link>
           <span style={{ marginLeft: "auto" }}>
-            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--blue-700)" }}>Browse all 14 namespaces →</Link>
+            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--color-text-link)" }}>Browse all 14 namespaces →</Link>
           </span>
         </div>
       </div>
@@ -363,7 +366,7 @@ function CapabilityTeaser() {
 }
 
 // ---------------------------------------------------------------------------
-// Integrations — reassigned header links now live here
+// Integrations - reassigned header links now live here
 // ---------------------------------------------------------------------------
 function IntegrationGrid() {
   const cards: { title: string; to: string; badge: string; badgeVariant: "active" | "upcoming"; desc: string; cta: string }[] = [
@@ -388,7 +391,7 @@ function IntegrationGrid() {
       to: "/docs/integration/angular",
       badge: "Upcoming · Roadmap",
       badgeVariant: "upcoming",
-      desc: "Standalone components & injectable SDK service — aligned with Angular 17+ patterns.",
+      desc: "Standalone components & injectable SDK service - aligned with Angular 17+ patterns.",
       cta: "View Angular guide →",
     },
     {
@@ -396,7 +399,7 @@ function IntegrationGrid() {
       to: "/docs/playground",
       badge: "Interactive · Live in docs",
       badgeVariant: "active",
-      desc: "Try every sdk.* method against a mock transport. No local setup — runs inside the docs site.",
+      desc: "Try every sdk.* method against a mock transport. No local setup - runs inside the docs site.",
       cta: "Open playground →",
     },
   ];
@@ -405,14 +408,14 @@ function IntegrationGrid() {
       <div className="container">
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 14 }}>
           <div>
-            <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-tertiary)", marginBottom: 4 }}>
+            <div style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-secondary)", marginBottom: 4 }}>
               Choose your stack
             </div>
             <Heading as="h2" style={{ fontSize: "1.35rem", fontWeight: 800, margin: 0, letterSpacing: "-0.015em" }}>
               Framework guides & tools
             </Heading>
           </div>
-          <Link to="/docs/overview" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--blue-700)" }}>
+          <Link to="/docs/overview" style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--color-text-link)" }}>
             Platform overview →
           </Link>
         </div>
@@ -430,7 +433,7 @@ function IntegrationGrid() {
                 </span>
               </div>
               <p style={{ fontSize: "0.88rem", color: "var(--color-text-secondary)", lineHeight: 1.55, margin: "0 0 14px", flex: 1 }}>{card.desc}</p>
-              <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--blue-700)" }}>{card.cta}</span>
+              <span style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--color-text-link)" }}>{card.cta}</span>
             </Link>
           ))}
         </div>
@@ -440,7 +443,7 @@ function IntegrationGrid() {
 }
 
 // ---------------------------------------------------------------------------
-// Playground teaser — static preview, not full explorer
+// Playground teaser - static preview, not full explorer
 // ---------------------------------------------------------------------------
 function PlaygroundTeaser() {
   return (
@@ -469,7 +472,7 @@ function PlaygroundTeaser() {
                 fontWeight: 700,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
-                color: "var(--color-text-tertiary)",
+                color: "var(--color-text-secondary)",
                 marginBottom: 8,
               }}
             >
@@ -481,10 +484,10 @@ function PlaygroundTeaser() {
             </Heading>
             <p style={{ color: "var(--color-text-secondary)", fontSize: "0.92rem", lineHeight: 1.6, margin: "0 0 16px" }}>
               Call any <code>sdk.*</code> method with a mock transport, inspect request/response shapes, and copy the snippet into your mini app.
-              Built from <code>packages/sdk-playground</code> — no extra install.
+              Built from <code>packages/sdk-playground</code> - no extra install.
             </p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <Link to="/docs/playground" className="button button--primary" style={{ fontWeight: 700, borderRadius: 10, padding: "8px 16px", background: "var(--neutral-900)", color: "#fff", border: "none" }}>
+              <Link to="/docs/playground" className="button button--primary" style={{ fontWeight: 700, borderRadius: 10, padding: "8px 16px", background: "var(--color-action-primary)", color: "var(--color-action-primary-foreground)", border: "1px solid var(--color-border-default)" }}>
                 Open playground
               </Link>
               <Link
@@ -520,7 +523,7 @@ function PlaygroundTeaser() {
                 padding: "8px 12px",
                 borderBottom: "1px solid var(--color-border-decorative)",
                 fontSize: "0.78rem",
-                color: "var(--color-text-tertiary)",
+                color: "var(--color-text-secondary)",
               }}
             >
               <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#ff5f57" }} />
@@ -529,12 +532,12 @@ function PlaygroundTeaser() {
               <span style={{ marginLeft: 6, fontFamily: "monospace" }}>playground · sdk.auth.getUser()</span>
             </div>
             <div style={{ padding: "12px", fontFamily: "monospace", fontSize: "0.78rem", lineHeight: 1.55 }}>
-              <div style={{ color: "var(--color-text-tertiary)" }}>▸ sdk.auth.getUser()</div>
+              <div style={{ color: "var(--color-text-secondary)" }}>▸ sdk.auth.getUser()</div>
               <div style={{ color: "var(--color-text-secondary)", marginTop: 8, background: "var(--color-surface-card)", border: "1px solid var(--color-border-decorative)", borderRadius: 8, padding: "8px 10px" }}>
-                {"{"} <span style={{ color: "#059669" }}>"id": "citizen_12"</span>, <span style={{ color: "#059669" }}>"name": "Demo User"</span> {"}"}
+                {"{"} <span style={{ color: "var(--landing-code-string)" }}>"id": "citizen_12"</span>, <span style={{ color: "var(--landing-code-string)" }}>"name": "Demo User"</span> {"}"}
               </div>
-              <div style={{ color: "var(--color-text-tertiary)", marginTop: 8 }}>▸ sdk.device.location()</div>
-              <div style={{ color: "var(--color-text-tertiary)", marginTop: 4, fontStyle: "italic" }}>→ {"{ status: \"granted\", data: { latitude, longitude } }"}</div>
+              <div style={{ color: "var(--color-text-secondary)", marginTop: 8 }}>▸ sdk.device.location()</div>
+              <div style={{ color: "var(--color-text-secondary)", marginTop: 4, fontStyle: "italic" }}>→ {"{ status: \"granted\", data: { latitude, longitude } }"}</div>
             </div>
           </div>
         </div>
@@ -544,7 +547,7 @@ function PlaygroundTeaser() {
 }
 
 // ---------------------------------------------------------------------------
-// Final CTA — dark band
+// Final CTA - dark band
 // ---------------------------------------------------------------------------
 function FinalCTA() {
   return (

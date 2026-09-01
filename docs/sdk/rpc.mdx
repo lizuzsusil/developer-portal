@@ -11,7 +11,7 @@ Every `sdk.*` method is an RPC call (`requestId` correlation, timeout, retry) ro
 ## Request
 
 ```typescript
-// Low-level — most apps use the typed sdk.* wrappers instead
+// Low-level - most apps use the typed sdk.* wrappers instead
 await sdk.request<T>("auth", "getUser", payload, {
   signal?: AbortSignal,
   mapPayload?: (payload) => unknown,
@@ -23,8 +23,8 @@ await sdk.batch([{ namespace, action, payload }]); // batch via host or parallel
 
 | Option | Default | Effect |
 |---|---|---|
-| `signal` | — | `AbortSignal` → `RequestCancelledError` |
-| `mapPayload` | — | Transform success payload; used by `http` to map `HttpResult` → `HttpClientError` / `HttpServerError` |
+| `signal` | - | `AbortSignal` → `RequestCancelledError` |
+| `mapPayload` | - | Transform success payload; used by `http` to map `HttpResult` → `HttpClientError` / `HttpServerError` |
 | `dedupe` | `false` | 50 ms window coalesces identical reads |
 
 **Dedup allowlist** (11 idempotent reads): `auth.getUser`, `permissions.has`, `flags.isEnabled`, `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
@@ -57,9 +57,9 @@ const logging: RpcMiddleware = async (ctx, next) => {
 sdk.use(logging);
 ```
 
-Koa-style `composeMiddleware` — wraps the retry loop. Also used by the offline queue plugin.
+Koa-style `composeMiddleware` - wraps the retry loop. Also used by the offline queue plugin.
 
 ## See Also
 
-- [Reliability](/docs/sdk/reliability) — circuit breaker and adaptive timeout
-- [Errors](/docs/sdk/errors) — error hierarchy and guards
+- [Reliability](/docs/sdk/reliability) - circuit breaker and adaptive timeout
+- [Errors](/docs/sdk/errors) - error hierarchy and guards

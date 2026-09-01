@@ -6,25 +6,25 @@ sidebar_label: Core & Lifecycle
 
 # Core SDK & Lifecycle
 
-In production mini apps the SDK is **injected by the host** at `window.__GSA_SDK__` — see [Getting Started](/docs/getting-started). The instance itself exposes lifecycle, capability, and introspection APIs documented here. Direct construction via `@lizuz/mini-app-sdk` is for testing and host shells.
+In production mini apps the SDK is **injected by the host** at `window.__GSA_SDK__` - see [Getting Started](/docs/getting-started). The instance itself exposes lifecycle, capability, and introspection APIs documented here. Direct construction via `@lizuz/mini-app-sdk` is for testing and host shells.
 
 ---
 
 ## Instance
 
 ```typescript
-// Production — read the injected instance
+// Production - read the injected instance
 const sdk: MiniAppSdk = window.__GSA_SDK__;
 
-// Testing / host shell — direct construction
+// Testing / host shell - direct construction
 import { createMiniAppSdk } from "@lizuz/mini-app-sdk";
 const sdk = createMiniAppSdk({ miniAppId: "water-bill-app", timeout: 8000 });
 await sdk.initialize(); // handshake + hydration
 ```
 
-`sdk.capabilities: string[]` — granted namespaces. `sdk.capabilityVersions`, `sdk.traceId`, `sdk.hostDescriptor`, `sdk.version`.
+`sdk.capabilities: string[]` - granted namespaces. `sdk.capabilityVersions`, `sdk.traceId`, `sdk.hostDescriptor`, `sdk.version`.
 
-`getMiniAppSdk()` / `initMiniAppSdk()` are legacy helpers that operate on the active global instance — prefer reading `window.__GSA_SDK__` directly as shown in [React Guide](/docs/integration/react).
+`getMiniAppSdk()` / `initMiniAppSdk()` are legacy helpers that operate on the active global instance - prefer reading `window.__GSA_SDK__` directly as shown in [React Guide](/docs/integration/react).
 
 ---
 

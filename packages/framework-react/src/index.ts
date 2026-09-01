@@ -1,10 +1,10 @@
 /**
- * @sewa/framework-react — React adapter for the Sewa Mini App SDK
+ * @sewa/framework-react - React adapter for the Sewa Mini App SDK
  *
  * Provides PlatformSDKProvider, hooks (useMiniAppSdk, useAuth, useAppearance),
  * and React Router integration.
  *
- * Internal workspace package — not published to npm.
+ * Internal workspace package - not published to npm.
  * See docs/integration/react.mdx for the reference implementation in test-mini-app.
  */
 

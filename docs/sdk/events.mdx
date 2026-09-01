@@ -11,15 +11,15 @@ The SDK exposes a typed event bus. The host publishes platform events; mini apps
 ## Subscribe
 
 ```typescript
-// sdk.on — persistent handler
+// sdk.on - persistent handler
 const unsubscribe = sdk.on("appearance.theme.changed", (payload) => {
   console.log(payload); // ThemeState
 });
 
-// sdk.once — single-shot promise
+// sdk.once - single-shot promise
 const theme = await sdk.once("appearance.theme.changed");
 
-// sdk.events — async iterable
+// sdk.events - async iterable
 for await (const payload of sdk.events("navigation.back.requested")) {
   // ...
 }
@@ -33,7 +33,7 @@ sdk.on("appearance.locale.changed", handler, { replay: true, signal: abortSignal
 | `replay: true` | Immediately replays the last 5 buffered events for that key |
 | `signal` | `AbortSignal` auto-unsubscribes / breaks the iterable |
 
-Interceptors: `sdk.addEventInterceptor((event, payload) => payload | false)` — return `false` to drop an event.
+Interceptors: `sdk.addEventInterceptor((event, payload) => payload | false)` - return `false` to drop an event.
 
 ## Publishing
 
@@ -42,18 +42,18 @@ await sdk.emit("myapp.ready", { version: "1.2.0" });
 // Routed as RPC: namespace "event", action "emit"
 ```
 
-## Catalog — `SdkEventMap`
+## Catalog - `SdkEventMap`
 
 | Event | Payload |
 |---|---|
 | `appearance.locale.changed` | `string \| LocaleState` |
 | `appearance.theme.changed` | `string \| ThemeState` |
-| `navigation.back.requested` | `undefined` — host back button; respond with `sdk.navigation.router.back(consumed)` |
-| `navigation.route.changed` | `{ previous, current, canGoBack }` — emitted by mini app via `sdk.emit` |
+| `navigation.back.requested` | `undefined` - host back button; respond with `sdk.navigation.router.back(consumed)` |
+| `navigation.route.changed` | `{ previous, current, canGoBack }` - emitted by mini app via `sdk.emit` |
 | `connection.lost` | `{ timestamp }` |
 | `connection.established` | `{ timestamp }` |
-| `http.uploadProgress` | `HttpProgress` — forwarded to `http.post` `onProgress` |
-| `notifications.token` | `string` — push token from host |
+| `http.uploadProgress` | `HttpProgress` - forwarded to `http.post` `onProgress` |
+| `notifications.token` | `string` - push token from host |
 | `notifications.opened` | `NotificationOpenEvent` |
 | `links.opened` | `LinksOpenedEvent` |
 

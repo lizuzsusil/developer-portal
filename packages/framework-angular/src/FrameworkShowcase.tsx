@@ -42,7 +42,7 @@ export function AngularFrameworkShowcase() {
           overflowX: "auto",
         }}
       >
-        <code>{`// Preview — not yet implemented
+        <code>{`// Preview - not yet implemented
 // Planned: injectable MiniAppSdkService + RxJS Observables
 // See docs/integration/angular.mdx for the roadmap pattern`}</code>
       </pre>

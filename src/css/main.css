@@ -2,7 +2,7 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
-  /* Primitive — Gold */
+  /* Primitive - Gold */
   --gold-50: #fffef2;
   --gold-100: #fff8d6;
   --gold-200: #ffe880;
@@ -15,7 +15,37 @@
   --gold-900: #503d00;
   --gold-950: #2b2100;
 
-  /* Primitive — Neutral */
+  /* Semantic - Landing adaptive accents */
+  --landing-step-color: var(--gold-800);
+  --landing-code-string: var(--green-700);
+  --landing-muted: var(--color-text-tertiary);
+
+  /* Hero - adaptive light/dark (hero is themed, not always dark) */
+  --hero-bg: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #dbeafe 100%);
+  --hero-border: var(--neutral-200);
+  --hero-text: var(--neutral-900);
+  --hero-text-accent: var(--gold-700);
+  --hero-subtext: var(--neutral-600);
+  --hero-kicker-bg: rgba(180, 138, 0, 0.08);
+  --hero-kicker-border: rgba(180, 138, 0, 0.18);
+  --hero-kicker-text: var(--gold-800);
+  --hero-kicker-dot: var(--gold-600);
+  --hero-inline-code-text: var(--gold-800);
+  --hero-inline-code-bg: rgba(180, 138, 0, 0.1);
+  --hero-code-bg: var(--neutral-0);
+  --hero-code-border: var(--neutral-200);
+  --hero-code-header-bg: var(--neutral-50);
+  --hero-code-header-border: var(--neutral-200);
+  --hero-code-header-text: var(--neutral-600);
+  --hero-code-text: var(--neutral-800);
+  --hero-code-footer-border: var(--neutral-200);
+  --hero-code-footer-text: var(--neutral-500);
+  --hero-code-link: var(--gold-700);
+  --hero-secondary-btn-text: var(--neutral-900);
+  --hero-secondary-btn-border: var(--neutral-300);
+  --hero-secondary-btn-bg: transparent;
+
+  /* Primitive - Neutral */
   --neutral-0: #ffffff;
   --neutral-50: #fafafb;
   --neutral-100: #f5f6f8;
@@ -36,7 +66,7 @@
   --neutral-950: #030712;
   --neutral-1000: #000000;
 
-  /* Primitive — Green */
+  /* Primitive - Green */
   --green-100: #e0f2ec;
   --green-300: #5dc896;
   --green-400: #34d399;
@@ -46,7 +76,7 @@
   --green-800: #065f46;
   --green-900: #064e3b;
 
-  /* Primitive — Red */
+  /* Primitive - Red */
   --red-100: #fdecea;
   --red-300: #f47272;
   --red-400: #f87171;
@@ -56,7 +86,7 @@
   --red-800: #991b1b;
   --red-900: #7f1d1d;
 
-  /* Primitive — Teal */
+  /* Primitive - Teal */
   --teal-100: #d0f0f5;
   --teal-200: #7dd8e8;
   --teal-300: #67d2e1;
@@ -64,14 +94,14 @@
   --teal-600: #0d6b7b;
   --teal-800: #0f4855;
 
-  /* Primitive — Blue */
+  /* Primitive - Blue */
   --blue-100: #e3edff;
   --blue-300: #93c5fd;
   --blue-500: #1a56d6;
   --blue-700: #1041a8;
   --blue-900: #1e3a8a;
 
-  /* Primitive — Orange */
+  /* Primitive - Orange */
   --orange-100: #fef0e3;
   --orange-400: #fb923c;
   --orange-500: #f97316;
@@ -79,16 +109,16 @@
   --orange-800: #78350f;
   --orange-900: #7c2d12;
 
-  /* Primitive — Purple */
+  /* Primitive - Purple */
   --purple-100: #ede9ff;
   --purple-300: #a78bfa;
   --purple-500: #6747c7;
   --purple-900: #4c1d95;
 
-  /* Primitive — Maroon */
+  /* Primitive - Maroon */
   --maroon-700: #7a1240;
 
-  /* Primitive — Dark Subtle (dark-mode semantic fills) */
+  /* Primitive - Dark Subtle (dark-mode semantic fills) */
   --dark-subtle-gold: #2e2200;
   --dark-subtle-green: #062b1a;
   --dark-subtle-red: #330d0d;
@@ -97,7 +127,7 @@
   --dark-subtle-purple: #1a0f38;
   --dark-subtle-blue: #0a1733;
 
-  /* Semantic — Light mode (default) */
+  /* Semantic - Light mode (default) */
   --color-text-primary: var(--neutral-900);
   --color-text-secondary: var(--neutral-600);
   --color-text-tertiary: var(--neutral-400);
@@ -196,7 +226,33 @@
   --foreground: var(--color-text-primary);
 }
 
+[data-theme="dark"],
 .dark {
+  --landing-step-color: var(--gold-300);
+  --landing-code-string: var(--green-300);
+  --hero-bg: linear-gradient(135deg, #0a0a0a 0%, #111827 50%, #1a2744 100%);
+  --hero-border: #2a2a2a;
+  --hero-text: #fff;
+  --hero-text-accent: #ffc700;
+  --hero-subtext: #9aa0b0;
+  --hero-kicker-bg: rgba(255, 199, 0, 0.12);
+  --hero-kicker-border: rgba(255, 199, 0, 0.25);
+  --hero-kicker-text: #ffd740;
+  --hero-kicker-dot: #ffc700;
+  --hero-inline-code-text: #ffd740;
+  --hero-inline-code-bg: rgba(255, 199, 0, 0.12);
+  --hero-code-bg: #0f1115;
+  --hero-code-border: #242836;
+  --hero-code-header-bg: #0f1115;
+  --hero-code-header-border: #1f2433;
+  --hero-code-header-text: #6b7280;
+  --hero-code-text: #e5e7eb;
+  --hero-code-footer-border: #1f2433;
+  --hero-code-footer-text: #6b7280;
+  --hero-code-link: #ffd740;
+  --hero-secondary-btn-text: #fff;
+  --hero-secondary-btn-border: rgba(255, 255, 255, 0.22);
+  --hero-secondary-btn-bg: transparent;
   --color-text-primary: var(--neutral-0);
   --color-text-secondary: var(--neutral-400);
   --color-text-tertiary: var(--neutral-600);

@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
@@ -41,11 +44,23 @@ const config: Config = {
     ],
   ],
 
+  customFields: {
+    // Types package name - override via env at build time
+    // e.g. TYPES_PACKAGE=@sewa/mini-app-types npm run build
+    // Reads from .env / .env.local etc. via dotenv
+    typesPackage:
+      (process.env.TYPES_PACKAGE?.trim() ||
+        process.env.SEWA_TYPES_PACKAGE?.trim() ||
+        process.env.MINI_APP_TYPES_PACKAGE?.trim() ||
+        "@lizuz/mini-app-types") as string,
+  },
+
   themeConfig: {
     image: "img/docusaurus-social-card.jpg",
     colorMode: {
-      defaultMode: "dark",
-      respectPrefersColorScheme: true,
+      defaultMode: "light",
+      disableSwitch: false,
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: "Sewa Developer Portal",
@@ -114,7 +129,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Sewa - Government of Srilanka.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Sewa - Government of Sri Lanka.`,
     },
     prism: {
       theme: prismThemes.github,

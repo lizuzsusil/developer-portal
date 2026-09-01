@@ -12,14 +12,14 @@ All SDK failures are `SdkError` subclasses with a `code` and optional `retryable
 
 ```
 SdkError
-├── HandshakeError        — handshake rejected / timeout / version mismatch
-├── TransportError        — transport send/start failure
-├── ProtocolError         — malformed wire message
-├── TimeoutError          — per-request timeout (retryable)
-├── RequestCancelledError — AbortSignal aborted
-├── StreamCancelledError  — StreamBuilder.cancel()
-├── HttpClientError       — 4xx (not retryable)
-└── HttpServerError       — 5xx (retryable)
+├── HandshakeError        - handshake rejected / timeout / version mismatch
+├── TransportError        - transport send/start failure
+├── ProtocolError         - malformed wire message
+├── TimeoutError          - per-request timeout (retryable)
+├── RequestCancelledError - AbortSignal aborted
+├── StreamCancelledError  - StreamBuilder.cancel()
+├── HttpClientError       - 4xx (not retryable)
+└── HttpServerError       - 5xx (retryable)
 ```
 
 ## Codes
