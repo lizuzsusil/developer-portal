@@ -1,0 +1,175 @@
+/* ==========================================================================
+   Host Playground — embedded (Docusaurus) styles
+   ==========================================================================
+
+   The standalone Vite app pulls in the full Tailwind bundle, preflight
+   included. The developer portal deliberately does not: `src/css/main.css`
+   imports only `tailwindcss/theme.css` and `tailwindcss/utilities.css`, so
+   Docusaurus/Infima keeps its own base styles. Without preflight, utilities
+   such as `border-neutral-800` set a border *colour* but never a width or
+   style, `<button>` keeps its native grey chrome, and every heading and
+   paragraph inherits Infima's margins — the playground renders, but looks
+   broken.
+
+   So we ship the handful of preflight rules the playground actually relies
+   on, scoped to `.hp-root`, and put them in the `theme` cascade layer. Layer
+   order in the portal is:
+
+       docusaurus.infima < ... < properties < theme < utilities
+
+   which means these resets beat Infima's element styles while still losing to
+   any Tailwind utility on the element itself — exactly what preflight does.
+   This file is @imported from `src/css/main.css` right after the two Tailwind
+   imports so that `theme` and `utilities` are always registered in that order,
+   whatever order the bundler emits the chunks in.
+
+   Nothing here reaches a vendor mini app: those mount inside a Shadow DOM.
+   ========================================================================== */
+
+@layer theme {
+  .hp-root,
+  .hp-root *,
+  .hp-root *::before,
+  .hp-root *::after,
+  .hp-root ::backdrop {
+    box-sizing: border-box;
+    /* The rule that matters most: gives every `border-*` utility a width and
+       style to attach to. */
+    border: 0 solid;
+  }
+
+  .hp-root :is(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+    margin: 0;
+  }
+
+  .hp-root :is(p, ul, ol, dl, dd, figure, blockquote, pre, hr, fieldset) {
+    margin: 0;
+    padding: 0;
+  }
+
+  .hp-root :is(ul, ol) {
+    list-style: none;
+  }
+
+  .hp-root a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  .hp-root :is(button, input, select, optgroup, textarea) {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    background-color: transparent;
+    border-radius: 0;
+    opacity: 1;
+  }
+
+  .hp-root button {
+    cursor: pointer;
+    text-align: inherit;
+  }
+
+  .hp-root button:disabled {
+    cursor: default;
+  }
+
+  .hp-root :is(img, svg, video, canvas, iframe) {
+    display: block;
+    vertical-align: middle;
+  }
+
+  .hp-root :is(img, video) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .hp-root [hidden] {
+    display: none !important;
+  }
+
+  /* Base surface — the standalone app puts this on <body> (src/index.css). */
+  .hp-root {
+    background:
+      radial-gradient(1200px 600px at 70% -10%, rgba(99, 102, 241, 0.14), transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, rgba(139, 92, 246, 0.12), transparent 55%),
+      #0b0b0f;
+    color: #f5f5f5;
+    font-family: "Inter", var(--ifm-font-family-base, system-ui), -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: left;
+    /* Contain the drawer/modal z-indexes so they never race the Docusaurus
+       navbar while the widget is inline. */
+    isolation: isolate;
+  }
+
+  .hp-root ::selection {
+    background: #6366f1;
+    color: #fff;
+  }
+
+  .hp-root *:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Layout of the widget inside a docs article. Unlayered on purpose: these are
+   the embed's own structural rules, not resets, and nothing should override
+   them.
+   -------------------------------------------------------------------------- */
+
+.hp-embed {
+  margin: 2rem 0;
+  /* Reserve the frame's height so entering full screen does not collapse the
+     article and jump the scroll position. */
+  min-height: var(--hp-embed-height);
+  --hp-embed-height: clamp(560px, 76vh, 880px);
+}
+
+.hp-embed__frame {
+  height: var(--hp-embed-height);
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.55);
+}
+
+.hp-embed__frame.hp-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 500; /* above --ifm-z-index-fixed (200), i.e. navbar + sidebar */
+  height: 100%;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+.hp-embed__hint {
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ifm-color-content-secondary);
+}
+
+.hp-embed__fallback {
+  display: flex;
+  height: var(--hp-embed-height);
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #27272a;
+  border-radius: 16px;
+  background: #0b0b0f;
+  color: #9ca3af;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .hp-embed {
+    --hp-embed-height: clamp(520px, 80vh, 720px);
+  }
+}

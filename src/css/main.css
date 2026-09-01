@@ -1,6 +1,11 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Host Playground embed: scoped preflight + widget layout. Imported here, and
+   after the two lines above, so the `theme` and `utilities` cascade layers are
+   always registered in that order regardless of chunk emission order. */
+@import "../../packages/host-playground/src/embed.css";
+
 :root {
   /* Primitive - Gold */
   --gold-50: #fffef2;

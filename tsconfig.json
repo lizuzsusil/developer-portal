@@ -14,6 +14,7 @@
       "@sewa/design-tokens/*": ["./packages/design-tokens/*"],
       "@sewa/sdk-playground": ["./packages/sdk-playground/src"],
       "@sewa/sdk-playground/*": ["./packages/sdk-playground/src/*"],
+      "@sewa/host-playground/*": ["./packages/host-playground/src/*"],
       "@sewa/framework-react": ["./packages/framework-react/src"],
       "@sewa/framework-react/*": ["./packages/framework-react/src/*"],
       "@sewa/framework-vue": ["./packages/framework-vue/src"],

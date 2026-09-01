@@ -125,8 +125,12 @@ const config: Config = {
               to: "/docs/sdk/core",
             },
             {
-              label: "Interactive Playground",
+              label: "Interactive SDK Playground",
               to: "/docs/playground",
+            },
+            {
+              label: "Interactive Host Playground",
+              to: "/docs/host-playground",
             },
           ],
         },

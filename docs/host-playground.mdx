@@ -1,0 +1,91 @@
+---
+id: host-playground
+title: Interactive Host Playground
+sidebar_label: Interactive Host Playground
+hide_table_of_contents: true
+---
+
+import { HostExplorer } from "@site/src/components/HostExplorer";
+
+# Interactive Host Playground
+
+
+Test your mini app in our **HOST PLAYGROUND** without leaving the docs. This is our sandbox where you(vendor) can test your mini app
+only with your mini app frontend url. Just upload the frontend url (live or previewed), select the **requiredSDKVersion** select capabilites
+that you want to test against your mini app and hit **Test & Load App**. This will fetch your **manifest.json** and do everything that
+our actual host do. Also you can maintain the capabilites from inside the sandbox after successfull load of your mini app.
+
+<HostExplorer />
+
+## Using the sandbox
+
+1. Click **Load app** in the playground header (or **Configure mini app** in the empty sandbox) to open setup.
+2. Enter a **Display name** and the **Frontend URL** — the base directory that serves your `manifest.json`.
+3. Pick an **SDK version**. The list is fetched live from npm; the newest release is preselected.
+4. Expand **Capabilities** to choose what the host grants. Core capabilities are always on; anything you leave off
+   answers `PERMISSION_DENIED`.
+5. **Test & load app** fetches the manifest, downloads the bundle, injects the SDK, and mounts your `mount()` export.
+
+Once it is running you can toggle capabilities live in the **Capabilities** drawer, and flip **theme** and **language**
+to see your app receive `appearance.theme.changed` / `appearance.locale.changed`. The expand button gives you the
+full-screen standalone proportions; `Escape` returns to the article.
+
+To try a **different** mini app, hit **Load another app** — the form opens with your current settings, and **Clear**
+empties the name and URL for a fresh one. The **↻ reload** button next to it re-downloads the app currently in the
+sandbox and remounts it with whatever capabilities are toggled on right now, which is what you want after redeploying
+a new build.
+
+The sandbox always starts empty when you open or refresh this page — it never remounts your last app behind your back
+— but it does remember your last settings, so coming back is **Load app** → **Test & load app**.
+
+## Preparing your mini app
+
+1. Build as an **ES library** that exports `mount(container, runtime)` (and optionally `unmount(container)`).
+   See [Getting Started](./getting-started.mdx).
+2. Emit a `manifest.json` at the build output root:
+
+   ```json
+   {
+     "application": { "id": "my-mini-app" },
+     "bundle": {
+       "entry": "index.js",
+       "styles": ["style.css"],
+       "files": ["index.js", "style.css"]
+     }
+   }
+   ```
+
+   The playground fetches `<Frontend URL>/manifest.json`, then every file in `bundle.files`.
+
+3. Host the `dist/` folder (Vercel, Netlify, S3, …) **with CORS enabled**. The docs site fetches from a different
+   origin, so your mini app must send `Access-Control-Allow-Origin` for `manifest.json`, `*.js`, `*.css` and assets.
+
+:::tip CORS on Vercel
+Add this to `vercel.json` at the root of your mini-app repo and redeploy:
+
+```json
+{
+  "headers": [
+    { "source": "/(.*)", "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }] }
+  ]
+}
+```
+
+For S3/CloudFront, set the bucket CORS rule and forward the `Access-Control-Allow-Origin` response header.
+:::
+
+## How it works
+
+Everything runs in your browser — no upload, no account, no server-side build.
+
+- **Runtime** — `packages/host-playground/src/lib/runtime-loader.ts`. `loadAndMountMiniApp()` fetches the manifest,
+  downloads `bundle.files` (caching them in IndexedDB), publishes assets as blob URLs, injects the selected SDK from
+  jsDelivr, evaluates your entry via a Blob module URL, and calls `mount()` inside a Shadow DOM so your CSS and the
+  docs' CSS cannot collide.
+- **Host RPC** — `lib/mock-handlers.ts` answers every `sdk.*` call with a deterministic stub, gated by
+  `lib/capabilities.ts`. The handshake advertises exactly the capabilities you toggled on.
+- **Appearance** — `lib/appearance.ts` owns the sandbox's theme and locale and broadcasts change events to subscribed
+  mini apps. Embedded, it writes to the playground's own root element, so toggling the sandbox theme does not change
+  the docs theme.
+- **Source of truth** — `packages/host-playground`. The standalone Vite app and this embed render the identical
+  `HostPlaygroundApp` shell; only the framing differs.

@@ -63,7 +63,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Playground",
       collapsed: false,
-      items: ["playground"],
+      items: ["playground", "host-playground"],
     },
   ],
 };

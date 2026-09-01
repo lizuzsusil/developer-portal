@@ -27,6 +27,7 @@
     "@sewa/framework-react": "workspace:*",
     "@sewa/framework-vue": "workspace:*",
     "@sewa/sdk-playground": "workspace:*",
+    "@sewa/host-playground": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "clsx": "^2.0.0",
     "dotenv": "^17.4.2",

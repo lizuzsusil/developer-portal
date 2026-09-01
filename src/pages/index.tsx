@@ -414,6 +414,14 @@ function IntegrationGrid() {
       cta: "Open playground →",
       ctaId: "homepage.integrations.playground.cta",
     },
+    {
+      title: "Host Playground",
+      to: "/docs/host-playground",
+      badge: "Interactive · Live in docs",
+      badgeVariant: "active",
+      desc: "Test your mini app. Get the manifest/frontend url and select your required sdk version.",
+      cta: "Open playground →",
+    },
   ];
   return (
     <section style={{ padding: "36px 0 24px" }}>
