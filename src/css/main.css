@@ -1,4 +1,3 @@
-/* Tailwind theme + utilities only — preflight excluded to avoid clobbering Docusaurus/Infima */
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
