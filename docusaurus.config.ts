@@ -16,6 +16,7 @@ const config: Config = {
 
   url: "https://developer.sewa.gov",
   baseUrl: "/",
+  trailingSlash: false,
 
   organizationName: "sewa",
   projectName: "developer-portal",
