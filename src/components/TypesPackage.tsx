@@ -1,6 +1,8 @@
 import React from "react";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import CodeBlock from "@theme/CodeBlock";
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
 
 const FALLBACK = "@lizuz/mini-app-types";
 
@@ -22,6 +24,38 @@ export function TypesPackageName(): React.ReactNode {
 export function InstallCommandBlock({ prefix = "pnpm add -D " }: { prefix?: string }) {
   const pkg = useTypesPackage();
   return <CodeBlock language="bash">{`${prefix}${pkg}`}</CodeBlock>;
+}
+
+const PKG_MANAGERS: [string, string][] = [
+  ["pnpm", "pnpm add -D "],
+  ["npm", "npm install -D "],
+  ["yarn", "yarn add --dev "],
+  ["bun", "bun add -d "],
+];
+
+/**
+ * Renders switchable install commands (one tab per package manager) using the
+ * Docusaurus theme's <Tabs>/<TabItem> + <CodeBlock>.
+ */
+export function InstallCommandTabs() {
+  const pkg = useTypesPackage();
+  return (
+    <Tabs
+      groupId="pkg-install"
+      queryString
+    >
+      {PKG_MANAGERS.map((mgr) => {
+        const [label, prefix] = mgr;
+        return (
+          <TabItem key={label} value={label}>
+            <CodeBlock language="bash">
+              {`${prefix}${pkg}`}
+            </CodeBlock>
+          </TabItem>
+        );
+      })}
+    </Tabs>
+  );
 }
 
 export function ImportCodeBlock() {

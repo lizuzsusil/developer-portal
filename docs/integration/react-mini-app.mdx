@@ -1,0 +1,172 @@
+---
+id: react-mini-app
+title: Creating a React Mini App
+sidebar_label: React Mini App How-To
+---
+
+import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
+import { TypesPackageName, InstallCommandTabs } from "@site/src/components/TypesPackage";
+
+# Creating a React Mini App - Step by Step
+
+<FrameworkBadge framework="react" status="active" />
+
+This guide walks you through creating a React mini app from a blank Vite project, using the `test-mini-app` reference project as the template.
+
+---
+
+## 0. Do you need the runtime in your mini app?
+
+**No.** A Sewa mini app must **not** `npm install` or `import` the SDK runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your app only needs the **types** package (`@lizuz/mini-app-types`) as a dev dependency for compile-time safety. The `platform.runtime` / `platform.sdk` semver constraints in the generated `manifest.json` are matched **host-side** by the loader; they are metadata, not a bundle dependency.
+
+---
+
+## 1. Scaffold a Vite + React + TS app
+
+```bash
+pnpm create vite mini-app --template react-ts
+cd mini-app
+pnpm install
+```
+
+Enable automatic JSX runtime and Tailwind (optional), and add the types package (pick your package manager):
+
+<InstallCommandTabs />
+
+---
+
+## 2. Declare the host-injected globals
+
+Create `src/gov-sdk.d.ts`. This maps `window.__GSA_SDK__` to `MiniAppSdkInterface` from the types package so `sdk.*` calls are fully typed:
+
+```typescript
+// src/gov-sdk.d.ts
+import type { MiniAppSdkInterface, PlatformUser } from "@lizuz/mini-app-types";
+
+declare global {
+  type MiniAppSdk = MiniAppSdkInterface;
+  type SdkPlatformUser = PlatformUser;
+  interface Window {
+    __GSA_SDK__?: MiniAppSdk;
+  }
+}
+```
+
+No runtime import is needed — the host provides the instance.
+
+---
+
+## 3. Build the `mount` entry point
+
+```typescript
+// src/main.tsx
+import type { Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+
+function applyInitialHash(initialPath?: string) {
+  if (!initialPath) return;
+  const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
+  if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
+    window.location.replace(`#${normalized}`);
+  }
+}
+
+export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
+  const root: Root = createRoot(container);
+  applyInitialHash(runtime?.initialPath);
+  root.render(<App />);
+  return { unmount() { root.unmount(); } };
+}
+```
+
+---
+
+## 4. Wire up the SDK provider
+
+```typescript
+// src/App.tsx
+import { HashRouter } from "react-router";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { PlatformSDKProvider } from "./providers/PlatformSDKProvider";
+import TestMiniApp from "./components/MiniApp";
+import "./index.css";
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <HashRouter>
+        <PlatformSDKProvider>
+          <TestMiniApp />
+        </PlatformSDKProvider>
+      </HashRouter>
+    </ErrorBoundary>
+  );
+}
+```
+
+The provider (see [React Integration Guide](/docs/integration/react) section 3) polls `window.__GSA_SDK__`, waits on the `__GSA_SDK_READY__` event, fetches the signed-in user, and gates all device calls on the `granted` permission state.
+
+---
+
+## 5. Vite library build + manifest
+
+```typescript
+// vite.config.ts
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+import { createManifest } from "./src/utils/createManifest.ts";
+
+export default defineConfig({
+  plugins: [
+    react({ jsxRuntime: "automatic" }),
+    tailwindcss(),
+    createManifest(),
+  ],
+  define: { "process.env.NODE_ENV": JSON.stringify("production") },
+  build: {
+    target: "chrome89",
+    manifest: "manifest.json",
+    outDir: "dist",
+    cssCodeSplit: true,
+    lib: { entry: "./src/main.tsx", name: "MyMiniApp", formats: ["es"] },
+    rollupOptions: {
+      output: {
+        codeSplitting: false,
+        format: "es",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash][extname]",
+      },
+    },
+  },
+  server: { host: "0.0.0.0", cors: true },
+});
+```
+
+The `createManifest` plugin emits `dist/manifest.json` with the `application`, `platform` (runtime/sdk constraints), and `bundle` (entry + files) contract the host loader consumes.
+
+---
+
+## 6. Build, lint, and serve
+
+```bash
+pnpm run build     # biome check --error-on-warnings && tsc -b && vite build
+pnpm run lint      # biome check
+pnpm run preview    # vite preview --port 3002
+```
+
+Verify `dist/manifest.json` lists your entry and files before uploading the bundle to the host.
+
+---
+
+## Checklist
+
+- [ ] Install `<TypesPackageName />` with your package manager (pnpm / npm / yarn / bun) - see the multi-manager block
+- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__`
+- [ ] `src/main.tsx` exports `mount(container, runtime)`
+- [ ] `PlatformSDKProvider` gates on `granted` permission state
+- [ ] `vite.config.ts` builds an ES library + host manifest
+- [ ] `dist/manifest.json` lists the entry and file payload
+- [ ] `pnpm run build` passes (biome + tsc + vite)

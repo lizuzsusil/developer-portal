@@ -54,6 +54,7 @@ const sidebars: SidebarsConfig = {
       label: "Framework Adapters",
       collapsed: false,
       items: [
+        "integration/react-mini-app",
         "integration/react",
         "integration/vue",
         "integration/angular",

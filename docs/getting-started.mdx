@@ -4,13 +4,13 @@ title: Getting Started
 sidebar_label: Getting Started
 ---
 
-import {TypesPackageName, InstallCommandBlock, ImportCodeBlock} from '@site/src/components/TypesPackage';
+import {TypesPackageName, InstallCommandTabs, ImportCodeBlock} from '@site/src/components/TypesPackage';
 
 # Getting Started
 
 The Sewa Mini App SDK is **injected by the host shell** at runtime via `window.__GSA_SDK__`. You do not `npm install` the SDK itself. Instead, your mini app depends on the shared type package for development, and the host provides the live SDK instance when your app is mounted inside the container.
 
-You can see the full working example in [`test-mini-app/`](/).
+You can see the full working example in the `test-mini-app/` reference project. See the [React Mini App How-To](/docs/integration/react-mini-app) for a step-by-step creation guide.
 
 ---
 
@@ -18,7 +18,7 @@ You can see the full working example in [`test-mini-app/`](/).
 
 The SDK runtime is host-provided - your app installs only the type package for compile-time safety:
 
-<InstallCommandBlock />
+<InstallCommandTabs />
 
 Your mini app is built as an **ES library** that exports a `mount` / `unmount` lifecycle. The host loads your bundle and calls `mount(container, runtime)` when the user opens the mini app.
 
@@ -30,7 +30,7 @@ flowchart LR
     E --> C
 ```
 
-`mini-app-sdk` itself re-exports every shared type from the same <TypesPackageName /> package as its single source - see `src/types/sdk.types.ts` in the SDK. Host, SDK, and mini app all agree on `PlatformMessage`, `MiniAppSdkInterface`, `SdkEventMap`, etc., from one place. Adding the dev dependency gives you the full `sdk.*` surface, `PlatformUser`, `AppearanceState`, `Device*` results, and `SdkEventMap` without any runtime bundle cost.
+The types package is your single source of truth. Host, SDK, and mini app all agree on `PlatformMessage`, `MiniAppSdkInterface`, `SdkEventMap`, `PlatformUser`, `AppearanceState`, and `Device*` result types from one place. Adding the dev dependency gives you the full `sdk.*` surface without any runtime bundle cost — this is why the runtime does **not** need to be installed or imported by your mini app.
 
 ---
 
@@ -64,18 +64,29 @@ Export a `mount` function - the host calls it with a DOM container and an option
 
 ```typescript
 // src/main.tsx
-import { createRoot } from "react-dom/client";
 import type { Root } from "react-dom/client";
+import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import "./index.css";
+
+/** Sets the initial hash so HashRouter starts at the host-provided path. */
+function applyInitialHash(initialPath?: string) {
+  if (!initialPath) return;
+  const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
+  if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
+    window.location.replace(`#${normalized}`);
+  }
+}
 
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
   const root: Root = createRoot(container);
-  root.render(<App initialPath={runtime?.initialPath} />);
+  applyInitialHash(runtime?.initialPath);
+  root.render(<App />);
   return { unmount() { root.unmount(); } };
 }
 ```
 
-No direct SDK import - the provider reads `window.__GSA_SDK__` at runtime.
+No direct SDK import - the provider reads `window.__GSA_SDK__` at runtime. The host sets the initial hash so `HashRouter` opens at the right route; if the host already set the hash (deep link) it is left untouched.
 
 ---
 
@@ -85,15 +96,23 @@ Build as a library so the host can load your bundle as a module:
 
 ```typescript
 // vite.config.ts
-import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { createManifest } from "./src/utils/createManifest.ts";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react({ jsxRuntime: "automatic" }),
+    tailwindcss(),
+    createManifest(),
+  ],
+  define: { "process.env.NODE_ENV": JSON.stringify("production") },
   build: {
     target: "chrome89",
+    manifest: "manifest.json",
     outDir: "dist",
+    cssCodeSplit: true,
     lib: {
       entry: "./src/main.tsx",
       name: "RevenueMiniApp",
@@ -101,13 +120,27 @@ export default defineConfig({
       fileName: () => "[name][hash].js",
     },
     rollupOptions: {
-      output: { format: "es", chunkFileNames: "assets/[name]-[hash].js" },
+      output: {
+        codeSplitting: false,
+        format: "es",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash][extname]",
+      },
     },
+  },
+  server: {
+    host: "0.0.0.0",
+    cors: true,
+    headers: { "Access-Control-Allow-Origin": "*" },
   },
 });
 ```
 
-See the complete config in [`test-mini-app/vite.config.ts`](/).
+The `createManifest` plugin writes the host-discovery `manifest.json`. The `platform` section records `runtime` / `sdk` semver constraints the host matches against its own versions.
+
+### Is the runtime needed to initialize the app?
+
+No. The bundle imports **no runtime module**. The host injects `window.__GSA_SDK__`; the `platform` fields in the manifest are metadata for the host loader, not a bundle dependency. During development you can run the app without the host — the provider's retry loop simply keeps polling until the SDK global appears.
 
 ---
 

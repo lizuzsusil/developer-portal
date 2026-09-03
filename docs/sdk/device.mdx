@@ -10,6 +10,41 @@ The `sdk.device` module grants mini apps access to native hardware sensors, came
 
 ---
 
+## Device Permission Statuses
+
+Every device call returns a result with a `status` field. The mini app must branch on it rather than assuming success:
+
+| Status | Meaning | Required action |
+| --- | --- | --- |
+| `granted` | Permission granted; `data` is populated (e.g. `location`, `file`) | Use `res.data`. |
+| `denied` | User denied permission | Show a retry affordance or a settings hint. |
+| `permanentlyDenied` | Permission permanently denied / revoked | Direct user to device settings to re-enable it. |
+| `restricted` | OS-level restriction (e.g. parental controls, MDM) | Inform the user that the device is restricted. |
+
+`data` exists only on `granted`. In `test-mini-app`, every tab (location, camera, gallery, files, download, contact, biometric) switches on `res.status` and maps each case to a distinct UI error message. A typical handler:
+
+```typescript
+const res = await sdk.device.location({ reason: "To view your current location" });
+switch (res.status) {
+  case "granted":
+    setLocation(res.data ?? null);
+    break;
+  case "denied":
+    setError("Location permission denied.");
+    break;
+  case "permanentlyDenied":
+    setError("Please enable location permission from device settings.");
+    break;
+  case "restricted":
+    setError("Location access is restricted on this device.");
+    break;
+}
+```
+
+> **Is a runtime needed to initialize the mini app?** No. Device capabilities are bridged by the host via `window.__GSA_SDK__`; the mini app bundle imports no runtime module. The `platform.runtime` constraint in the manifest is a host-side version check.
+
+---
+
 ## Feature Detection
 
 ### `isSupported(action)`

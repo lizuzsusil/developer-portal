@@ -4,7 +4,7 @@ title: Platform Overview
 sidebar_label: Platform Overview
 ---
 
-import {TypesPackageName} from '@site/src/components/TypesPackage';
+import {TypesPackageName, InstallCommandTabs} from '@site/src/components/TypesPackage';
 
 # Platform Overview
 
@@ -14,7 +14,9 @@ The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (web and 
 
 - **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime)` - see [`Getting Started`](/docs/getting-started) and [`test-mini-app/`](https://github.com/anomalyco/sewa-platform/tree/main/test-mini-app).
 - **SDK injection**: The host sets `window.__GSA_SDK__` before calling `mount`. No `npm install` of the SDK.
-- **Types**: <code>pnpm add -D <TypesPackageName /></code>.
+- **Types**: install the type package with your preferred manager:
+
+<InstallCommandTabs />
 
 ```mermaid
 sequenceDiagram
