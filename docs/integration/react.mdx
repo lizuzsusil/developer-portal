@@ -5,7 +5,7 @@ sidebar_label: React Integration [Active]
 ---
 
 import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
-import { TypesPackageName, ReactGovSdkImportBlock, PackageJsonBlock, UseAppearanceBlock } from "@site/src/components/TypesPackage";
+import { TypesPackageName, InstallCommandTabs, ReactGovSdkImportBlock, PackageJsonBlock, UseAppearanceBlock } from "@site/src/components/TypesPackage";
 
 # React Integration Guide
 
@@ -13,19 +13,41 @@ import { TypesPackageName, ReactGovSdkImportBlock, PackageJsonBlock, UseAppearan
 
 > **Package:** `@sewa/framework-react` - internal workspace package at `packages/framework-react`. This guide documents the production-ready React integration pattern for Sewa mini apps.
 
-React is the production-ready framework for Sewa mini apps. The reference implementation shows the exact pattern: a Vite ES-library build, host-injected SDK via `window.__GSA_SDK__`, and a `PlatformSDKProvider` with strict lifecycle handling.
+React is the production-ready framework for Sewa mini apps. This single guide covers the whole flow: scaffolding a react-vite project, declaring host-injected types, exporting the `mount` lifecycle, wiring the SDK provider and hooks, and building the ES library the host loads. The pattern is a Vite ES-library build, host-injected SDK via `window.__GSA_SDK__`, and a `PlatformSDKProvider` with strict lifecycle handling.
+
+> **Important — no runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your app only needs the **types** package (`<TypesPackageName />`) as a dev dependency for compile-time safety. The `platform.runtime` / `platform.sdk` constraints in `manifest.json` are matched **host-side** by the loader; they are metadata, not a bundle dependency.
 
 ---
 
-## 1. Type Declarations
+## 1. Scaffold a project
+
+Start from any react-vite project. From scratch:
+
+```bash
+pnpm create vite my-mini-app --template react-ts
+cd my-mini-app
+pnpm install
+```
+
+Enable automatic JSX runtime and Tailwind, then add the types package (pick your package manager):
+
+```bash
+pnpm add -D @vitejs/plugin-react @tailwindcss/vite tailwindcss
+```
+
+<InstallCommandTabs />
+
+---
+
+## 2. Type Declarations
 
 <ReactGovSdkImportBlock />
 
-Only <code><TypesPackageName /></code> is a dev dependency - there is no `npm install` for the runtime SDK.
+Only <code><TypesPackageName /></code> is a dev dependency - there is no `npm install` for the runtime SDK. No runtime import is needed — the host provides the instance at load time. The type declaration is the bridge between the host's runtime and your application's type checker.
 
 ---
 
-## 2. Entry Points
+## 3. Entry Points
 
 ### `main.tsx` - host-callable mount
 
@@ -83,11 +105,34 @@ export default function App() {
 }
 ```
 
-The mini app uses `HashRouter` - `main.tsx`'s `applyInitialHash` normalizes an optional host-provided `runtime.initialPath` into the hash, and otherwise the router starts from the current hash (a host-set deep link is left untouched). This avoids touching browser history in a way that would break the host container's back-button policy. If your app runs inside a Flutter/native shell, `HashRouter` keeps navigation self-contained.
+The mini app uses `HashRouter` - `main.tsx`'s `applyInitialHash` normalizes an optional host-provided `runtime.initialPath` into the hash, and otherwise the router starts from the current hash (a host-set deep link is left untouched). This avoids touching browser history in a way that would break the host container's back-button policy. If your app runs inside a Flutter/native shell, `HashRouter` keeps navigation self-contained. React Router's `Link` components intercept navigation natively, so no special handling is needed for sidebar links.
+
+### Why does initialPath exist?
+
+A mini app cannot use the real URL — the host shell owns browser history and the address bar. So mini apps route on the hash fragment (`HashRouter`) or fully in memory. That leaves one question: **how does the mini app learn which screen to boot on?**
+
+- **Deep links need a channel.** A push notification, a home-screen shortcut, or one mini app navigating to another (`sdk.navigation.navigate` with a target route) must be able to open a specific screen — not always home. `initialPath` is that channel: the route the host wants the mini app to boot on.
+- **The hash can't be that channel.** `window.location.hash` is global, shared, mutable state. If the host shell uses hash routing itself, pre-writing the mini app's route into the hash corrupts host navigation — host and mini app fight over one fragment. An explicit function argument carries the same intent with no global side effects.
+
+Resolution order in `applyInitialHash` reflects this priority:
+
+1. A host-set hash (deep link) wins and is left untouched.
+2. Otherwise `runtime.initialPath` is applied when the host provides it.
+3. Otherwise the router boots at its default (`/`).
+
+### Why is it called initialPath?
+
+`initialPath` means "the path the app boots on." Candidates like `initialRoute` (closer to react-router's vocabulary), `deepLink`, or `entry` each describe the intent slightly better. **Keep `initialPath` anyway:** hosts in the wild already send exactly this key, and renaming it requires a coordinated host-plus-mini-app migration (during which both keys would have to be accepted).
+
+### Key points
+
+- **`mount` is the only export the host calls.** It must accept `(container, runtime?)` and return `{ unmount() }`.
+- **`runtime` is optional to provide but must be accepted.** Hosts that deep-link pass `{ initialPath }`; hosts that don't pass nothing. Dropping the parameter breaks hash routing on hosts that rely on it.
+- **The `unmount` return** lets the host clean up React state when the mini app is closed or navigated away from.
 
 ---
 
-## 3. SDK Context & Provider
+## 4. SDK Context & Provider
 
 The provider reads the host-injected SDK from `window.__GSA_SDK__` with retry, an `AbortController` for clean unmount, and a reducer-based state machine (`loading → ready | error`). A full standalone mock is included so the app also runs outside the host during development.
 
@@ -161,7 +206,7 @@ export function PlatformSDKProvider({ children }: { children: ReactNode }) {
 
 ---
 
-## 4. Hooks
+## 5. Hooks
 
 ### `usePlatformSDK` - guarded access
 
@@ -266,10 +311,10 @@ Key difference vs. the simplified version: instead of maintaining a `depthRef` c
 
 ---
 
-## 5. Vite Build
+## 6. Vite Build
 
 ```typescript
-// src/utils/createManifest.ts
+// vite.config.ts
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
@@ -310,7 +355,7 @@ export default defineConfig({
 });
 ```
 
-The `createManifest` plugin (src/utils/createManifest.ts:8) reads Vite's `.vite/manifest.json`, finds the entry, collects all `dist` files, and writes a host-discovery manifest to `dist/manifest.json`.
+The `createManifest` plugin reads Vite's manifest output, finds the entry, collects all `dist` files, and writes a host-discovery `manifest.json`. The `platform` section records `runtime` / `sdk` semver constraints the host matches against its own versions.
 
 ### Manifest Schema
 
@@ -346,10 +391,64 @@ The emitted `manifest.json` is the contract the host uses to load your app:
 
 ---
 
-## 6. Package Setup
+## 7. Package Setup
 
 Only the types package is needed at dev time:
 
 <PackageJsonBlock />
 
 The runtime SDK (`MiniAppSdk`) comes from the host shell - never `npm install` it.
+
+---
+
+## 8. Build, lint, and serve
+
+```bash
+pnpm run build     # typecheck + vite build
+pnpm run preview   # vite preview --port 3002
+```
+
+Verify `dist/manifest.json` lists your entry and files before uploading the bundle to the host.
+
+---
+
+## 9. Essential folder structure
+
+The canonical react-vite layout for a mini app — entry contract, SDK types, provider layer, and build manifest. Only the load-bearing files are shown; feature tabs and cards live under `components/`:
+
+```
+my-mini-app/
+├── index.html              # Vite entry — single <div id="root">
+├── package.json            # dependencies + scripts
+├── vite.config.ts          # Vite lib mode + manifest plugin
+├── tsconfig.app.json       # app TS config (referenced by tsconfig.json)
+├── public/                 # static assets
+└── src/
+    ├── main.tsx            # ← mount(container, runtime?)
+    ├── App.tsx             # ← HashRouter + PlatformSDKProvider + shell
+    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── routes.ts           # route definitions
+    ├── index.css           # Tailwind + custom styles
+    ├── components/         # tabs, shell, ErrorBoundary, Loader, LoadError
+    ├── providers/          # PlatformSDKProvider.tsx
+    ├── context/            # SDKContext.tsx (SDK state shape)
+    ├── hooks/              # usePlatformSDK, useAppearance, useHostRouter, useT
+    ├── types/              # shared interfaces (index.ts)
+    ├── utils/              # createManifest.ts, retry.ts
+    └── i18n/               # en / si / ta dictionaries
+```
+
+---
+
+## Checklist
+
+- [ ] Types package installed with your package manager (pnpm / npm / yarn / bun)
+- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }`
+- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates on the `granted` permission state
+- [ ] `src/App.tsx` composes `HashRouter`, `PlatformSDKProvider`, and the root component
+- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
+- [ ] `vite.config.ts` builds an ES library + host manifest via `createManifest()`
+- [ ] `dist/manifest.json` lists the entry and file payload
+- [ ] Build passes (typecheck + vite build)

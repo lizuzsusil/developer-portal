@@ -10,7 +10,7 @@ import {TypesPackageName, InstallCommandTabs, ImportCodeBlock} from '@site/src/c
 
 The Sewa Mini App SDK is **injected by the host shell** at runtime via `window.__GSA_SDK__`. You do not `npm install` the SDK itself. Instead, your mini app depends on the shared type package for development, and the host provides the live SDK instance when your app is mounted inside the container.
 
-See the [React Mini App How-To](/docs/integration/react-mini-app) for a step-by-step creation guide.
+See the [React Integration Guide](/docs/integration/react) for the full step-by-step creation guide.
 
 ---
 
@@ -76,7 +76,7 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
 }
 ```
 
-No direct SDK import - the provider reads `window.__GSA_SDK__` at runtime. `runtime` is optional: honor `runtime.initialPath` when the host provides it, otherwise `HashRouter` starts from the current hash. If the host already set the hash (deep link) it is left untouched. See the [React Mini App How-To](/docs/integration/react-mini-app#the-mount-contract-in-depth) for why this parameter exists and why it is named `initialPath`.
+No direct SDK import - the provider reads `window.__GSA_SDK__` at runtime. `runtime` is optional: honor `runtime.initialPath` when the host provides it, otherwise `HashRouter` starts from the current hash. If the host already set the hash (deep link) it is left untouched. See the [React Integration Guide](/docs/integration/react#why-does-initialpath-exist) for why this parameter exists and why it is named `initialPath`.
 
 ---
 

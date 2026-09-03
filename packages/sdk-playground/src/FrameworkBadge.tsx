@@ -13,7 +13,10 @@ export function FrameworkBadge({ framework, status }: FrameworkBadgeProps) {
       ? "Vue.js"
       : "Angular (NG)";
 
-  const isUpcoming = status === "upcoming" || framework !== "react";
+  // An explicit status always wins; otherwise React defaults to active and
+  // every other framework defaults to upcoming.
+  const isUpcoming =
+    status === "upcoming" || (status !== "active" && framework !== "react");
 
   return (
     <div

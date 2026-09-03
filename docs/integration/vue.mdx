@@ -1,107 +1,369 @@
 ---
 id: vue
 title: Vue 3 Integration Guide
-sidebar_label: Vue Integration [Upcoming]
+sidebar_label: Vue Integration [Active]
 ---
 
 import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
+import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
 
 # Vue 3 Integration Guide
 
-<FrameworkBadge framework="vue" status="upcoming" />
+<FrameworkBadge framework="vue" status="active" />
 
-> **Package:** `@sewa/framework-vue` - internal workspace package at `packages/framework-vue`. Preview pattern; not a separately published package.
+> **Package:** no framework runtime package — Vue 3 + vue-router from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Vue 3 integration pattern for Sewa mini apps.
 
-> [!NOTE]
-> **Roadmap Feature**: Official Vue 3 Composition API plugin support is currently on the platform roadmap. Below is the recommended integration preview pattern.
+Vue 3 is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and a provider component with strict lifecycle handling — expressed with Vue idioms (Composition API, `provide`/`inject`, vue-router hash history).
 
 ---
 
-## 1. SDK Plugin & `provide / inject` Pattern
+## 1. Scaffold a project
 
-In Vue 3, initialize the SDK inside your main entry point and provide it globally:
+Start from any Vue + Vite project. From scratch:
 
-```typescript
-// src/main.ts (Vue 3 Preview)
-import { createApp, ref, shallowRef } from 'vue';
-import App from './App.vue';
-import { initMiniAppSdk, type MiniAppSdkInterface } from '@lizuz/mini-app-sdk';
-
-const app = createApp(App);
-
-const sdkRef = shallowRef<MiniAppSdkInterface | null>(null);
-const isReady = ref(false);
-
-initMiniAppSdk({ miniAppId: 'utility-bill-vue' }).then((instance) => {
-  sdkRef.value = instance;
-  isReady.value = true;
-});
-
-app.provide('miniAppSdk', sdkRef);
-app.provide('miniAppSdkReady', isReady);
-app.mount('#app');
+```bash
+npm create vite@latest my-mini-app -- --template vue-ts
+cd my-mini-app
+npm install
 ```
 
+Add routing, icons, Tailwind, and the types package (`@vitejs/plugin-vue` already ships with the template):
+
+```bash
+npm install vue-router lucide-vue-next
+npm install -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
+```
+
+Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8.
+
 ---
 
-## 2. Vue Composable (`useMiniAppSdk`)
+## 2. Type Declarations
 
-Create a reusable composable for components:
+<ReactGovSdkImportBlock />
+
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `gov-sdk.d.ts` serves React and Vue apps alike.
+
+---
+
+## 3. Entry Points
+
+### `main.ts` - host-callable mount
 
 ```typescript
-// src/composables/useMiniAppSdk.ts
-import { inject, ref, onMounted, onUnmounted, type ShallowRef } from 'vue';
-import type { MiniAppSdkInterface, AppearanceState } from '@lizuz/mini-app-sdk';
+// src/main.ts
+import { createApp } from "vue";
+import App from "./App.vue";
+import "./index.css";
+import { createMiniAppRouter } from "./router";
 
-export function useMiniAppSdk() {
-  const sdk = inject<ShallowRef<MiniAppSdkInterface | null>>('miniAppSdk');
-  const isReady = inject<ShallowRef<boolean>>('miniAppSdkReady');
-  const appearance = ref<AppearanceState | null>(null);
+/** Sets the initial hash so the hash history starts at the host-provided path. */
+function applyInitialHash(initialPath?: string) {
+  if (!initialPath) return;
+  const normalized = initialPath.startsWith("/")
+    ? initialPath
+    : `/${initialPath}`;
+  if (
+    !window.location.hash ||
+    window.location.hash === "#" ||
+    !window.location.hash.startsWith("#/")
+  ) {
+    window.location.replace(`#${normalized}`);
+  }
+  // If the host already set the hash (e.g. deep link), leave it alone.
+}
 
-  let unsubscribe: (() => void) | null = null;
+export function mount(
+  container: HTMLElement,
+  runtime?: { initialPath?: string },
+) {
+  // Seed the hash BEFORE the router is installed: vue-router snapshots the
+  // start location at install/mount, so a host-provided initialPath applied
+  // afterwards would be overwritten by the initial navigation resolving to /.
+  applyInitialHash(runtime?.initialPath);
 
-  onMounted(() => {
-    if (sdk?.value) {
-      appearance.value = sdk.value.appearance.state();
-      unsubscribe = sdk.value.appearance.subscribe((next) => {
-        appearance.value = next;
-      });
-    }
-  });
+  const app = createApp(App);
+  const router = createMiniAppRouter();
+  app.use(router);
+  app.mount(container);
 
-  onUnmounted(() => {
-    unsubscribe?.();
-  });
+  return {
+    unmount() {
+      app.unmount();
+    },
+  };
+}
 
-  return { sdk, isReady, appearance };
+// Dev-only bootstrap so `vite dev` / `vite preview` render without a host.
+// The branch is statically false in the production library build.
+if (import.meta.env.DEV) {
+  const el = document.getElementById("app");
+  if (el) mount(el);
 }
 ```
 
+Two details differ from React and both matter:
+
+- **The router is created per `mount()` call** (`createMiniAppRouter()` factory). A router instance must not be shared across Vue apps — the host may mount, unmount, and remount the mini app.
+- **The hash is seeded before `app.use(router)`.** vue-router snapshots the start location at install; applying `initialPath` afterwards gets overwritten by the initial navigation resolving to `/`, silently breaking host deep links.
+
+### `App.vue` - provider shell
+
+```vue
+<script setup lang="ts">
+import ErrorBoundary from "./components/ErrorBoundary.vue";
+import MiniApp from "./components/MiniApp/index.vue";
+import PlatformSDKProvider from "./components/PlatformSDKProvider.vue";
+</script>
+
+<template>
+  <ErrorBoundary>
+    <PlatformSDKProvider>
+      <MiniApp />
+    </PlatformSDKProvider>
+  </ErrorBoundary>
+</template>
+```
+
+`ErrorBoundary.vue` uses `onErrorCaptured` and renders a `LoadError` fallback — the Vue equivalent of the React class boundary.
+
 ---
 
-## 3. Vue Router Integration Preview
+## 4. SDK State & Provider
+
+`src/plugins/sdk.ts` holds the injection key and state shape (the counterpart of React's `SDKContext`):
 
 ```typescript
-// src/router/index.ts
-import { createRouter, createWebHistory } from 'vue-router';
+// src/plugins/sdk.ts
+import type { InjectionKey } from "vue";
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes: [...],
+export interface SdkState {
+  sdk: MiniAppSdk | null;
+  user: SdkPlatformUser | null;
+  isReady: boolean;
+  error: Error | null;
+}
+
+export const SdkKey: InjectionKey<SdkState> = Symbol("sdk");
+```
+
+`PlatformSDKProvider.vue` creates a `reactive<SdkState>`, `provide`s it, and gates rendering on three phases — identical to the React provider:
+
+1. **loading** — polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
+2. **ready** — provides state, mounts a renderless `HostRouterSync` component (which runs `useHostRouter()`), and renders the default slot.
+3. **error** — renders `LoadError` with the failure message.
+
+Cleanup mirrors `AbortController` semantics via `onUnmounted(() => controller.abort())`.
+
+---
+
+## 5. Composables
+
+### `usePlatformSDK` - guarded access
+
+```typescript
+// src/composables/usePlatformSDK.ts
+import { inject } from "vue";
+import type { SdkState } from "../plugins/sdk";
+import { SdkKey } from "../plugins/sdk";
+
+export function usePlatformSDK(): SdkState & { sdk: MiniAppSdk } {
+  const state = inject(SdkKey, null);
+  if (!state?.sdk) {
+    throw new Error("usePlatformSDK must be used within PlatformSDKProvider");
+  }
+  return state as SdkState & { sdk: MiniAppSdk };
+}
+```
+
+Returning the reactive state object (rather than destructured values) preserves reactivity for `user` / `isReady` downstream.
+
+### `useAppearance` - theme/locale sync
+
+Keeps a `reactive<AppearanceState>` seeded from `sdk.appearance.state()`, refreshes it `onMounted`, and subscribes — unsubscribing `onUnmounted`. Returns `{ locale, theme }` as computed refs, so templates use `theme.mode` directly.
+
+### `useHostRouter` - bidirectional navigation sync
+
+Same responsibilities as the React hook — emit `navigation.route.changed` with `canGoBack` derived from "is the route root?", answer `navigation.back.requested` via `router.back()`, and guard every `sdk.navigation.router.*` call with `?.` because some mobile hosts don't implement the router bridge. Two Vue-specific notes:
+
+- vue-router exposes no navigation-type API, so PUSH vs POP is approximated: navigations triggered by the composable's own `goBack()` count as POPs, everything else as PUSHes. The flag is consumed and cleared by the route watcher (deterministic, no timers).
+- It runs inside the renderless `HostRouterSync.vue` child of the provider, so back-button sync is always active once the SDK is ready.
+
+### Sidebar routing gotcha - always navigate through vue-router
+
+vue-router listens only to `popstate`, never `hashchange`, and drives the URL via `pushState`. A native anchor jump therefore changes the hash **behind the router's back**: its internal location desyncs, and the next programmatic navigation first replaces the URL with the stale route — visible as a "reset to root". Sidebar links must call the `RouterLink` slot's `navigate()`:
+
+```vue
+<RouterLink :to="path" custom v-slot="{ isActive, href, navigate }">
+  <!-- navigate() routes through vue-router (pushState + state). -->
+  <a :href="href" :class="..." @click="(event) => onNavClick(event, navigate)">
+    ...
+  </a>
+</RouterLink>
+```
+
+```typescript
+function onNavClick(event: MouseEvent, navigate: (event?: MouseEvent) => void) {
+  if (window.innerWidth < 768) {
+    emit("toggle"); // close the sidebar on mobile
+  }
+  // Handles preventDefault for plain left clicks; lets modifier-clicks
+  // fall through to native behavior.
+  navigate(event);
+}
+```
+
+### `useT` - locale dictionaries
+
+Loads the `en` / `si` / `ta` JSON dictionaries, selects by `locale.language`, falls back to `en` then to the key, and interpolates `{param}` placeholders. Returns computed refs, so templates call `t('home.badge')` directly.
+
+---
+
+## 6. Vite Build
+
+Same library contract as React — Vue plugin instead of the React plugin, `VueMiniApp` as the lib name, and `framework: "vue"` in the emitted manifest:
+
+```typescript
+// vite.config.ts
+import tailwindcss from "@tailwindcss/vite";
+import vue from "@vitejs/plugin-vue";
+import { defineConfig } from "vite";
+import { createManifest } from "./src/utils/createManifest.ts";
+
+export default defineConfig({
+  plugins: [vue(), tailwindcss(), createManifest()],
+  define: { "process.env.NODE_ENV": JSON.stringify("production") },
+  build: {
+    target: "chrome89",
+    manifest: "manifest.json",
+    outDir: "dist",
+    cssCodeSplit: true,
+    lib: {
+      entry: "./src/main.ts",
+      name: "VueMiniApp",
+      formats: ["es"],
+      fileName: () => "[name][hash].js",
+    },
+    rollupOptions: {
+      output: {
+        codeSplitting: false,
+        format: "es",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash][extname]",
+      },
+    },
+  },
+  server: {
+    host: "0.0.0.0",
+    cors: true,
+    headers: { "Access-Control-Allow-Origin": "*" },
+  },
 });
+```
 
-export function setupHostRouterSync(sdk: MiniAppSdkInterface) {
-  router.afterEach(() => {
-    sdk.navigation.router.push(true);
-  });
+The `createManifest` plugin is a straight port of the React one: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "vue"`. As on React, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies — the bundle ships zero SDK code.
 
-  sdk.on('navigation.back.requested', async () => {
-    if (window.history.length > 1) {
-      router.back();
-      await sdk.navigation.router.back(true);
-    } else {
-      await sdk.navigation.router.back(false);
-    }
+### Router table
+
+`src/router.ts` mirrors the React `<Routes>` table one-to-one (hash history, catch-all redirect), including its quirks — `/images` and `/router` have sidebar entries but no route, so they fall through to `/`:
+
+```typescript
+// src/router.ts
+import { createRouter, createWebHashHistory } from "vue-router";
+import TabHome from "./components/TabHome.vue";
+// ... one import per tab
+
+export function createMiniAppRouter() {
+  return createRouter({
+    history: createWebHashHistory(),
+    routes: [
+      { path: "/", component: TabHome },
+      { path: "/test-api", component: TabTestApi },
+      { path: "/chat", component: TabChat },
+      { path: "/location", component: TabLocation },
+      { path: "/camera", component: TabCamera },
+      { path: "/gallery", component: TabGallery },
+      { path: "/files", component: TabFiles },
+      { path: "/download", component: TabDownload },
+      { path: "/contact", component: TabContacts },
+      { path: "/biometric", component: TabBiometric },
+      { path: "/:pathMatch(.*)*", redirect: "/" },
+    ],
   });
 }
 ```
+
+Routed tabs receive their props from the shell (`MiniApp/index.vue`) via `<RouterView v-slot>` + a per-path props object — preserving the React architecture where tab state lives above the route switch and survives tab changes.
+
+---
+
+## 7. Package Setup
+
+Only the types package is needed at dev time, plus the Vue toolchain:
+
+```json
+{
+  "dependencies": {
+    "@tailwindcss/vite": "4.3.3",
+    "lucide-vue-next": "1.0.0",
+    "tailwindcss": "4.3.3",
+    "vue": "3.5.42",
+    "vue-router": "5.3.1"
+  },
+  "devDependencies": {
+    "@lizuz/mini-app-types": "1.1.2",
+    "@vitejs/plugin-vue": "6.0.8",
+    "typescript": "^5.9.3",
+    "vite": "8.2.2",
+    "vue-tsc": "3.3.11"
+  }
+}
+```
+
+> **Why TypeScript 5.9, not 7.x?** `vue-tsc@3` cannot run on the TypeScript 7 native port (`./lib/tsc` subpath missing), so Vue projects pin `typescript@^5` while keeping the same strict flags (`noUnusedLocals`, `verbatimModuleSyntax`, `erasableSyntaxOnly`). Build with `vue-tsc -b && vite build`.
+
+The runtime SDK (`MiniAppSdk`) comes from the host shell - never `npm install` it.
+
+---
+
+## 8. Essential folder structure
+
+The canonical Vue layout for a mini app — entry contract, SDK state, composables, and build manifest. Only the load-bearing files are shown; feature tabs and cards live under `components/`:
+
+```
+vue-mini-app/
+├── index.html              # Vite dev entry — single <div id="app">
+├── package.json            # dependencies + scripts
+├── vite.config.ts          # Vite lib mode + manifest plugin
+├── tsconfig.app.json       # app TS config (referenced by tsconfig.json)
+├── public/                 # static assets
+└── src/
+    ├── main.ts             # ← mount(container, runtime?)
+    ├── App.vue             # ← ErrorBoundary + Provider + shell
+    ├── router.ts           # ← per-mount hash-history factory
+    ├── routes.ts           # sidebar nav items
+    ├── index.css           # Tailwind + custom styles
+    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── components/         # tabs, cards, shell, provider, Sidebar
+    ├── composables/        # usePlatformSDK, useAppearance, useHostRouter, useT
+    ├── plugins/            # sdk.ts (SdkKey injection wiring)
+    ├── types/              # shared interfaces (index.ts)
+    ├── utils/              # createManifest.ts, retry.ts, errorDetails.ts
+    └── i18n/               # en / si / ta dictionaries
+```
+
+---
+
+## Checklist
+
+- [ ] Scaffolded `vue-ts` plus `vue-router`, `lucide-vue-next`, Tailwind, and the types package
+- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/main.ts` exports `mount(container, runtime?)` returning `{ unmount() }`
+- [ ] Router is created per mount via the factory — never a shared singleton
+- [ ] Sidebar and links navigate via `navigate()`, never raw hash writes
+- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates the slot on ready
+- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
+- [ ] `vite.config.ts` builds an ES library + host manifest (`framework: "vue"`)
+- [ ] `dist/manifest.json` lists the entry and file payload
+- [ ] Build passes (`vue-tsc -b` + vite build)
