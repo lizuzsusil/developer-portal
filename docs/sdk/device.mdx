@@ -21,7 +21,7 @@ Every device call returns a result with a `status` field. The mini app must bran
 | `permanentlyDenied` | Permission permanently denied / revoked | Direct user to device settings to re-enable it. |
 | `restricted` | OS-level restriction (e.g. parental controls, MDM) | Inform the user that the device is restricted. |
 
-`data` exists only on `granted`. In `test-mini-app`, every tab (location, camera, gallery, files, download, contact, biometric) switches on `res.status` and maps each case to a distinct UI error message. A typical handler:
+`data` exists only on `granted`. Every tab (location, camera, gallery, files, download, contact, biometric) switches on `res.status` and maps each case to a distinct UI error message. A typical handler:
 
 ```typescript
 const res = await sdk.device.location({ reason: "To view your current location" });

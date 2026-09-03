@@ -11,37 +11,43 @@ import { TypesPackageName, InstallCommandTabs } from "@site/src/components/Types
 
 <FrameworkBadge framework="react" status="active" />
 
-This guide walks you through creating a React mini app from a blank Vite project, using the `test-mini-app` reference project as the template.
+This guide walks you through converting an existing **react-vite** application into a Sewa mini app — a self-contained ES module that the host shell loads at runtime. Every step preserves the Vite toolchain you already know, replacing only the entry and build configuration.
+
+> **Important — no runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your app only needs the **types** package (`<TypesPackageName />`) as a dev dependency for compile-time safety. The `platform.runtime` / `platform.sdk` semver constraints in the generated `manifest.json` are matched **host-side** by the loader; they are metadata, not a bundle dependency.
 
 ---
 
-## 0. Do you need the runtime in your mini app?
+## The react-vite to mini-app conversion
 
-**No.** A Sewa mini app must **not** `npm install` or `import` the SDK runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your app only needs the **types** package (`@lizuz/mini-app-types`) as a dev dependency for compile-time safety. The `platform.runtime` / `platform.sdk` semver constraints in the generated `manifest.json` are matched **host-side** by the loader; they are metadata, not a bundle dependency.
+The transformation from a standard react-vite application to a Sewa mini app is a focused, four-stage process. Each stage addresses a specific concern of the mini app contract: type safety, mount lifecycle, SDK provisioning, and build packaging.
 
----
+### Stage 1 — Install types and configure the toolchain
 
-## 1. Scaffold a Vite + React + TS app
+Start from your existing react-vite project. If you don't have one, scaffold it first:
 
 ```bash
-pnpm create vite mini-app --template react-ts
-cd mini-app
+pnpm create vite my-mini-app --template react-ts
+cd my-mini-app
 pnpm install
 ```
 
-Enable automatic JSX runtime and Tailwind (optional), and add the types package (pick your package manager):
+Then add the types package (pick your package manager):
 
 <InstallCommandTabs />
 
----
+Enable automatic JSX runtime and Tailwind in your Vite config:
 
-## 2. Declare the host-injected globals
+```bash
+pnpm add -D @vitejs/plugin-react @tailwindcss/vite tailwindcss
+```
 
-Create `src/gov-sdk.d.ts`. This maps `window.__GSA_SDK__` to `MiniAppSdkInterface` from the types package so `sdk.*` calls are fully typed:
+### Stage 2 — Declare the host-injected globals
+
+Create `src/gov-sdk.d.ts`. This maps `window.__GSA_SDK__` to `MiniAppSdkInterface` from the types package so every `sdk.*` call is fully typed — without importing the runtime:
 
 ```typescript
 // src/gov-sdk.d.ts
-import type { MiniAppSdkInterface, PlatformUser } from "@lizuz/mini-app-types";
+import type { MiniAppSdkInterface, PlatformUser } from "<TypesPackageName />";
 
 declare global {
   type MiniAppSdk = MiniAppSdkInterface;
@@ -52,23 +58,28 @@ declare global {
 }
 ```
 
-No runtime import is needed — the host provides the instance.
+No runtime import is needed — the host provides the instance at load time. The type declaration is the bridge between the host's runtime and your application's type checker.
 
----
+### Stage 3 — Build the `mount` entry point
 
-## 3. Build the `mount` entry point
+Replace `src/main.tsx` with the mini app entry. The `mount` function is the contract the host calls when a user opens your mini app. It receives a `container` element and an optional `runtime` object (`{ initialPath }`) used for host-driven deep links:
 
 ```typescript
 // src/main.tsx
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
+import App from "./App";
 import "./index.css";
 
+/** Sets the initial hash so HashRouter starts at the host-provided path. */
 function applyInitialHash(initialPath?: string) {
   if (!initialPath) return;
   const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
-  if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
+  if (
+    !window.location.hash ||
+    window.location.hash === "#" ||
+    !window.location.hash.startsWith("#/")
+  ) {
     window.location.replace(`#${normalized}`);
   }
 }
@@ -77,20 +88,125 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
   const root: Root = createRoot(container);
   applyInitialHash(runtime?.initialPath);
   root.render(<App />);
-  return { unmount() { root.unmount(); } };
+
+  return {
+    unmount() {
+      root.unmount();
+    },
+  };
 }
 ```
 
----
+Key points:
 
-## 4. Wire up the SDK provider
+- **`mount` is the only export the host calls.** It must accept `(container, runtime?)` and return `{ unmount() }`.
+- **`runtime` is optional to provide but must be accepted.** Hosts that deep-link pass `{ initialPath }`; hosts that don't pass nothing. Honor it when present, otherwise `HashRouter` starts from the current hash (a host-set deep link is left untouched). Dropping the parameter breaks hash routing on hosts that rely on it.
+- **Hash routing** is used instead of browser history because the host shell manages the URL outside the mini app's iframe/container.
+- **The `unmount` return** lets the host clean up React state when the mini app is closed or navigated away from.
+
+### Stage 4 — Wire the SDK provider and application shell
+
+Create the provider that polls `window.__GSA_SDK__`, waits on the `__GSA_SDK_READY__` event, fetches the signed-in user, and gates all device calls on the `granted` permission state:
+
+```typescript
+// src/providers/PlatformSDKProvider.tsx
+import type { ReactNode } from "react";
+import { useEffect, useReducer } from "react";
+import { SDKContext } from "../context/SDKContext";
+
+type State =
+  | { phase: "loading" }
+  | { phase: "ready"; sdk: MiniAppSdk; user: SdkPlatformUser | null }
+  | { phase: "error"; error: Error };
+
+type Action =
+  | { type: "ready"; sdk: MiniAppSdk; user: SdkPlatformUser | null }
+  | { type: "error"; error: Error };
+
+function reducer(_state: State, action: Action): State {
+  switch (action.type) {
+    case "ready":
+      return { phase: "ready", sdk: action.sdk, user: action.user };
+    case "error":
+      return { phase: "error", error: action.error };
+  }
+}
+
+function getSDK(): MiniAppSdk {
+  const instance = window.__GSA_SDK__ ?? null;
+  if (!instance) throw new Error("SDK not available");
+  return instance;
+}
+
+function retry(fn: () => Promise<MiniAppSdk>, { maxAttempts, delayMs }: { maxAttempts: number; delayMs: number }): Promise<MiniAppSdk> {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const attempt = async () => {
+      try {
+        const result = await fn();
+        resolve(result);
+      } catch {
+        attempts++;
+        if (attempts >= maxAttempts) return reject(new Error("SDK initialization failed"));
+        setTimeout(attempt, delayMs);
+      }
+    };
+    attempt();
+  });
+}
+
+export function PlatformSDKProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, { phase: "loading" });
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const init = async () => {
+      try {
+        const instance = await retry(() => getSDK(), { maxAttempts: 30, delayMs: 500 });
+        await new Promise<void>((res) => {
+          if (window.__GSA_SDK__) return res();
+          window.addEventListener("__GSA_SDK_READY__", () => res(), { once: true });
+        });
+        const user = await instance.auth.getUser();
+        if (!controller.signal.aborted) {
+          dispatch({ type: "ready", sdk: instance, user: user ?? null });
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          dispatch({ type: "error", error: error instanceof Error ? error : new Error("SDK initialization failed") });
+        }
+      }
+    };
+
+    init();
+    return () => controller.abort();
+  }, []);
+
+  if (state.phase === "error") {
+    return <div>Connection failed — please refresh.</div>;
+  }
+
+  if (state.phase === "loading") {
+    return <div>Connecting to platform…</div>;
+  }
+
+  return (
+    <SDKContext.Provider value={{ sdk: state.sdk, user: state.user, isReady: true, error: null }}>
+      {children}
+    </SDKContext.Provider>
+  );
+}
+```
+
+Then compose your `App.tsx` with `HashRouter`, `PlatformSDKProvider`, and your root component:
 
 ```typescript
 // src/App.tsx
 import { HashRouter } from "react-router";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { PlatformSDKProvider } from "./providers/PlatformSDKProvider";
-import TestMiniApp from "./components/MiniApp";
+import MiniApp from "./components/MiniApp";
 import "./index.css";
 
 export default function App() {
@@ -98,7 +214,7 @@ export default function App() {
     <ErrorBoundary>
       <HashRouter>
         <PlatformSDKProvider>
-          <TestMiniApp />
+          <MiniApp />
         </PlatformSDKProvider>
       </HashRouter>
     </ErrorBoundary>
@@ -106,18 +222,16 @@ export default function App() {
 }
 ```
 
-The provider (see [React Integration Guide](/docs/integration/react) section 3) polls `window.__GSA_SDK__`, waits on the `__GSA_SDK_READY__` event, fetches the signed-in user, and gates all device calls on the `granted` permission state.
+### Stage 5 — Vite library build + manifest
 
----
-
-## 5. Vite library build + manifest
+Reconfigure `vite.config.ts` to build as an ES library with a host manifest plugin. The `createManifest` utility emits `dist/manifest.json` with the `application`, `platform` (runtime/sdk constraints), and `bundle` (entry + files) contract the host loader consumes:
 
 ```typescript
 // vite.config.ts
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { createManifest } from "./src/utils/createManifest.ts";
+import { createManifest } from "./src/utils/createManifest";
 
 export default defineConfig({
   plugins: [
@@ -125,13 +239,20 @@ export default defineConfig({
     tailwindcss(),
     createManifest(),
   ],
-  define: { "process.env.NODE_ENV": JSON.stringify("production") },
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("production"),
+  },
   build: {
     target: "chrome89",
     manifest: "manifest.json",
     outDir: "dist",
     cssCodeSplit: true,
-    lib: { entry: "./src/main.tsx", name: "MyMiniApp", formats: ["es"] },
+    lib: {
+      entry: "./src/main.tsx",
+      name: "MyMiniApp",
+      formats: ["es"],
+      fileName: () => "[name][hash].js",
+    },
     rollupOptions: {
       output: {
         codeSplitting: false,
@@ -141,19 +262,46 @@ export default defineConfig({
       },
     },
   },
-  server: { host: "0.0.0.0", cors: true },
+  server: {
+    host: "0.0.0.0",
+    cors: true,
+    headers: { "Access-Control-Allow-Origin": "*" },
+  },
 });
 ```
 
-The `createManifest` plugin emits `dist/manifest.json` with the `application`, `platform` (runtime/sdk constraints), and `bundle` (entry + files) contract the host loader consumes.
+Create the manifest utility:
 
----
+```typescript
+// src/utils/createManifest.ts
+import type { Plugin } from "vite";
 
-## 6. Build, lint, and serve
+export function createManifest(): Plugin {
+  return {
+    name: "create-manifest",
+    closeBundle() {
+      const manifest = {
+        application: {
+          entry: "assets/[name][hash].js",
+          files: ["assets/[name][hash].js", "assets/[name][hash].css"],
+        },
+        platform: {
+          runtime: ">=1.0.0",
+          sdk: ">=2.0.0 <3.0.0",
+        },
+      };
+      // In a real plugin this writes to dist/manifest.json
+      console.log("[manifest]", JSON.stringify(manifest, null, 2));
+    },
+  };
+}
+```
+
+### Stage 6 — Build, lint, and serve
 
 ```bash
-pnpm run build     # biome check --error-on-warnings && tsc -b && vite build
-pnpm run lint      # biome check
+pnpm run build     # check + tsc + vite build
+pnpm run lint      # lint check
 pnpm run preview    # vite preview --port 3002
 ```
 
@@ -161,12 +309,161 @@ Verify `dist/manifest.json` lists your entry and files before uploading the bund
 
 ---
 
+## Essential react-vite folder structure for a mini app
+
+When converting a react-vite project to a mini app, the folder layout must accommodate the new entry contract, SDK types, provider layer, and build manifest. Below is the canonical structure:
+
+```
+my-mini-app/
+├── index.html              # Vite entry — single <div id="root">
+├── package.json            # dependencies + scripts
+├── tsconfig.json           # project references (app + node)
+├── tsconfig.app.json       # app-specific TS config
+├── tsconfig.node.json      # config/file TS config
+├── biome.json              # linting & formatting
+├── vercel.json             # deployment config (optional)
+├── vite.config.ts          # Vite lib mode + manifest plugin
+├── pnpm-workspace.yaml     # workspace definition (if monorepo)
+├── public/                 # static assets
+│   └── favicon.ico
+└── src/
+    ├── main.tsx            # ← mount() entry point (was main.tsx)
+    ├── App.tsx             # ← root component with Router + Provider
+    ├── index.css           # Tailwind + custom styles
+    ├── gov-sdk.d.ts        # ← host-injected global type declarations
+    ├── components/         # UI components
+    │   ├── ErrorBoundary.tsx
+    │   ├── Loader.tsx
+    │   ├── LoadError.tsx
+    │   └── MiniApp/        # feature component(s)
+    │       └── index.tsx
+    ├── providers/          # SDK provider layer
+    │   └── PlatformSDKProvider.tsx
+    ├── context/            # React context for SDK state
+    │   └── SDKContext.tsx
+    ├── hooks/              # custom hooks
+    │   ├── useAppearance.ts
+    │   ├── usePlatformSDK.ts
+    │   ├── useHostRouter.ts
+    │   └── useT.ts
+    ├── types/              # shared TypeScript interfaces
+    │   └── index.ts
+    ├── utils/              # utilities + manifest plugin
+    │   ├── createManifest.ts
+    │   └── retry.ts
+    ├── routes.ts           # route definitions (optional)
+    └── i18n/               # internationalization (optional)
+        └── index.ts
+```
+
+### File-by-file responsibilities
+
+| File | Responsibility |
+|---|---|
+| `src/main.tsx` | Exports `mount(container, runtime?)` — the host calls this to render the app |
+| `src/App.tsx` | Composes `HashRouter`, `PlatformSDKProvider`, and the root feature component |
+| `src/gov-sdk.d.ts` | Declares `window.__GSA_SDK__` as `MiniAppSdkInterface` — no runtime import |
+| `src/providers/PlatformSDKProvider.tsx` | Polls `window.__GSA_SDK__`, waits on `__GSA_SDK_READY__`, provides SDK context |
+| `src/context/SDKContext.tsx` | React context holding `{ sdk, user, isReady, error }` |
+| `src/hooks/usePlatformSDK.ts` | Convenience hook to access the SDK context |
+| `src/hooks/useAppearance.ts` | Subscribes to `sdk.appearance.state()` and changes |
+| `src/hooks/useHostRouter.ts` | Syncs hash navigation with the host shell |
+| `src/utils/createManifest.ts` | Vite plugin that emits `dist/manifest.json` for the host loader |
+| `src/utils/retry.ts` | Retry utility for SDK initialization polling |
+| `vite.config.ts` | `lib` build mode, ES format, `createManifest()` plugin |
+
+---
+
+## Vite configuration details
+
+The Vite configuration differs from a standard react-vite setup in three key areas:
+
+1. **Library mode (`build.lib`)** — outputs a single ES module instead of an HTML + JS bundle. The host loader imports this directly.
+2. **Manifest plugin (`createManifest()`)** — emits `manifest.json` describing the bundle entry, file payload, and platform constraints.
+3. **CORS server headers** — the dev server must allow cross-origin requests since the host shell loads the mini app in its own context.
+
+```typescript
+// The critical build config — lib mode + ES output
+build: {
+  target: "chrome89",
+  manifest: "manifest.json",
+  outDir: "dist",
+  cssCodeSplit: true,
+  lib: {
+    entry: "./src/main.tsx",
+    name: "MyMiniApp",
+    formats: ["es"],
+    fileName: () => "[name][hash].js",
+  },
+  rollupOptions: {
+    output: {
+      codeSplitting: false,
+      format: "es",
+      chunkFileNames: "assets/[name]-[hash].js",
+      assetFileNames: "assets/[name]-[hash][extname]",
+    },
+  },
+},
+```
+
+> **Why `codeSplitting: false`?** The host loader expects a single ES module entry. Split chunks would complicate the manifest contract and loading sequence.
+
+---
+
+## The `mount` contract in depth
+
+The `mount` function is the only contract between your mini app and the host shell. It follows a specific pattern:
+
+```typescript
+export function mount(
+  container: HTMLElement,
+  runtime?: { initialPath?: string },
+): { unmount(): void } {
+  const root = createRoot(container);
+  // apply hash from host-provided path (no-op when the host passes nothing)
+  applyInitialHash(runtime?.initialPath);
+  // render the full app tree
+  root.render(<App />);
+  // return cleanup handle
+  return {
+    unmount() {
+      root.unmount();
+    },
+  };
+}
+```
+
+The host calls `mount(container, runtime?)` when the user opens your mini app and calls `unmount()` when navigating away. The optional `runtime.initialPath` parameter lets a host deep-link into a specific route inside the mini app's hash router; when absent, the router starts from the current hash.
+
+### Why does `initialPath` exist?
+
+A mini app cannot use the real URL — the host shell owns browser history and the address bar. So mini apps route on the hash fragment (`HashRouter`) or fully in memory (`MemoryRouter`). That leaves one question: **how does the mini app learn which screen to boot on?**
+
+- **Deep links need a channel.** A push notification, a home-screen shortcut, or one mini app navigating to another (`sdk.navigation.navigate` with a target route) must be able to open a specific screen — not always home. `initialPath` is that channel: the route the host wants the mini app to boot on.
+- **The hash can't be that channel.** `window.location.hash` is global, shared, mutable state. If the host shell uses hash routing itself, pre-writing the mini app's route into the hash corrupts host navigation — host and mini app fight over one fragment. An explicit function argument carries the same intent with no global side effects.
+- **`MemoryRouter` can't read the URL at all.** It boots purely from `initialEntries`, so without the `initialPath` prop there is literally no way to deep-link it.
+
+Resolution order in `applyInitialHash` reflects this priority:
+
+1. A host-set hash (deep link) wins and is left untouched.
+2. Otherwise `runtime.initialPath` is applied when the host provides it.
+3. Otherwise the router boots at its default (`/`).
+
+### Why is it called `initialPath` — and should it be renamed?
+
+`initialPath` means "the path the app boots on." Candidates like `initialRoute` (closer to react-router's `initialEntries` vocabulary), `deepLink`, or `entry` each describe the intent slightly better. **Keep `initialPath` anyway:** hosts in the wild already send exactly this key, and renaming it requires a coordinated host-plus-mini-app migration (during which both keys would have to be accepted). A precise description above makes the name unambiguous enough — compatibility beats elegance here.
+
+---
+
 ## Checklist
 
-- [ ] Install `<TypesPackageName />` with your package manager (pnpm / npm / yarn / bun) - see the multi-manager block
-- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__`
-- [ ] `src/main.tsx` exports `mount(container, runtime)`
-- [ ] `PlatformSDKProvider` gates on `granted` permission state
-- [ ] `vite.config.ts` builds an ES library + host manifest
+- [ ] Install `<TypesPackageName />` with your package manager (pnpm / npm / yarn / bun) — see the multi-manager block
+- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }`
+- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates on `granted` permission state
+- [ ] `src/App.tsx` composes `HashRouter`, `PlatformSDKProvider`, and the root component
+- [ ] `vite.config.ts` builds an ES library + host manifest via `createManifest()`
 - [ ] `dist/manifest.json` lists the entry and file payload
 - [ ] `pnpm run build` passes (biome + tsc + vite)
+- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] `useAppearance` hook subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`

@@ -12,24 +12,11 @@ The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (web and 
 
 ## Runtime Model
 
-- **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime)` - see [`Getting Started`](/docs/getting-started) and [`test-mini-app/`](https://github.com/anomalyco/sewa-platform/tree/main/test-mini-app).
+- **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime?)` - see [`Getting Started`](/docs/getting-started) and the [Sewa Platform repo](https://github.com/anomalyco/sewa-platform). `runtime` is optional: hosts that deep-link pass `{ initialPath }`, others pass nothing.
 - **SDK injection**: The host sets `window.__GSA_SDK__` before calling `mount`. No `npm install` of the SDK.
 - **Types**: install the type package with your preferred manager:
 
 <InstallCommandTabs />
-
-```mermaid
-sequenceDiagram
-    participant Host as Host shell
-    participant MiniApp as Mini app
-    participant SDK as window.__GSA_SDK__
-    Host->>MiniApp: mount(container, { initialPath })
-    MiniApp->>SDK: window.__GSA_SDK__
-    MiniApp->>SDK: sdk.auth.getUser()
-    SDK->>Host: RPC request (auth.getUser)
-    Host-->>SDK: response
-    SDK-->>MiniApp: PlatformUser
-```
 
 ## Capability Negotiation
 

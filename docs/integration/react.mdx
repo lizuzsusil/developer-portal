@@ -11,9 +11,9 @@ import { TypesPackageName, ReactGovSdkImportBlock, PackageJsonBlock, UseAppearan
 
 <FrameworkBadge framework="react" status="active" />
 
-> **Package:** `@sewa/framework-react` - internal workspace package at `packages/framework-react`. This guide is extracted from the reference app at [`test-mini-app/`](/).
+> **Package:** `@sewa/framework-react` - internal workspace package at `packages/framework-react`. This guide documents the production-ready React integration pattern for Sewa mini apps.
 
-React is the production-ready framework for Sewa mini apps. The reference implementation in `test-mini-app` shows the exact pattern: a Vite ES-library build, host-injected SDK via `window.__GSA_SDK__`, and a `PlatformSDKProvider` with strict lifecycle handling.
+React is the production-ready framework for Sewa mini apps. The reference implementation shows the exact pattern: a Vite ES-library build, host-injected SDK via `window.__GSA_SDK__`, and a `PlatformSDKProvider` with strict lifecycle handling.
 
 ---
 
@@ -83,13 +83,13 @@ export default function App() {
 }
 ```
 
-The mini app uses `HashRouter` - the host sets `window.location.hash` to the initial path (`main.tsx`'s `applyInitialHash` normalizes `runtime.initialPath` into the hash). This avoids touching browser history in a way that would break the host container's back-button policy. If your app runs inside a Flutter/native shell, `HashRouter` keeps navigation self-contained.
+The mini app uses `HashRouter` - `main.tsx`'s `applyInitialHash` normalizes an optional host-provided `runtime.initialPath` into the hash, and otherwise the router starts from the current hash (a host-set deep link is left untouched). This avoids touching browser history in a way that would break the host container's back-button policy. If your app runs inside a Flutter/native shell, `HashRouter` keeps navigation self-contained.
 
 ---
 
 ## 3. SDK Context & Provider
 
-The provider in `test-mini-app/src/providers/PlatformSDKProvider.tsx` reads the host-injected SDK from `window.__GSA_SDK__` with retry, an `AbortController` for clean unmount, and a reducer-based state machine (`loading → ready | error`). A full standalone mock is included so the app also runs outside the host during development.
+The provider reads the host-injected SDK from `window.__GSA_SDK__` with retry, an `AbortController` for clean unmount, and a reducer-based state machine (`loading → ready | error`). A full standalone mock is included so the app also runs outside the host during development.
 
 Key pieces:
 

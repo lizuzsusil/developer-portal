@@ -40,7 +40,7 @@ The sandbox always starts empty when you open or refresh this page — it never 
 
 ## Preparing your mini app
 
-1. Build as an **ES library** that exports `mount(container, runtime)` (and optionally `unmount(container)`).
+1. Build as an **ES library** that exports `mount(container, runtime?)` (and optionally `unmount(container)`). `runtime` is optional - accept and honor `runtime.initialPath` when the host provides it.
    See [Getting Started](./getting-started.mdx).
 2. Emit a `manifest.json` at the build output root:
 
