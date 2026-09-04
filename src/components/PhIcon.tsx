@@ -1,4 +1,4 @@
-import React from "react";
+import type { CSSProperties } from "react";
 
 export type PhIconWeight = "thin" | "light" | "regular" | "bold" | "fill";
 
@@ -8,7 +8,7 @@ interface PhIconProps {
   /** v1 icon fonts ship one codepoint per weight; base class is regular. */
   weight?: PhIconWeight;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   title?: string;
 }
 

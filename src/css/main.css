@@ -1,5 +1,6 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 /* Host Playground embed: scoped preflight + widget layout. Imported here, and
    after the two lines above, so the `theme` and `utilities` cascade layers are
@@ -7,6 +8,8 @@
 @import "../../packages/host-playground/src/embed.css";
 
 :root {
+  --font-family-base: "Open Sans", sans-serif;
+
   /* Primitive - Gold */
   --gold-50: #fffef2;
   --gold-100: #fff8d6;
@@ -514,10 +517,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-family-base);
-}
-
-:root {
-  --font-family-base: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 ::selection {
