@@ -20,7 +20,10 @@ export interface HostPlaygroundEmbedProps {
 }
 
 export default function HostPlaygroundEmbed({ hint = true }: HostPlaygroundEmbedProps) {
-  const [fullscreen, setFullscreen] = useState(false)
+  // The docs page can't really show a "normal" embedded frame usefully,
+  // so open in full screen by default. Escape leaves full screen and restores
+  // the surrounding docs layout.
+  const [fullscreen, setFullscreen] = useState(true)
 
   const toggleFullscreen = useCallback(() => setFullscreen((f) => !f), [])
 
