@@ -36,7 +36,7 @@ export function PlaygroundGrid() {
                         </div>
                         <Heading as="h2" className="m-0 text-[1.4rem] font-extrabold tracking-[-0.015em]">
                             <Translate id="homepage.playground.title" description="Playground title">
-                                Playgrounds
+                                Playground
                             </Translate>
                         </Heading>
                     </div>
