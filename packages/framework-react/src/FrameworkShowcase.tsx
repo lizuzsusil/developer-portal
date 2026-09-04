@@ -1,4 +1,5 @@
 import React from "react";
+import { PhIcon } from "../../../src/components/PhIcon";
 
 export function ReactFrameworkShowcase() {
   return (
@@ -11,7 +12,7 @@ export function ReactFrameworkShowcase() {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-        <span style={{ fontSize: "1.4rem" }}>⚛️</span>
+        <span style={{ fontSize: "1.4rem", display: "inline-flex" }}><PhIcon name="atom" /></span>
         <strong>React Adapter</strong>
         <span
           style={{

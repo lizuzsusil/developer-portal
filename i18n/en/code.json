@@ -359,11 +359,11 @@
     "description": "Hero badge"
   },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib → ES module",
+    "message": "vite build --lib {arrow} ES module",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "Scaffold in 4 steps →",
+    "message": "Scaffold in 4 steps {arrow}",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {
@@ -411,7 +411,7 @@
     "description": "Capability title"
   },
   "homepage.capability.cta": {
-    "message": "Full SDK reference →",
+    "message": "Full SDK reference {arrow}",
     "description": "Capability CTA"
   },
   "homepage.capability.alsoAvailable": {
@@ -419,7 +419,7 @@
     "description": "Capability also"
   },
   "homepage.capability.browseAll": {
-    "message": "Browse all 14 namespaces →",
+    "message": "Browse all 14 namespaces {arrow}",
     "description": "Capability browse"
   },
   "homepage.integrations.kicker": {
@@ -431,7 +431,7 @@
     "description": "Integrations title"
   },
   "homepage.integrations.cta": {
-    "message": "Platform overview →",
+    "message": "Platform overview {arrow}",
     "description": "Integrations CTA"
   },
   "homepage.playground.kicker": {
@@ -507,7 +507,7 @@
     "description": "React description"
   },
   "homepage.integrations.react.cta": {
-    "message": "View React guide →",
+    "message": "View React guide",
     "description": "React CTA"
   },
   "homepage.integrations.vue.badge": {
@@ -519,7 +519,7 @@
     "description": "Vue description"
   },
   "homepage.integrations.vue.cta": {
-    "message": "View Vue guide →",
+    "message": "View Vue guide",
     "description": "Vue CTA"
   },
   "homepage.integrations.angular.badge": {
@@ -531,7 +531,7 @@
     "description": "Angular description"
   },
   "homepage.integrations.angular.cta": {
-    "message": "View Angular guide →",
+    "message": "View Angular guide",
     "description": "Angular CTA"
   },
   "homepage.integrations.playground.badge": {
@@ -543,7 +543,7 @@
     "description": "Playground description"
   },
   "homepage.integrations.playground.cta": {
-    "message": "Open playground →",
+    "message": "Open playground",
     "description": "Playground CTA"
   }
 }

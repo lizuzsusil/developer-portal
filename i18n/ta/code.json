@@ -359,11 +359,11 @@
     "description": "Hero badge"
   },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib → ES தொகுதி",
+    "message": "vite build --lib {arrow} ES தொகுதி",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "4 படிகளில் உருவாக்கவும் →",
+    "message": "4 படிகளில் உருவாக்கவும் {arrow}",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {
@@ -411,7 +411,7 @@
     "description": "Capability title"
   },
   "homepage.capability.cta": {
-    "message": "முழு SDK குறிப்பு →",
+    "message": "முழு SDK குறிப்பு {arrow}",
     "description": "Capability CTA"
   },
   "homepage.capability.alsoAvailable": {
@@ -419,7 +419,7 @@
     "description": "Capability also"
   },
   "homepage.capability.browseAll": {
-    "message": "14 பெயர்வெளிகளையும் உலாவுக →",
+    "message": "14 பெயர்வெளிகளையும் உலாவுக {arrow}",
     "description": "Capability browse"
   },
   "homepage.integrations.kicker": {
@@ -431,7 +431,7 @@
     "description": "Integrations title"
   },
   "homepage.integrations.cta": {
-    "message": "தள மேலோட்டம் →",
+    "message": "தள மேலோட்டம் {arrow}",
     "description": "Integrations CTA"
   },
   "homepage.playground.kicker": {
@@ -507,7 +507,7 @@
     "description": "React description"
   },
   "homepage.integrations.react.cta": {
-    "message": "React வழிகாட்டியைப் பார்க்கவும் →",
+    "message": "React வழிகாட்டியைப் பார்க்கவும்",
     "description": "React CTA"
   },
   "homepage.integrations.vue.badge": {
@@ -519,7 +519,7 @@
     "description": "Vue description"
   },
   "homepage.integrations.vue.cta": {
-    "message": "Vue வழிகாட்டியைப் பார்க்கவும் →",
+    "message": "Vue வழிகாட்டியைப் பார்க்கவும்",
     "description": "Vue CTA"
   },
   "homepage.integrations.angular.badge": {
@@ -531,7 +531,7 @@
     "description": "Angular description"
   },
   "homepage.integrations.angular.cta": {
-    "message": "Angular வழிகாட்டியைப் பார்க்கவும் →",
+    "message": "Angular வழிகாட்டியைப் பார்க்கவும்",
     "description": "Angular CTA"
   },
   "homepage.integrations.playground.badge": {
@@ -543,7 +543,7 @@
     "description": "Playground description"
   },
   "homepage.integrations.playground.cta": {
-    "message": "விளையாட்டு மைதானத்தைத் திறக்கவும் →",
+    "message": "விளையாட்டு மைதானத்தைத் திறக்கவும்",
     "description": "Playground CTA"
   }
 }

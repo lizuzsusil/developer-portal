@@ -359,11 +359,11 @@
     "description": "Hero badge"
   },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib → ES මොඩියුලය",
+    "message": "vite build --lib {arrow} ES මොඩියුලය",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "පියවර 4 කින් සකසන්න →",
+    "message": "පියවර 4 කින් සකසන්න {arrow}",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {
@@ -411,7 +411,7 @@
     "description": "Capability title"
   },
   "homepage.capability.cta": {
-    "message": "සම්පූර්ණ SDK විමර්ශනය →",
+    "message": "සම්පූර්ණ SDK විමර්ශනය {arrow}",
     "description": "Capability CTA"
   },
   "homepage.capability.alsoAvailable": {
@@ -419,7 +419,7 @@
     "description": "Capability also"
   },
   "homepage.capability.browseAll": {
-    "message": "නාම අවකාශ 14ම බලන්න →",
+    "message": "නාම අවකාශ 14ම බලන්න {arrow}",
     "description": "Capability browse"
   },
   "homepage.integrations.kicker": {
@@ -431,7 +431,7 @@
     "description": "Integrations title"
   },
   "homepage.integrations.cta": {
-    "message": "වේදිකා දළ විශ්ලේෂණය →",
+    "message": "වේදිකා දළ විශ්ලේෂණය {arrow}",
     "description": "Integrations CTA"
   },
   "homepage.playground.kicker": {
@@ -507,7 +507,7 @@
     "description": "React description"
   },
   "homepage.integrations.react.cta": {
-    "message": "React මාර්ගෝපදේශය බලන්න →",
+    "message": "React මාර්ගෝපදේශය බලන්න",
     "description": "React CTA"
   },
   "homepage.integrations.vue.badge": {
@@ -519,7 +519,7 @@
     "description": "Vue description"
   },
   "homepage.integrations.vue.cta": {
-    "message": "Vue මාර්ගෝපදේශය බලන්න →",
+    "message": "Vue මාර්ගෝපදේශය බලන්න",
     "description": "Vue CTA"
   },
   "homepage.integrations.angular.badge": {
@@ -531,7 +531,7 @@
     "description": "Angular description"
   },
   "homepage.integrations.angular.cta": {
-    "message": "Angular මාර්ගෝපදේශය බලන්න →",
+    "message": "Angular මාර්ගෝපදේශය බලන්න",
     "description": "Angular CTA"
   },
   "homepage.integrations.playground.badge": {
@@ -543,7 +543,7 @@
     "description": "Playground description"
   },
   "homepage.integrations.playground.cta": {
-    "message": "ක්‍රීඩාංගනය විවෘත කරන්න →",
+    "message": "ක්‍රීඩාංගනය විවෘත කරන්න",
     "description": "Playground CTA"
   }
 }

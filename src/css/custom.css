@@ -1,5 +1,51 @@
 @import "./main.css";
 
+/* ------------------------------------------------------------------ */
+/*  Phosphor Icons (v1) - subset builds only the glyphs used by the
+    portal (see static/fonts). To add an icon: take its codepoint from
+    phosphor-icons/src/css/icons.css, extend the subset command below,
+    re-run it, and add the matching rule here.
+    Subset: pyftsubset Phosphor.ttf
+      --unicodes="U+F8B5,U+F7AC,U+F855,U+F7A8,U+F917,U+F9B3,U+F6A2,U+F733,U+F6CE,U+F986,U+F77A"
+*/
+@font-face {
+  font-family: "Phosphor";
+  src: url("/fonts/phosphor-subset.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+[class^="ph-"],
+[class*=" ph-"] {
+  display: inline-flex;
+}
+
+[class^="ph-"]:before,
+[class*=" ph-"]:before {
+  font: normal normal normal 1em/1 "Phosphor";
+  color: inherit;
+  flex-shrink: 0;
+  speak: none;
+  text-transform: none;
+  text-decoration: inherit;
+  text-align: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ph-lock-key-bold::before { content: "\f8b5"; }
+.ph-device-mobile-bold::before { content: "\f7ac"; }
+.ph-globe-bold::before { content: "\f855"; }
+.ph-database-bold::before { content: "\f7a8"; }
+.ph-palette-bold::before { content: "\f917"; }
+.ph-sparkle-bold::before { content: "\f9b3"; }
+.ph-arrow-right-bold::before { content: "\f6a2"; }
+.ph-caret-right-bold::before { content: "\f733"; }
+.ph-atom-bold::before { content: "\f6ce"; }
+.ph-shield-bold::before { content: "\f986"; }
+.ph-code-bold::before { content: "\f77a"; }
+
 :root {
   --ifm-color-primary: var(--blue-500);
   --ifm-color-primary-dark: var(--blue-700);
@@ -517,6 +563,16 @@ html.plugin-pages .footer .container {
   flex-shrink: 0;
   background: var(--color-surface-sunken);
   border: 1px solid var(--color-border-decorative);
+}
+
+/* Capability card arrow nudge on hover */
+.portal-card .cap-arrow {
+  display: inline-block;
+  transition: transform var(--duration-normal) var(--easing-standard);
+}
+
+.portal-card:hover .cap-arrow {
+  transform: translateX(4px);
 }
 
 

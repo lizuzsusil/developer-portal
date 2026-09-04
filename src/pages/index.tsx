@@ -5,6 +5,7 @@ import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 import Translate, { translate } from "@docusaurus/Translate";
 import styles from "./index.module.css";
+import { PhIcon } from "../components/PhIcon";
 import { useTypesPackage } from "../components/TypesPackage";
 
 function Hero() {
@@ -220,9 +221,9 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
                   background: "var(--hero-code-header-bg)",
                 }}
               >
-                <span style={{ color: "var(--hero-code-footer-text)", fontFamily: "monospace" }}><Translate id="homepage.hero.code.footer" description="Hero code footer">vite build --lib → ES module</Translate></span>
-                <Link to="/docs/getting-started" style={{ color: "var(--hero-code-link)", fontWeight: 700, textDecoration: "none" }}>
-                  <Translate id="homepage.hero.code.craft" description="Hero code craft">Scaffold in 4 steps →</Translate>
+<span style={{ color: "var(--hero-code-footer-text)", fontFamily: "monospace" }}><Translate id="homepage.hero.code.footer" description="Hero code footer" values={{ arrow: <PhIcon name="arrow-right" /> }}>{"vite build --lib {arrow} ES module"}</Translate></span>
+                <Link to="/docs/getting-started" style={{ color: "var(--hero-code-link)", fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <Translate id="homepage.hero.code.craft" description="Hero code craft" values={{ arrow: <PhIcon name="arrow-right" /> }}>{"Scaffold in 4 steps {arrow}"}</Translate>
                 </Link>
               </div>
             </div>
@@ -327,34 +328,67 @@ function HowItWorks() {
 }
 
 function CapabilityTeaser() {
-  const caps: { title: string; href: string; desc: string; icon: string; descId: string }[] = [
-    { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout — citizen identity", icon: "🔐", descId: "homepage.capability.auth.desc" },
-    { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "📱", descId: "homepage.capability.device.desc" },
-    { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "🌐", descId: "homepage.capability.http.desc" },
-    { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "💾", descId: "homepage.capability.storage.desc" },
-    { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "🎨", descId: "homepage.capability.appearance.desc" },
-    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText — AI chat gateway", icon: "✦", descId: "homepage.capability.gicChat.desc" },
+  const caps: { title: string; href: string; desc: string; icon: string; descId: string; methods: string[] }[] = [
+    { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout — citizen identity", icon: "lock-key", descId: "homepage.capability.auth.desc", methods: ["getUser()", "isAuthenticated()", "logout()"] },
+    { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "device-mobile", descId: "homepage.capability.device.desc", methods: ["location()", "camera()", "gallery()"] },
+    { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "globe", descId: "homepage.capability.http.desc", methods: ["post()", "stream()", "getStream()"] },
+    { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "database", descId: "homepage.capability.storage.desc", methods: ["setJson()", "getMany()", "scoped()"] },
+    { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "palette", descId: "homepage.capability.appearance.desc", methods: ["getTheme()", "getLocale()", "subscribe()"] },
+    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText — AI chat gateway", icon: "sparkle", descId: "homepage.capability.gicChat.desc", methods: ["startSession()", "streamText()"] },
+  ];
+  const others: { label: string; href: string }[] = [
+    { label: "permissions", href: "/docs/sdk/permissions" },
+    { label: "flags", href: "/docs/sdk/flags" },
+    { label: "navigation", href: "/docs/sdk/navigation" },
+    { label: "notifications", href: "/docs/sdk/notifications" },
+    { label: "links", href: "/docs/sdk/links" },
+    { label: "config", href: "/docs/sdk/config" },
   ];
   return (
     <section style={{ padding: "48px 0 24px" }}>
       <div className="container">
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
-          <Heading as="h2" style={{ fontSize: "1.4rem", fontWeight: 800, margin: 0, letterSpacing: "-0.015em" }}>
-            <Translate id="homepage.capability.title" description="Capability title">What you can build with</Translate>
-          </Heading>
-          <Link to="/docs/sdk/core" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-text-link)" }}>
-            <Translate id="homepage.capability.cta" description="Capability CTA">Full SDK reference →</Translate>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+          <div>
+            <div style={{ fontSize: "0.74rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--color-text-secondary)", marginBottom: 6 }}>
+              <Translate id="homepage.capability.kicker" description="Capability kicker">Capability catalog</Translate>
+            </div>
+            <Heading as="h2" style={{ fontSize: "1.4rem", fontWeight: 800, margin: 0, letterSpacing: "-0.015em" }}>
+              <Translate id="homepage.capability.title" description="Capability title">What you can build with</Translate>
+            </Heading>
+          </div>
+          <Link to="/docs/sdk/core" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-text-link)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Translate id="homepage.capability.cta" description="Capability CTA" values={{ arrow: <PhIcon name="arrow-right" /> }}>{"Full SDK reference {arrow}"}</Translate>
           </Link>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(310px, 1fr))", gap: 16 }}>
           {caps.map((c) => (
-            <Link key={c.title} to={c.href} className="portal-card" style={{ padding: "22px 20px", textDecoration: "none", flexDirection: "row", gap: 16, alignItems: "flex-start" }}>
-              <span className="landing-feature-icon" aria-hidden>{c.icon}</span>
-              <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                <code style={{ fontSize: "0.94rem", fontWeight: 700, color: "var(--color-text-primary)", marginBottom: 6 }}>{c.title}</code>
-                <span style={{ fontSize: "0.88rem", color: "var(--color-text-secondary)", lineHeight: 1.55 }}>{translate({ id: c.descId, message: c.desc, description: `Capability ${c.title} description` })}</span>
-              </span>
+            <Link key={c.title} to={c.href} className="portal-card" style={{ padding: "22px 20px", textDecoration: "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+                <span className="landing-feature-icon" aria-hidden style={{ width: 44, height: 44, fontSize: "1.35rem", borderRadius: 12 }}><PhIcon name={c.icon} /></span>
+                <code style={{ fontSize: "1rem", fontWeight: 800, color: "var(--color-text-primary)" }}>{c.title}</code>
+                <span className="cap-arrow" aria-hidden style={{ marginLeft: "auto", color: "var(--landing-step-color)", fontSize: "1rem", display: "inline-flex" }}><PhIcon name="arrow-right" /></span>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                {c.methods.map((m) => (
+                  <code
+                    key={m}
+                    style={{
+                      fontSize: "0.72rem",
+                      fontWeight: 600,
+                      background: "var(--color-surface-sunken)",
+                      border: "1px solid var(--color-border-decorative)",
+                      padding: "3px 9px",
+                      borderRadius: 9999,
+                      color: "var(--color-text-secondary)",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {m}
+                  </code>
+                ))}
+              </div>
+              <span style={{ fontSize: "0.88rem", color: "var(--color-text-secondary)", lineHeight: 1.55 }}>{translate({ id: c.descId, message: c.desc, description: `Capability ${c.title} description` })}</span>
             </Link>
           ))}
         </div>
@@ -369,20 +403,32 @@ function CapabilityTeaser() {
             fontSize: "0.88rem",
             color: "var(--color-text-secondary)",
             display: "flex",
-            gap: 8,
+            gap: 10,
             flexWrap: "wrap",
             alignItems: "center",
           }}
         >
           <span style={{ fontWeight: 600, color: "var(--color-text-primary)" }}><Translate id="homepage.capability.alsoAvailable" description="Capability also">Also available:</Translate></span>
-          <Link to="/docs/sdk/permissions" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>permissions</Link>
-          <span>·</span> <Link to="/docs/sdk/flags" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>flags</Link>
-          <span>·</span> <Link to="/docs/sdk/navigation" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>navigation</Link>
-          <span>·</span> <Link to="/docs/sdk/notifications" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>notifications</Link>
-          <span>·</span> <Link to="/docs/sdk/links" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>links</Link>
-          <span>·</span> <Link to="/docs/sdk/config" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>config</Link>
+          {others.map((o) => (
+            <Link
+              key={o.label}
+              to={o.href}
+              style={{
+                fontWeight: 600,
+                fontSize: "0.82rem",
+                color: "var(--color-text-link)",
+                background: "var(--color-surface-card)",
+                border: "1px solid var(--color-border-decorative)",
+                padding: "4px 12px",
+                borderRadius: 9999,
+                textDecoration: "none",
+              }}
+            >
+              {o.label}
+            </Link>
+          ))}
           <span style={{ marginLeft: "auto" }}>
-            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--color-text-link)" }}><Translate id="homepage.capability.browseAll" description="Capability browse">Browse all 14 namespaces →</Translate></Link>
+            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--color-text-link)", display: "inline-flex", alignItems: "center", gap: 6 }}><Translate id="homepage.capability.browseAll" description="Capability browse" values={{ arrow: <PhIcon name="arrow-right" /> }}>{"Browse all 14 namespaces {arrow}"}</Translate></Link>
           </span>
         </div>
       </div>
@@ -397,7 +443,7 @@ function IntegrationGrid() {
       to: "/docs/integration/react",
       desc: "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
       descId: "homepage.integrations.react.desc",
-      cta: "View React guide →",
+      cta: "View React guide",
       ctaId: "homepage.integrations.react.cta",
     },
     {
@@ -405,7 +451,7 @@ function IntegrationGrid() {
       to: "/docs/integration/vue",
       desc: "Composition API adapter for Vue 3. Tracks the same mount() lifecycle.",
       descId: "homepage.integrations.vue.desc",
-      cta: "View Vue guide →",
+      cta: "View Vue guide",
       ctaId: "homepage.integrations.vue.cta",
     },
     {
@@ -413,7 +459,7 @@ function IntegrationGrid() {
       to: "/docs/integration/angular",
       desc: "Standalone components & injectable SDK service — aligned with Angular 17+ patterns.",
       descId: "homepage.integrations.angular.desc",
-      cta: "View Angular guide →",
+      cta: "View Angular guide",
       ctaId: "homepage.integrations.angular.cta",
     },
     {
@@ -421,7 +467,7 @@ function IntegrationGrid() {
       to: "/docs/playground",
       desc: "Try every sdk.* method against a mock transport. No local setup — runs inside the docs site.",
       descId: "homepage.integrations.playground.desc",
-      cta: "Open playground →",
+      cta: "Open playground",
       ctaId: "homepage.integrations.playground.cta",
     },
     {
@@ -429,7 +475,7 @@ function IntegrationGrid() {
       to: "/docs/host-playground",
       desc: "Test your mini app. Get the manifest & frontend URL and select your required SDK version.",
       descId: "homepage.integrations.hostPlayground.desc",
-      cta: "Open playground →",
+      cta: "Open playground",
       ctaId: "homepage.integrations.hostPlayground.cta",
     },
   ];
@@ -445,8 +491,8 @@ function IntegrationGrid() {
               <Translate id="homepage.integrations.title" description="Integrations title">Framework guides & tools</Translate>
             </Heading>
           </div>
-          <Link to="/docs/overview" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-text-link)" }}>
-            <Translate id="homepage.integrations.cta" description="Integrations CTA">Platform overview →</Translate>
+          <Link to="/docs/overview" style={{ fontSize: "0.9rem", fontWeight: 600, color: "var(--color-text-link)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Translate id="homepage.integrations.cta" description="Integrations CTA" values={{ arrow: <PhIcon name="arrow-right" /> }}>{"Platform overview {arrow}"}</Translate>
           </Link>
         </div>
 
@@ -455,7 +501,7 @@ function IntegrationGrid() {
             <Link key={card.title} to={card.to} className="portal-card" style={{ padding: "24px 22px", textDecoration: "none" }}>
               <span style={{ fontWeight: 800, fontSize: "1.1rem", color: "var(--color-text-primary)", marginBottom: 10, display: "block" }}>{card.title}</span>
               <p style={{ fontSize: "0.9rem", color: "var(--color-text-secondary)", lineHeight: 1.6, margin: "0 0 16px", flex: 1 }}>{translate({ id: card.descId, message: card.desc, description: `${card.title} description` })}</p>
-              <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--color-text-link)" }}>{translate({ id: card.ctaId, message: card.cta, description: `${card.title} CTA` })}</span>
+              <span style={{ fontSize: "0.88rem", fontWeight: 700, color: "var(--color-text-link)", display: "inline-flex", alignItems: "center", gap: 6 }}>{translate({ id: card.ctaId, message: card.cta, description: `${card.title} CTA` })}<PhIcon name="arrow-right" /></span>
             </Link>
           ))}
         </div>
@@ -551,12 +597,12 @@ function PlaygroundTeaser() {
               <span style={{ marginLeft: 8, fontFamily: "monospace" }}>playground · sdk.auth.getUser()</span>
             </div>
             <div style={{ padding: "16px", fontFamily: "monospace", fontSize: "0.8rem", lineHeight: 1.6 }}>
-              <div style={{ color: "var(--color-text-secondary)" }}>▸ sdk.auth.getUser()</div>
+              <div style={{ color: "var(--color-text-secondary)", display: "flex", alignItems: "center", gap: 6 }}><PhIcon name="caret-right" /> sdk.auth.getUser()</div>
               <div style={{ color: "var(--color-text-secondary)", marginTop: 8, background: "var(--color-surface-card)", border: "1px solid var(--color-border-decorative)", borderRadius: 10, padding: "10px 12px" }}>
                 {"{"} <span style={{ color: "var(--landing-code-string)" }}>"id": "citizen_12"</span>, <span style={{ color: "var(--landing-code-string)" }}>"name": "Demo User"</span> {"}"}
               </div>
-              <div style={{ color: "var(--color-text-secondary)", marginTop: 10 }}>▸ sdk.device.location()</div>
-              <div style={{ color: "var(--color-text-secondary)", marginTop: 4, fontStyle: "italic" }}>→ {"{ status: \"granted\", data: { latitude, longitude } }"}</div>
+              <div style={{ color: "var(--color-text-secondary)", marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}><PhIcon name="caret-right" /> sdk.device.location()</div>
+              <div style={{ color: "var(--color-text-secondary)", marginTop: 4, fontStyle: "italic" }}>{"{ status: \"granted\", data: { latitude, longitude } }"}</div>
             </div>
           </div>
         </div>
