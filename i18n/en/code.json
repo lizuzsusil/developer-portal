@@ -430,6 +430,10 @@
     "message": "Framework guides & tools",
     "description": "Integrations title"
   },
+  "homepage.integrations.playground": {
+    "message": "Playgrounds",
+    "description": "Playground title"
+  },
   "homepage.integrations.cta": {
     "message": "Platform overview {arrow}",
     "description": "Integrations CTA"
@@ -438,8 +442,12 @@
     "message": "Live SDK Playground",
     "description": "Playground kicker"
   },
+   "homepage.playground.cta": {
+    "message": "Playground overview {arrow}",
+    "description": "Playground CTA"
+  },
   "homepage.playground.title": {
-    "message": "Try the SDK before you ship",
+    "message": "Try the playground before you ship",
     "description": "Playground title"
   },
   "homepage.playground.description": {
@@ -506,10 +514,6 @@
     "message": "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
     "description": "React description"
   },
-  "homepage.integrations.react.cta": {
-    "message": "View React guide",
-    "description": "React CTA"
-  },
   "homepage.integrations.vue.badge": {
     "message": "Upcoming · Roadmap",
     "description": "Vue badge"
@@ -518,10 +522,6 @@
     "message": "Composition API adapter for Vue 3. Tracks the same mount() lifecycle.",
     "description": "Vue description"
   },
-  "homepage.integrations.vue.cta": {
-    "message": "View Vue guide",
-    "description": "Vue CTA"
-  },
   "homepage.integrations.angular.badge": {
     "message": "Upcoming · Roadmap",
     "description": "Angular badge"
@@ -529,10 +529,6 @@
   "homepage.integrations.angular.desc": {
     "message": "Standalone components & injectable SDK service - aligned with Angular 17+ patterns.",
     "description": "Angular description"
-  },
-  "homepage.integrations.angular.cta": {
-    "message": "View Angular guide",
-    "description": "Angular CTA"
   },
   "homepage.integrations.playground.badge": {
     "message": "Interactive · Live in docs",

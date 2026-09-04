@@ -1,11 +1,6 @@
 import type { ReactNode } from "react";
 import Layout from "@theme/Layout";
-import { CapabilityTeaser } from "../components/Landing/CapabilityTeaser";
-import { FinalCTA } from "../components/Landing/FinalCTA";
-import { Hero } from "../components/Landing/Hero";
-import { HowItWorks } from "../components/Landing/HowItWorks";
-import { IntegrationGrid } from "../components/Landing/IntegrationGrid";
-import { PlaygroundTeaser } from "../components/Landing/PlaygroundTeaser";
+import { CapabilityTeaser, FinalCTA, Hero, HowItWorks, IntegrationGrid, PlaygroundGrid, PlaygroundTeaser } from "../components/Landing";
 
 export default function Home(): ReactNode {
   return (
@@ -15,6 +10,7 @@ export default function Home(): ReactNode {
         <HowItWorks />
         <CapabilityTeaser />
         <IntegrationGrid />
+        <PlaygroundGrid />
         <PlaygroundTeaser />
         <FinalCTA />
       </main>

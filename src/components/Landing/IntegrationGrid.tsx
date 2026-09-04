@@ -1,98 +1,108 @@
 import Link from "@docusaurus/Link";
 import Translate, { translate } from "@docusaurus/Translate";
 import Heading from "@theme/Heading";
+import { Angular, React, VueJs } from "developer-icons";
+import { ComponentType } from "react";
 import { PhIcon } from "../PhIcon";
-import { ArrowLink } from "./ArrowLink";
 
-interface Integration {
+type IntegrationCard = {
   title: string;
   to: string;
-  desc: string;
-  descId: string;
-  cta: string;
   ctaId: string;
-}
-
-const INTEGRATIONS: Integration[] = [
-  {
-    title: "React",
-    to: "/docs/integration/react",
-    desc: "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
-    descId: "homepage.integrations.react.desc",
-    cta: "View React guide",
-    ctaId: "homepage.integrations.react.cta",
-  },
-  {
-    title: "Vue.js",
-    to: "/docs/integration/vue",
-    desc: "Composition API adapter for Vue 3. Tracks the same mount() lifecycle.",
-    descId: "homepage.integrations.vue.desc",
-    cta: "View Vue guide",
-    ctaId: "homepage.integrations.vue.cta",
-  },
-  {
-    title: "Angular (NG)",
-    to: "/docs/integration/angular",
-    desc: "Standalone components & injectable SDK service — aligned with Angular 17+ patterns.",
-    descId: "homepage.integrations.angular.desc",
-    cta: "View Angular guide",
-    ctaId: "homepage.integrations.angular.cta",
-  },
-  {
-    title: "SDK Playground",
-    to: "/docs/playground",
-    desc: "Try every sdk.* method against a mock transport. No local setup — runs inside the docs site.",
-    descId: "homepage.integrations.playground.desc",
-    cta: "Open playground",
-    ctaId: "homepage.integrations.playground.cta",
-  },
-  {
-    title: "Host Playground",
-    to: "/docs/host-playground",
-    desc: "Test your mini app. Get the manifest & frontend URL and select your required SDK version.",
-    descId: "homepage.integrations.hostPlayground.desc",
-    cta: "Open playground",
-    ctaId: "homepage.integrations.hostPlayground.cta",
-  },
-];
-
-function IntegrationCard({ card }: { card: Integration }) {
-  return (
-    <Link key={card.title} to={card.to} className="portal-card p-[24px_22px]! no-underline">
-      <span className="mb-[10px] block text-[1.1rem] font-extrabold text-[var(--color-text-primary)]">{card.title}</span>
-      <p className="m-0 mb-4 flex-1 text-[0.9rem] leading-[1.6] text-[var(--color-text-secondary)]">{translate({ id: card.descId, message: card.desc, description: `${card.title} description` })}</p>
-      <span className="inline-flex items-center gap-1.5 text-[0.88rem] font-bold text-[var(--color-text-link)]">{translate({ id: card.ctaId, message: card.cta, description: `${card.title} CTA` })}<PhIcon name="arrow-right" /></span>
-    </Link>
-  );
-}
+  icon: ComponentType<{ size?: number; className?: string }>;
+};
 
 export function IntegrationGrid() {
+  const cards: IntegrationCard[] = [
+    {
+      title: "React",
+      to: "/docs/integration/react",
+      ctaId: "homepage.integrations.react.cta",
+   
+      icon: React,
+    },
+    {
+      title: "Vue.js",
+      to: "/docs/integration/vue",
+      ctaId: "homepage.integrations.vue.cta",
+      icon: VueJs,
+    },
+    {
+      title: "Angular (NG)",
+      to: "/docs/integration/angular",
+      ctaId: "homepage.integrations.angular.cta",
+      icon: Angular,
+    },
+  ];
+
   return (
-    <section className="pt-[44px] pb-8">
+    <section className="py-11 pb-8">
       <div className="container">
-        <div className="mb-[18px] flex flex-wrap items-baseline justify-between gap-3">
+        {/* Header Section */}
+        <div className="mb-4.5 flex flex-wrap items-baseline justify-between gap-3">
           <div>
-            <div className="mb-1.5 text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[var(--color-text-secondary)]">
-              <Translate id="homepage.integrations.kicker" description="Integrations kicker">Choose your stack</Translate>
+            <div className="mb-1.5 text-[0.74rem] font-bold uppercase tracking-[0.08em] text-text-secondary">
+              <Translate id="homepage.integrations.kicker" description="Integrations kicker">
+                Choose your stack
+              </Translate>
             </div>
             <Heading as="h2" className="m-0 text-[1.4rem] font-extrabold tracking-[-0.015em]">
-              <Translate id="homepage.integrations.title" description="Integrations title">Framework guides & tools</Translate>
+              <Translate id="homepage.integrations.title" description="Integrations title">
+                Framework guides & tools
+              </Translate>
             </Heading>
           </div>
-          <ArrowLink
+
+          <Link
             to="/docs/overview"
-            id="homepage.integrations.cta"
-            description="Integrations CTA"
-            className="text-[0.9rem] font-semibold text-[var(--color-text-link)]"
+            className="inline-flex items-center gap-1.5 text-[0.9rem] font-semibold text-text-link transition-colors hover:opacity-80"
           >
-            {"Platform overview {arrow}"}
-          </ArrowLink>
+            <Translate
+              id="homepage.integrations.cta"
+              description="Integrations CTA"
+              values={{ arrow: <PhIcon name="arrow-right" /> }}
+            >
+              {"Platform overview {arrow}"}
+            </Translate>
+          </Link>
         </div>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
-          {INTEGRATIONS.map((card) => (
-            <IntegrationCard key={card.title} card={card} />
-          ))}
+        {/* Grid Cards */}
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+          {cards.map((card) => {
+            const IconComponent = card.icon;
+
+            return (
+              <Link
+                key={card.title}
+                to={card.to}
+                className="portal-card group flex flex-col justify-between rounded-xl border border-(--ifm-color-emphasis-200) bg-(--ifm-card-background-color,#fff) p-5 no-underline transition-all hover:-translate-y-0.5 hover:border-text-link hover:shadow-md"
+              >
+                {/* Top: Icon + Title */}
+                <div className="mb-6 flex items-center gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-(--ifm-color-emphasis-100) p-2 transition-colors  [&_svg]:h-full [&_svg]:w-full">
+                    <IconComponent size={24} />
+                  </div>
+                  <span className="text-base font-extrabold text-text-primary">
+                    {card.title}
+                  </span>
+                </div>
+
+                {/* Bottom: CTA */}
+                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-text-link">
+                  {translate({
+                    id: card.ctaId,
+                    message: "View Guide",
+                    description: `${card.title} CTA`,
+                  })}
+                  <PhIcon
+                    name="arrow-right"
+                    className="transition-transform group-hover:translate-x-1"
+                  />
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
