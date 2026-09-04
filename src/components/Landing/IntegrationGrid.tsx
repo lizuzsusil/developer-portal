@@ -89,7 +89,7 @@ export function IntegrationGrid() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {cards.map((card) => {
             const IconComponent = card.icon;
 
@@ -99,26 +99,15 @@ export function IntegrationGrid() {
                 to={card.to}
                 className="group flex flex-col justify-between rounded-xl border border-(--ifm-color-emphasis-200) bg-(--ifm-card-background-color,#fff) p-5 no-underline transition-all hover:-translate-y-0.5 hover:border-text-link hover:shadow-md"
               >
-                <div className="flex items-center justify-between gap-3.5">
-                  <div className="flex gap-3 shrink-0 items-center rounded-lg bg-(--ifm-color-emphasis-100) p-2 transition-colors  [&_svg]:h-full [&_svg]:w-full">
-                    <span className="size-7">
-                      <IconComponent size={20} />
-                    </span>
-                    <span className="text-base font-extrabold text-text-primary">
+                <div className="flex items-center justify-center gap-3.5">
+                  <div className="flex flex-col gap-3 shrink-0 items-center transition-colors">
+                    <div className="size-10">
+                      <IconComponent size={30} className="size-full"/>
+                    </div>
+                    <span className="text-base font-extrabold text-white">
                       {card.title}
                     </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 text-sm font-bold text-text-link">
-                    {translate({
-                      id: card.ctaId,
-                      message: "View Guide",
-                      description: `${card.title} CTA`,
-                    })}
-                    <PhIcon
-                      name="arrow-right"
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </span>
                 </div>
               </Link>
             );
