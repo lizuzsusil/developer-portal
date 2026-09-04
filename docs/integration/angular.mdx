@@ -1,111 +1,336 @@
 ---
 id: angular
-title: Angular (NG) Integration Guide
-sidebar_label: Angular Integration [Upcoming]
+title: Angular Integration Guide
+sidebar_label: Angular Integration
 ---
 
 import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
+import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
 
-# Angular (NG) Integration Guide
+# Angular Integration Guide
 
-<FrameworkBadge framework="angular" status="upcoming" />
+<FrameworkBadge framework="angular" status="active" />
 
-> **Package:** `@sewa/framework-angular` - internal workspace package at `packages/framework-angular`. Preview pattern; not a separately published package.
+> **Package:** no framework runtime package — Angular + Router from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Angular integration pattern for Sewa mini apps.
 
-> [!NOTE]
-> **Roadmap Feature**: Official Angular (NG) injectable service integration is currently on the platform roadmap. Below is the recommended RxJS service architecture pattern.
+Angular is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting the `mount` lifecycle, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling — expressed with Angular idioms (standalone components, signals, `providedIn: "root"` services, hash-location router). State lives in feature services rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
 
 ---
 
-## 1. Injectable Singleton Service (`MiniAppSdkService`)
+## 1. Scaffold a project
 
-Wrap the SDK instance inside an Angular `@Injectable({ providedIn: 'root' })` service:
+There is no `create-vite` template for this stack, so scaffold manually — project files, then the exact dependency set:
+
+```bash
+mkdir my-mini-app && cd my-mini-app
+npm init -y
+npm install @analogjs/vite-plugin-angular @angular/common @angular/compiler \
+  @angular/core @angular/platform-browser @angular/router \
+  lucide-angular tailwindcss @tailwindcss/vite zone.js
+npm install -D @angular/build @angular/compiler-cli \
+  "@lizuz/mini-app-types" @types/node typescript@^5 vite
+```
+
+Then add the configs (`vite.config.ts`, `vite.lib.config.ts`, `tsconfig.*.json`,
+`index.html`), declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), add the
+core services (§4) and one feature folder per screen (§5), and build (§6). The
+full working layout is shown in §8.
+
+> **Why Angular 21, not 22?** `lucide-angular@1` peers on `@angular/core 13–21`,
+> so the reference pins v21 to keep installs clean (no `--legacy-peer-deps`).
+> **Why TypeScript 5.9?** It matches the Angular 21 toolchain.
+
+---
+
+## 2. Type Declarations
+
+<ReactGovSdkImportBlock />
+
+Only `@lizuz/mini-app-types` is a dev dependency - there is no `npm install` for the runtime SDK. The same `gov-sdk.d.ts` serves React, Vue, and Angular apps alike.
+
+---
+
+## 3. Entry Points
+
+### `main.ts` - host-callable mount/unmount
 
 ```typescript
-// src/app/services/mini-app-sdk.service.ts (Angular Preview)
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, from } from 'rxjs';
-import { initMiniAppSdk, type MiniAppSdkInterface, type PlatformUser, type AppearanceState } from '@lizuz/mini-app-sdk';
+// src/main.ts
+import "zone.js";
+import { ApplicationRef, ErrorHandler, provideZoneChangeDetection } from "@angular/core";
+import { createApplication } from "@angular/platform-browser";
+import { provideRouter, withHashLocation } from "@angular/router";
+import { appRoutes } from "./app.routes";
+import { AppComponent } from "./app.component";
+import { MiniAppErrorHandler } from "./core/error-store";
 
-@Injectable({
-  providedIn: 'root',
-})
-export class MiniAppSdkService implements OnDestroy {
-  private sdkInstance: MiniAppSdkInterface | null = null;
-  private isReadySubject = new BehaviorSubject<boolean>(false);
-  private userSubject = new BehaviorSubject<PlatformUser | null>(null);
-  private appearanceSubject = new BehaviorSubject<AppearanceState | null>(null);
-
-  isReady$: Observable<boolean> = this.isReadySubject.asObservable();
-  user$: Observable<PlatformUser | null> = this.userSubject.asObservable();
-  appearance$: Observable<AppearanceState | null> = this.appearanceSubject.asObservable();
-
-  private appearanceUnsub: (() => void) | null = null;
-
-  constructor() {
-    this.initSdk();
+/** Sets the initial hash so the router starts at the host-provided path. */
+function applyInitialHash(initialPath?: string) {
+  if (!initialPath) return;
+  const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
+  if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
+    window.location.replace(`#${normalized}`);
   }
+  // If the host already set the hash (e.g. deep link), leave it alone.
+}
 
-  private async initSdk() {
-    try {
-      this.sdkInstance = await initMiniAppSdk({ miniAppId: 'ng-tax-app' });
-      this.isReadySubject.next(true);
+const mounted = new WeakMap<HTMLElement, { appRef: ApplicationRef; host: HTMLElement }>();
 
-      const user = await this.sdkInstance.auth.getUser();
-      this.userSubject.next(user);
+export async function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
+  // Seed the hash BEFORE bootstrap: the router reads the start location
+  // during initialization.
+  applyInitialHash(runtime?.initialPath);
 
-      this.appearanceSubject.next(this.sdkInstance.appearance.state());
-      this.appearanceUnsub = this.sdkInstance.appearance.subscribe((state) => {
-        this.appearanceSubject.next(state);
-      });
-    } catch (err) {
-      console.error('Failed to initialize MiniAppSdk in Angular:', err);
-    }
-  }
+  const appRef = await createApplication({
+    providers: [
+      provideZoneChangeDetection(),
+      provideRouter(appRoutes, withHashLocation()),
+      { provide: ErrorHandler, useClass: MiniAppErrorHandler },
+    ],
+  });
+  const host = document.createElement("app-root");
+  container.appendChild(host);
+  appRef.bootstrap(AppComponent, host);
+  mounted.set(container, { appRef, host });
 
-  getUser(): Observable<PlatformUser | null> {
-    return this.user$;
-  }
+  return { unmount() { unmountApp(container); } };
+}
 
-  getLocation() {
-    if (!this.sdkInstance) throw new Error('SDK not initialized');
-    return from(this.sdkInstance.device.location());
-  }
-
-  ngOnDestroy() {
-    this.appearanceUnsub?.();
-    this.sdkInstance?.destroy();
-  }
+/** Host-called teardown. The host loader calls this directly. */
+export function unmount(container: HTMLElement): void {
+  const entry = mounted.get(container);
+  if (!entry) return;
+  entry.appRef.destroy();
+  entry.host.remove();
+  mounted.delete(container);
 }
 ```
 
----
+Three details differ from React/Vue and all three matter:
 
-## 2. Consuming Service in Angular Component
+- **`mount` is async** (`createApplication` returns a promise). The host ignores the return value and uses the module-level `unmount(container)` export instead.
+- **`unmount` is a real export**, tracked per container in a `WeakMap`. `ApplicationRef.destroy()` plus host-node removal is the only leak-free teardown — unlike React/Vue, DOM removal alone is not enough.
+- **The router is fresh per mount** (`provideRouter` inside `createApplication`), so remounts never share router state.
+
+### `app.component.ts` - phase gating
+
+The root component is the Angular counterpart of the provider gate: render errors → `LoadError`, SDK failure → `LoadError`, SDK loading → placeholder, ready → shell.
 
 ```typescript
-// src/app/components/home/home.component.ts
-import { Component, OnInit } from '@angular/core';
-import { MiniAppSdkService } from '../../services/mini-app-sdk.service';
-import { Observable } from 'rxjs';
-import { PlatformUser } from '@lizuz/mini-app-sdk';
-
+// src/app.component.ts
 @Component({
-  selector: 'app-home',
+  selector: "app-root",
+  imports: [ShellComponent, LoadErrorComponent],
   template: `
-    <div *ngIf="user$ | async as user" class="user-card">
-      <h2>Welcome, {{ user.name }}</h2>
-      <p>Email: {{ user.email }}</p>
-    </div>
+    @if (errors.details()) {
+      <app-load-error [details]="errors.details() ?? undefined" />
+    } @else if (sdk.phase() === "error") {
+      <app-load-error [message]="sdk.error()?.message ?? 'Failed to load the application.'" />
+    } @else if (sdk.phase() === "loading") {
+      <div>Connecting to platform...</div>
+    } @else {
+      <app-shell />
+    }
   `,
 })
-export class HomeComponent implements OnInit {
-  user$: Observable<PlatformUser | null>;
-
-  constructor(private sdkService: MiniAppSdkService) {
-    this.user$ = this.sdkService.user$;
-  }
-
-  ngOnInit() {}
+export class AppComponent {
+  protected readonly sdk = inject(SdkService);
+  protected readonly errors = inject(ErrorStore);
 }
 ```
+
+Global render errors are captured by `MiniAppErrorHandler implements ErrorHandler` (provided in `main.ts`) into `ErrorStore` — the Angular counterpart of the React error boundary.
+
+---
+
+## 4. Core services
+
+`core/` holds platform wiring only — no UI, no feature logic. All services are `providedIn: "root"` singletons.
+
+### `SdkService` - SDK lifecycle
+
+Polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, fetches the user, and publishes `sdk` / `user` / `phase` (`loading | ready | error`) signals with an `isReady` computed. Aborts via `AbortController` on destroy. Feature code reads the signals; nothing renders until `phase() === "ready"`.
+
+### `AppearanceService` - theme/locale sync
+
+Holds `locale` / `theme` computed signals seeded from `sdk.appearance.state()`. An `effect` starts the `sdk.appearance.subscribe()` subscription the moment the SDK signal becomes ready — no lifecycle-ordering assumptions — and unsubscribes on destroy.
+
+### `I18nService` - locale dictionaries
+
+Loads the `en` / `si` / `ta` JSON dictionaries, selects by `locale.language` with `en` fallback, and interpolates `{param}` placeholders. Components call `i18n.t('home.badge')` directly in templates.
+
+### `HostRouterService` - bidirectional navigation sync
+
+Subscribes to `router.events`, emits `navigation.route.changed` with `canGoBack` derived from "is the route root?", syncs immediately on start when booting off-root (deep link), and answers `navigation.back.requested` via `Location.back()`. Every `sdk.navigation.router.*` call is guarded with `?.` because some mobile hosts don't implement the router bridge. Advantage over React/Vue: PUSH vs POP uses Angular's native `NavigationStart.navigationTrigger` (`'imperative'` vs `'popstate'`) — no approximation needed. It is instantiated by the shell, so sync is active exactly while the app is mounted.
+
+---
+
+## 5. Feature segregation
+
+Each screen is a folder with a stateful service plus thin components — the service owns signals and SDK/browser calls, the component only binds `svc.x()` and `(click)="svc.method()"`. Presentational cards take data via `@Input` (icons as `LucideIconData`) and emit via `@Output`:
+
+```typescript
+// src/features/location/location.service.ts (shape)
+@Injectable({ providedIn: "root" })
+export class LocationService {
+  private readonly sdkSvc = inject(SdkService);
+  readonly location = signal<SdkDeviceLocationResult | null>(null);
+  readonly loadLocation = signal(false);
+  readonly error = signal("");
+  // ... browser-location trio
+  async viewSdkLocation(): Promise<void> { /* permission switch, as in React */ }
+  viewBrowserLocation(): void { /* navigator.geolocation */ }
+}
+```
+
+```typescript
+// src/features/location/location.component.ts (shape)
+@Component({
+  selector: "app-location",
+  imports: [LocationCardComponent, LucideAngularModule],
+  template: `
+    <app-location-card title="WITH SDK" color="emerald"
+      [icon]="CpuIcon" [location]="svc.location()" ... />
+  `,
+})
+export class LocationComponent {
+  protected readonly svc = inject(LocationService);
+}
+```
+
+Because services are singletons, tab state survives route changes exactly like the React shell's hoisted state — while each feature stays independently understandable and testable.
+
+### Router table
+
+`src/app.routes.ts` mirrors the React route table one-to-one (hash location comes from `withHashLocation()` in `main.ts`), including its quirks — `/images` and `/router` have sidebar entries but no route, so they fall through to the catch-all:
+
+```typescript
+export const appRoutes: Routes = [
+  { path: "", component: HomeComponent },
+  { path: "test-api", component: TestApiComponent },
+  { path: "chat", component: ChatComponent },
+  // ... location, camera, gallery, files, download, contact, biometric
+  { path: "**", redirectTo: "" },
+];
+```
+
+Sidebar links use `routerLink` + `routerLinkActive` — Angular intercepts these natively, so the hash-desync trap that bites raw anchors cannot occur.
+
+---
+
+## 6. Vite Build
+
+AOT compilation runs via `ngc`; Vite bundles the emitted JavaScript. The build script chains the whole pipeline:
+
+```bash
+ngc -p tsconfig.app.json --noEmit   # template + TS typecheck (fails the build)
+ngc -p tsconfig.emit.json           # AOT emit → ngc-out/ mirroring src/
+cp src/styles.css ngc-out/styles.css && cp -r src/i18n ngc-out/
+vite build --config vite.lib.config.ts
+```
+
+```typescript
+// vite.lib.config.ts
+import angular from "@analogjs/vite-plugin-angular";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import { createManifest } from "./src/utils/createManifest.ts";
+
+export default defineConfig({
+  // App code arrives AOT-compiled; the plugin contributes dependency
+  // linking/optimization of the emitted output.
+  plugins: [angular(), tailwindcss(), createManifest()],
+  build: {
+    target: "chrome89",
+    manifest: "manifest.json",
+    outDir: "dist",
+    lib: {
+      entry: "./ngc-out/main.js",
+      name: "AngularMiniApp",
+      formats: ["es"],
+      fileName: () => "[name][hash].js",
+    },
+    // ... codeSplitting: false, hashed asset names, CORS dev server
+  },
+});
+```
+
+The `createManifest` plugin is a straight port: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "angular"`. As on React/Vue, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies.
+
+---
+
+## 7. Package Setup
+
+```json
+{
+  "dependencies": {
+    "@analogjs/vite-plugin-angular": "2.7.1",
+    "@angular/common": "^21.0.0",
+    "@angular/compiler": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/platform-browser": "^21.0.0",
+    "@angular/router": "^21.0.0",
+    "@tailwindcss/vite": "4.3.3",
+    "lucide-angular": "1.0.0",
+    "tailwindcss": "4.3.3",
+    "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^21.2.23",
+    "@angular/compiler-cli": "^21.2.22",
+    "@lizuz/mini-app-types": "1.1.2",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0",
+    "vite": "8.2.2"
+  }
+}
+```
+
+Only the types package carries SDK typings — the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. (`@angular/build` + `@angular/compiler-cli` are required by the Vite plugin and `ngc`.)
+
+---
+
+## 8. Essential folder structure
+
+The canonical Angular layout — platform wiring, one folder per screen, shell, and build manifest. Only the load-bearing files are shown; presentational cards live beside their feature:
+
+```
+angular-mini-app/
+├── index.html              # Vite dev entry — single <app-root>
+├── package.json            # dependencies + scripts
+├── vite.config.ts          # dev server config
+├── vite.lib.config.ts      # production lib build (ngc-out entry)
+├── tsconfig.app.json       # app TS config (+ strictTemplates)
+├── tsconfig.emit.json      # AOT emit overlay → ngc-out/
+├── public/                 # static assets
+└── src/
+    ├── main.ts             # ← mount()/unmount() + router providers
+    ├── app.component.ts    # ← phase gating (loading/error/shell)
+    ├── app.routes.ts       # ← route table (hash location in main.ts)
+    ├── routes.ts           # sidebar nav items
+    ├── styles.css          # Tailwind + custom styles
+    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── core/               # SdkService, AppearanceService, I18nService,
+    │                       # HostRouterService, ErrorStore
+    ├── features/           # one folder per screen: *.service.ts (signals +
+    │                       # SDK calls) + *.component.ts (thin template)
+    ├── shell/              # layout + sidebar + router-outlet
+    ├── shared/             # loader, error, info display components
+    ├── types/              # shared interfaces (index.ts)
+    ├── utils/              # createManifest.ts, retry.ts, error-details.ts
+    └── i18n/               # en / si / ta dictionaries
+```
+
+---
+
+## Checklist
+
+- [ ] Angular 21 + router + `lucide-angular` installed; types package as devDependency
+- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/main.ts` exports async `mount(container, runtime?)` and `unmount(container)`
+- [ ] Router provided per mount via `provideRouter(..., withHashLocation())`
+- [ ] `SdkService` polls `window.__GSA_SDK__`; `AppComponent` gates on `phase()`
+- [ ] Each feature owns a root service (signals survive route changes); components stay thin
+- [ ] Sidebar uses `routerLink` (never raw hash writes)
+- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] `vite build` pipeline passes (`ngc` typecheck + emit, manifest lists entry/files)

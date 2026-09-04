@@ -10,18 +10,10 @@ The SDK and host speak a versioned message protocol over the transport. Every me
 
 ## Constants
 
-```typescript
-import { PROTOCOL_VERSION, MESSAGE_CHANNEL, HOST_TARGET } from "@lizuz/mini-app-sdk";
-// PROTOCOL_VERSION = "1.0.0"
-// MESSAGE_CHANNEL  = "gov-platform-sdk"
-// HOST_TARGET      = "shell"
-```
-
 | Constant | Value | Purpose |
 |---|---|---|
 | `PROTOCOL_VERSION` | `1.0.0` | Wire format version. Major bumps are breaking. |
 | `MESSAGE_CHANNEL` | `gov-platform-sdk` | Filters SDK traffic from unrelated `postMessage`s. |
-| `HOST_TARGET` | `shell` | `target` of every outbound request. |
 | `SDK_GLOBAL_KEY` | `__GSA_SDK__` | `window` key the host writes and the SDK overwrites with the live instance. |
 
 ## Wire Shape - `PlatformMessage`
