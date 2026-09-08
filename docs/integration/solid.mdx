@@ -1,0 +1,385 @@
+---
+id: solid
+title: Solid Integration Guide
+sidebar_label: Solid Integration
+---
+
+import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
+import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
+
+# Solid Integration Guide
+
+<FrameworkBadge framework="solid" status="active" />
+
+> **Package:** no framework runtime package — Solid + `@solidjs/router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Solid integration pattern for Sewa mini apps, verified against `mini-apps/solid-mini-app`.
+
+Solid is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and a provider component with strict lifecycle handling — expressed with Solid idioms (signals, `createContext`/`useContext`, `<Show>`, `onMount`/`onCleanup`, `HashRouter` + `useLocation`/`useNavigate`).
+
+---
+
+## 1. Scaffold a project
+
+Start from any Solid + Vite project. From scratch:
+
+```bash
+pnpm create vite my-mini-app -- --template solid-ts
+cd my-mini-app
+pnpm install
+```
+
+Add routing, icons, Tailwind, and the types package (`vite-plugin-solid` already ships with the template):
+
+```bash
+pnpm add @solidjs/router lucide-solid
+pnpm add -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
+```
+
+Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3010` (`vite --port 3010 --host`).
+
+---
+
+## 2. Type Declarations
+
+<ReactGovSdkImportBlock />
+
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `gov-sdk.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
+
+```typescript
+// src/gov-sdk.d.ts
+import type {
+  DeviceBiometricOptions,
+  DeviceBiometricResult,
+  DeviceCameraResult,
+  DeviceContactResult,
+  DeviceDownloadResult,
+  DeviceExtraOptions,
+  DeviceFileResult,
+  DeviceGalleryResult,
+  DeviceLocationResult,
+  DevicePermissionStatus,
+  FileModule,
+  MiniAppSdkInterface,
+  PlatformUser,
+} from "@lizuz/mini-app-types";
+
+declare global {
+  type MiniAppSdk = MiniAppSdkInterface;
+  type SdkPlatformUser = PlatformUser;
+  // ... SdkDevice* / SdkFileModule / SdkBiometricOptions aliases
+
+  interface Window {
+    __GSA_SDK__?: MiniAppSdk;
+  }
+}
+
+export {};
+```
+
+---
+
+## 3. Entry Points
+
+### `main.tsx` — host-callable mount
+
+```typescript
+// src/main.tsx
+import { render } from "solid-js/web";
+import App from "./App.tsx";
+import "./index.css";
+
+/** Sets the initial hash so the Solid router (hash-based) starts at the host-provided path. */
+function applyInitialHash(initialPath?: string) {
+  if (!initialPath) return;
+  const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
+  if (
+    !window.location.hash ||
+    window.location.hash === "#" ||
+    !window.location.hash.startsWith("#/")
+  ) {
+    window.location.replace(`#${normalized}`);
+  }
+  // If the host already set the hash (e.g. deep link), leave it alone.
+}
+
+export function mount(
+  container: HTMLElement,
+  runtime?: { initialPath?: string }
+) {
+  applyInitialHash(runtime?.initialPath);
+  const dispose = render(() => <App />, container);
+
+  return {
+    unmount() {
+      dispose();
+    },
+  };
+}
+```
+
+Two details differ from React and both matter:
+
+- **Solid's `render()` returns a `dispose` function** — that *is* the unmount. No `createRoot` equivalent is needed, and remounts never share state.
+- **The hash is seeded before `render()`** for the same reason as Vue: the router snapshots the start location at initialization, so applying `initialPath` afterwards would be overwritten by the initial navigation resolving to `/`. Unlike the Vue/Svelte entries, the reference app has no `import.meta.env.DEV` self-bootstrap — during development serve the app through `index.html` as usual.
+
+### `App.tsx` — router shell with provider
+
+```tsx
+// src/App.tsx
+import { HashRouter, Route } from "@solidjs/router";
+import { ErrorBoundary } from "./components/ErrorBoundary";
+import { PlatformSDKProvider } from "./PlatformSDKProvider";
+import TestMiniApp from "./components/MiniApp/index";
+import "./index.css";
+
+function AppRoot() {
+  return (
+    <PlatformSDKProvider>
+      <TestMiniApp />
+    </PlatformSDKProvider>
+  );
+}
+
+export default function App() {
+  return (
+    <ErrorBoundary>
+      <HashRouter>
+        <Route path="/*" component={AppRoot} />
+      </HashRouter>
+    </ErrorBoundary>
+  );
+}
+```
+
+Routing is a single catch-all `Route path="/*"`: tab switching happens inside `components/MiniApp/index.tsx` with `<Show when={location.pathname === "/chat"}>` blocks driven by `useLocation()`. Unknown paths fall back to `TabHome`; `/router/*` renders the nested `TabRouter`. `ErrorBoundary` wraps Solid's built-in `ErrorBoundary` and renders `LoadError` on any render crash — the counterpart of the React class boundary.
+
+---
+
+## 4. SDK State & Provider
+
+`src/store.ts` holds the provider phase (the counterpart of React's reducer state):
+
+```typescript
+// src/store.ts
+import type { PlatformUser } from "@lizuz/mini-app-types";
+
+export type ProviderState =
+  | { phase: "loading" }
+  | { phase: "ready"; sdk: MiniAppSdk; user: PlatformUser | null }
+  | { phase: "error"; error: Error };
+```
+
+`src/hooks/usePlatformSDK.ts` holds the context key and guarded accessor (the counterpart of React's `SDKContext`):
+
+```typescript
+// src/hooks/usePlatformSDK.ts
+import { createContext, useContext } from "solid-js";
+
+export interface SDKContextValue {
+  sdk: MiniAppSdk | null;
+  user: PlatformUser | null;
+  isReady: boolean;
+  error: Error | null;
+}
+
+export const usePlatformSDKContext = createContext<SDKContextValue>({
+  sdk: null,
+  user: null,
+  isReady: false,
+  error: null,
+});
+
+export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
+  const ctx = useContext(usePlatformSDKContext);
+  if (!ctx.sdk) {
+    throw new Error("usePlatformSDK must be used within PlatformSDKProvider");
+  }
+  return { ...ctx, sdk: ctx.sdk };
+}
+```
+
+`PlatformSDKProvider.tsx` owns a `createSignal<ProviderState>`, populates it in `onMount` (with `onCleanup` abort semantics mirroring React's `AbortController`), and gates rendering on three `<Show>` phases — identical to the React provider:
+
+1. **loading** — polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
+2. **ready** — provides state, mounts the renderless `PlatformSDKRuntime` component (which runs `useHostRouter()`), and renders children.
+3. **error** — renders `LoadError` with the failure message.
+
+---
+
+## 5. Hooks
+
+### `usePlatformSDK` — guarded access
+
+Shown in §4. Throws outside the provider and returns a non-null `sdk`, exactly like React's hook.
+
+### `useAppearance` — theme/locale sync
+
+Keeps a `createSignal<AppearanceState>` seeded from `sdk.appearance.state()`, refreshes it in a `createEffect` once the SDK is ready, and subscribes — unsubscribing via `onCleanup`. Returns getter-backed `{ locale, theme }`, so components read `theme.mode` reactively:
+
+```typescript
+// src/hooks/useAppearance.ts
+export function useAppearance(): UseAppearanceResult {
+  const { sdk, isReady } = usePlatformSDK();
+  const [state, setState] = createSignal<AppearanceState>(
+    (sdk && isReady ? sdk.appearance.state() : DEFAULT_STATE),
+  );
+
+  createEffect(() => {
+    if (!sdk || !isReady) return;
+    setState(sdk.appearance.state());
+    const cleanup = sdk.appearance.subscribe(setState);
+    onCleanup(cleanup);
+  });
+
+  return {
+    get locale() {
+      return state().locale;
+    },
+    get theme() {
+      return state().theme;
+    },
+  };
+}
+```
+
+### `useHostRouter` — bidirectional navigation sync
+
+Same responsibilities as the React hook — emit `navigation.route.changed` with `canGoBack` derived from "is the route root?", answer `navigation.back.requested` by navigating back one step, and guard every `sdk.navigation.router.*` call with `?.` because some mobile hosts don't implement the router bridge. Solid-specific notes:
+
+- Reactivity comes from `createEffect` tracking `location.pathname` (not a `location.key` dependency) — the effect re-runs on every path change, with a `lastPath`/`previousPath` pair for first-navigation dedupe.
+- `@solidjs/router` exposes no navigation-type API, so unlike React there is no PUSH-vs-POP distinction: every non-root change informs the host via `sdk.navigation.router?.push?.(true)`.
+- It runs inside the renderless `PlatformSDKRuntime` child of the provider, so back-button sync is always active once the SDK is ready.
+
+### Sidebar routing — `<A>` intercepts natively
+
+`components/Sidebar.tsx` uses `<A href={path}>` from `@solidjs/router` with `end={path === "/"}` and active state from `useLocation().pathname`. Solid's router intercepts these clicks natively, so the hash-desync trap that bites raw anchors cannot occur — no `navigate()` slot plumbing (cf. the Vue guide) is needed. Sidebar taps only close the drawer on mobile.
+
+### `useT` — locale dictionaries
+
+Loads the `en` / `si` / `tam` JSON dictionaries (the `tam.json` file is keyed as `ta`), selects by `locale.language`, falls back to `en` then to the key, and interpolates `{param}` placeholders. Returns a getter-backed `language` plus `t(key, params)`.
+
+---
+
+## 6. Vite Build
+
+Same library contract as React — Solid plugin instead of the React plugin, and `framework: "solid"` in the emitted manifest:
+
+```typescript
+// vite.config.ts
+import tailwindcss from "@tailwindcss/vite";
+import { createManifest } from "./src/utils/createManifest.ts";
+import solid from "vite-plugin-solid";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [
+    solid(),
+    tailwindcss(),
+    createManifest(),
+  ],
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("production"),
+  },
+  build: {
+    target: "chrome89",
+    manifest: "manifest.json",
+    outDir: "dist",
+    cssCodeSplit: true,
+    lib: {
+      entry: "./src/main.tsx",
+      name: "RevenueMiniApp",
+      formats: ["es"],
+      fileName: () => "[name][hash].js",
+    },
+    rollupOptions: {
+      output: {
+        codeSplitting: false,
+        format: "es",
+        chunkFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash][extname]",
+      },
+    },
+  },
+  server: {
+    host: "0.0.0.0",
+    cors: true,
+    headers: { "Access-Control-Allow-Origin": "*" },
+  },
+});
+```
+
+The `createManifest` plugin is a straight port of the React one: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "solid"`. As on React, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies — the bundle ships zero SDK code. (`lib.name` only affects the output filename; the reference app keeps the historical `RevenueMiniApp` name.)
+
+### Router table
+
+There is no route table file: `src/routes.ts` holds the sidebar `navItems` (path/label/icon per tab, including `/images` and `/router` entries that mirror the React quirks), and `components/MiniApp/index.tsx` switches tabs with `<Show>` blocks on `useLocation().pathname` under the single `/*` route.
+
+---
+
+## 7. Package Setup
+
+The reference dependency set (`mini-apps/solid-mini-app/package.json`):
+
+```json
+{
+  "dependencies": {
+    "@solidjs/router": "1.0.0",
+    "@tailwindcss/vite": "4.3.3",
+    "lucide-solid": "1.42.0",
+    "solid-js": "1.9.15",
+    "tailwindcss": "4.3.3"
+  },
+  "devDependencies": {
+    "@lizuz/mini-app-types": "1.1.2",
+    "@types/node": "26.5.0",
+    "vite-plugin-solid": "2.11.14",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
+  }
+}
+```
+
+Only the types package carries SDK typings — the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. Build with `tsc -b && vite build`.
+
+---
+
+## 8. Essential folder structure
+
+The canonical Solid layout for a mini app — entry contract, SDK state, signals, and build manifest. Only the load-bearing files are shown; feature tabs live under `components/`:
+
+```
+solid-mini-app/
+├── index.html              # Vite entry — single <div id="root">
+├── package.json            # dependencies + scripts (dev on :3010)
+├── vite.config.ts          # Vite lib mode + manifest plugin
+├── tsconfig.app.json       # app TS config (referenced by tsconfig.json)
+├── public/                 # static assets
+└── src/
+    ├── main.tsx            # ← mount(container, runtime?) via render()/dispose()
+    ├── App.tsx             # ← ErrorBoundary + HashRouter + catch-all Route
+    ├── PlatformSDKProvider.tsx  # ← ready/loading/error gating + host sync
+    ├── store.ts            # ← ProviderState (loading | ready | error)
+    ├── routes.ts           # sidebar nav items
+    ├── index.css           # Tailwind + custom styles
+    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── components/         # tabs, MiniApp shell, Sidebar, ErrorBoundary, Loader, LoadError
+    ├── hooks/              # usePlatformSDK, useAppearance, useHostRouter, useT
+    ├── types/              # shared interfaces (index.ts)
+    ├── utils/              # createManifest.ts, retry.ts
+    └── i18n/               # en / si / tam dictionaries
+```
+
+---
+
+## Checklist
+
+- [ ] Scaffolded `solid-ts` plus `@solidjs/router`, `lucide-solid`, Tailwind, and the types package
+- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }` via `render()`/`dispose()`
+- [ ] Hash is seeded before `render()`; single catch-all `Route path="/*"` with `<Show>` tab switching
+- [ ] Sidebar navigates via `<A>` (never raw hash writes)
+- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates children on ready
+- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
+- [ ] `vite.config.ts` builds an ES library + host manifest (`framework: "solid"`)
+- [ ] `dist/manifest.json` lists the entry and file payload
+- [ ] Build passes (`tsc -b` + vite build)

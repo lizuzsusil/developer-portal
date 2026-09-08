@@ -1,7 +1,7 @@
 import React from "react";
 
 export interface FrameworkBadgeProps {
-  framework: "react" | "vue" | "angular" | "ng";
+  framework: "react" | "vue" | "angular" | "ng" | "svelte" | "solid";
   status?: "active" | "upcoming";
 }
 
@@ -10,8 +10,12 @@ export function FrameworkBadge({ framework, status }: FrameworkBadgeProps) {
     framework === "react"
       ? "React"
       : framework === "vue"
-      ? "Vue.js"
-      : "Angular (NG)";
+        ? "Vue.js"
+        : framework === "svelte"
+          ? "Svelte"
+          : framework === "solid"
+            ? "Solid"
+            : "Angular (NG)";
 
   // An explicit status always wins; otherwise React defaults to active and
   // every other framework defaults to upcoming.

@@ -1,7 +1,7 @@
 import Link from "@docusaurus/Link";
 import Translate, { translate } from "@docusaurus/Translate";
 import Heading from "@theme/Heading";
-import { Angular, NextJs, NuxtJs, React, SolidJS, SvelteJS, VueJs } from "developer-icons";
+import { Angular, React, SolidJS, SvelteJS, VueJs } from "developer-icons";
 import { ComponentType } from "react";
 import { PhIcon } from "../PhIcon";
 
@@ -33,20 +33,8 @@ export function IntegrationGrid() {
       icon: Angular,
     },
     {
-      title: "NextJs",
-      to: "/docs/integration/nextjs",
-      ctaId: "homepage.integrations.angular.cta",
-      icon: NextJs,
-    },    
-    {
-      title: "Nuxt",
-      to: "/docs/integration/nuxt",
-      ctaId: "homepage.integrations.angular.cta",
-      icon: NuxtJs,
-    },
-    {  
-      title: "Svelete",
-      to: "/docs/integration/svelete",
+      title: "Svelte",
+      to: "/docs/integration/svelte",
       ctaId: "homepage.integrations.angular.cta",
       icon: SvelteJS,
     },
@@ -89,7 +77,7 @@ export function IntegrationGrid() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {cards.map((card) => {
             const IconComponent = card.icon;
 

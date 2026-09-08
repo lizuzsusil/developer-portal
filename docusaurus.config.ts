@@ -142,12 +142,20 @@ const config: Config = {
               to: "/docs/integration/react",
             },
             {
-              label: "Vue.js Integration (Upcoming)",
+              label: "Vue.js Integration (Active)",
               to: "/docs/integration/vue",
             },
             {
-              label: "Angular NG Integration (Upcoming)",
+              label: "Angular NG Integration (Active)",
               to: "/docs/integration/angular",
+            },
+            {
+              label: "Svelte Integration (Active)",
+              to: "/docs/integration/svelte",
+            },
+            {
+              label: "Solid Integration (Active)",
+              to: "/docs/integration/solid",
             },
           ],
         },

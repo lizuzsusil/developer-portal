@@ -57,6 +57,8 @@ const sidebars: SidebarsConfig = {
         "integration/react",
         "integration/vue",
         "integration/angular",
+        "integration/svelte",
+        "integration/solid",
       ],
     },
     {
