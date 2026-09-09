@@ -21,7 +21,7 @@ our actual host do. Also you can maintain the capabilites from inside the sandbo
 
 1. Click **Load app** in the playground header (or **Configure mini app** in the empty sandbox) to open setup.
 2. Enter a **Display name** and the **Frontend URL** — the base directory that serves your `manifest.json`.
-3. Pick an **SDK version**. The list is fetched live from npm; the newest release is preselected.
+3. Pick an **SDK version**. The list is fetched live from the `@lizuz/sewa-sdk` npm registry (the SDK bundle the **host** loads via jsDelivr — mini apps never install it); the newest release is preselected.
 4. Expand **Capabilities** to choose what the host grants. Core capabilities are always on; anything you leave off
    answers `PERMISSION_DENIED`.
 5. **Test & load app** fetches the manifest, downloads the bundle, injects the SDK, and mounts your `mount()` export.
@@ -40,13 +40,24 @@ The sandbox always starts empty when you open or refresh this page — it never 
 
 ## Preparing your mini app
 
-1. Build as an **ES library** that exports `mount(container, runtime?)` (and optionally `unmount(container)`). `runtime` is optional - accept and honor `runtime.initialPath` when the host provides it.
+1. Build as an **ES library** that exports `mount(container, runtime?)` (returning `{ unmount() }` — except Angular, which exports a separate `unmount(container)`). `runtime` is optional - accept and honor `runtime.initialPath` when the host provides it.
    See [Getting Started](./getting-started.mdx).
-2. Emit a `manifest.json` at the build output root:
+2. Emit a `manifest.json` at the build output root — the full host-discovery contract:
 
    ```json
    {
-     "application": { "id": "my-mini-app" },
+     "schemaVersion": "1",
+     "framework": "react",
+     "application": {
+       "id": "my-mini-app",
+       "name": "my-mini-app",
+       "version": "0.0.0",
+       "type": "mini-app"
+     },
+     "platform": {
+       "runtime": "^1.0.0",
+       "sdk": "^1.0.9"
+     },
      "bundle": {
        "entry": "index.js",
        "styles": ["style.css"],
@@ -56,6 +67,8 @@ The sandbox always starts empty when you open or refresh this page — it never 
    ```
 
    The playground fetches `<Frontend URL>/manifest.json`, then every file in `bundle.files`.
+   `platform.runtime` / `platform.sdk` are version constraints the host matches against its own
+   versions — they are metadata, not a bundle dependency (your bundle ships zero SDK code).
 
 3. Host the `dist/` folder (Vercel, Netlify, S3, …) **with CORS enabled**. The docs site fetches from a different
    origin, so your mini app must send `Access-Control-Allow-Origin` for `manifest.json`, `*.js`, `*.css` and assets.

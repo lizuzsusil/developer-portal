@@ -44,10 +44,11 @@ Retryable = `TimeoutError` or `SdkError` with `retryable: true` (5xx via `HttpSe
 
 ## Middleware
 
-```typescript
-import type { RpcMiddleware } from "@lizuz/mini-app-sdk";
+Middleware (`sdk.use`) is available on the injected instance but rarely needed in mini apps —
+prefer the typed `sdk.*` wrappers. It is primarily a host/test extension point.
 
-const logging: RpcMiddleware = async (ctx, next) => {
+```typescript
+const logging = async (ctx, next) => {
   console.log("→", ctx.namespace, ctx.action);
   const result = await next();
   console.log("←", result);

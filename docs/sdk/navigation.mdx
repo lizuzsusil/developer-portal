@@ -14,16 +14,21 @@ The `sdk.navigation` module manages platform route transitions and synchronizes 
 
 ### `navigate(target)`
 
-Requests the host platform to perform a navigation transition.
+Requests the host platform to navigate — typically to a route in another mini app.
 
 - **Signature**: `navigate(target: NavigationTarget): Promise<void>`
 
 ```typescript
 await sdk.navigation.navigate({
-  path: "/services/vehicle-tax",
-  params: { vehicleNo: "BA-2-PA-9918" },
+  app: "chat-mini-app",
+  route: "/",
+  params: { purpose: "Want to chat with AI" },
 });
 ```
+
+`NavigationTarget` is `{ app, route, params?, replace? }`. For deep-linking *into* your own mini
+app from outside, the host passes `{ initialPath }` to your `mount()` — see
+[Getting Started](/docs/getting-started) and [Links](/docs/sdk/links).
 
 ### `getCurrent()`
 
@@ -33,7 +38,7 @@ Queries current navigation state from the host.
 
 ```typescript
 const navState = await sdk.navigation.getCurrent();
-console.log("Current Route:", navState.route);
+console.log("Current route:", navState.current);
 ```
 
 ### `router.back(consumed)`
@@ -44,11 +49,24 @@ Reports whether the mini app internal router handled a back-press or wants the h
 
 ```typescript
 sdk.on("navigation.back.requested", async () => {
-  const hasInternalHistory = window.history.length > 1;
-  // If true, mini app handles back step. If false, host shell exits mini app.
-  await sdk.navigation.router.back(hasInternalHistory);
+  // Derive from your own router ("am I at root?"), not window.history —
+  // the host owns browser history. Guard with ?. : some mobile hosts don't
+  // implement the router bridge, and absence must not crash rendering.
+  const consumed = currentPath !== "/";
+  await sdk.navigation.router?.back?.(consumed);
+  if (consumed) goBackOneStep();
 });
 ```
+
+See the framework guides ([React](/docs/integration/react), [Vue](/docs/integration/vue),
+[Svelte](/docs/integration/svelte), [Solid](/docs/integration/solid)) for the full bidirectional
+sync pattern: emit `navigation.route.changed` with root-derived `canGoBack` on every route change.
+
+:::warning Raw hash writes
+Never navigate by assigning `location.hash` — in Chrome this fires a spurious `popstate` that the
+host shell mistakes for a back press (see the [Svelte guide](/docs/integration/svelte)). Always
+route through your framework router (or `history.pushState` + manual router notification).
+:::
 
 ### `router.push(consumed)`
 

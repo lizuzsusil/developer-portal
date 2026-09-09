@@ -44,7 +44,7 @@ export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
 }
 ```
 
-No `import { MiniAppSdk } from "@lizuz/mini-app-sdk"` at runtime - the host provides the instance. Types come from <TypesPackageName /> and are erased at build.
+There is no SDK runtime package to install — the host shell loads `@lizuz/sewa-sdk` itself (via CDN script tag) and injects the live instance at `window.__GSA_SDK__` before calling your `mount()`. Never `npm install` or `import` the SDK runtime in a mini app. Types come from <TypesPackageName /> and are erased at build.
 
 ---
 
@@ -136,4 +136,7 @@ No. The bundle imports **no runtime module**. The host injects `window.__GSA_SDK
 
 ## 4. Teardown
 
-The SDK instance itself does not need manual `destroy()` in normal host-injected usage - the `PlatformSDKProvider` cleans up via `AbortController` when the component unmounts. If you hold a direct reference outside React, call `sdk.destroy()` on unmount.
+Nothing to do: the host owns the SDK instance and destroys it. Your app only needs to return
+`{ unmount() }` from `mount()` (or export `unmount(container)` on Angular) so the host can
+unmount your framework tree — the `PlatformSDKProvider` aborts its polling via
+`AbortController` as part of that. Never call `sdk.destroy()` from a mini app.

@@ -6,6 +6,11 @@ sidebar_label: Plugins & Registry
 
 # Plugins & Module Registry
 
+> **Mostly host-side.** `sdk.usePlugin`, `registerModule`, and friends are methods on the injected
+> instance, so they are callable from a mini app — but plugins are normally installed by the host
+> before it hands you the SDK. Custom modules additionally require host support for the new
+> namespace. Read on for what each piece means; reach for them only when the host docs tell you to.
+
 Extend the SDK without forking it.
 
 ## Plugins - `SdkPlugin`
@@ -44,16 +49,16 @@ const analytics = await sdk.getModuleAsync("analytics");
 
 ## Instance Registry
 
-```typescript
-import { createMiniAppSdk, getMiniAppSdk } from "@lizuz/mini-app-sdk";
-
-const sdk = createMiniAppSdk({ miniAppId: "tax-calc" });
-await sdk.initialize();
-getMiniAppSdk(); // active instance
-```
-
-`getAllInstances()`, `clearInstances()`, `registerInstance()` are also available for multi-mini-app tabs.
+Multi-mini-app hosts track live instances in a registry (`getMiniAppSdk()` returns the active
+one; `getAllInstances()`, `clearInstances()`, `registerInstance()` exist for multi-tab shells).
+This is host-shell machinery — mini apps always read `window.__GSA_SDK__` (or their provider
+hook) instead.
 
 ## CDN Build
 
-`src/cdn.ts` is an IIFE that reads a pre-load config from `window.__GSA_SDK__` (a `MiniAppSdkOptions` object), auto-initializes, and then overwrites the global with the live instance. Used when the host injects the SDK via a `<script>` tag.
+This is how the instance gets to you: the host loads the `@lizuz/sewa-sdk` bundle via a
+`<script>` tag (`.../dist/sewa-sdk.min.js`), with a pre-load config on `window.__GSA_SDK__`
+carrying at least `{ miniAppId }`. The bundle auto-initializes (handshake + hydration) and then
+overwrites the same global with the live instance — which is what your provider polls for.
+You never load this script yourself; understand it so the `window.__GSA_SDK__` polling in
+[Getting Started](/docs/getting-started) makes sense.

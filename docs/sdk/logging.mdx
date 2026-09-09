@@ -6,34 +6,26 @@ sidebar_label: Logging & Dev Mode
 
 # Logging & Dev Mode
 
-Control SDK verbosity and dev-time warnings.
+> **Host-configured.** Logger, dev mode, and log level are set by the host when it constructs the
+> SDK. Mini apps get the behavior for free; the only thing vendors need to know is the
+> handler-leak warning below.
 
 ## Logger
 
-```typescript
-import { ConsoleLogger, NoopLogger } from "@lizuz/mini-app-sdk";
-
-const logger = new ConsoleLogger({ minLevel: "warn" }); // debug | info | warn | error
-```
-
-`Logger` is an interface; `NoopLogger` silences all output. Pass via `MiniAppSdkOptions.logger` or construct the SDK through `PlatformSDKProvider` which wires it internally.
+The SDK logs through a `Logger` interface (`debug | info | warn | error`); the host wires a
+console logger or a silencing no-op logger and picks the minimum level. There is nothing to
+import or construct in a mini app.
 
 ## Dev Mode
 
-```typescript
-createMiniAppSdk({ miniAppId, devMode: true, logLevel: "debug" });
-```
+The host may enable `devMode` (plus `logLevel: "debug"`), which turns on warnings for
+unavailable capabilities (`"[dev] ... requires http capability"`). When unset, it defaults to
+`process.env.NODE_ENV !== "production"` in the host build.
 
-- `devMode: true` enables warnings for unavailable capabilities (`"[dev] ... requires http capability"`) deduped via `warnedUnavailableCapabilities`.
-- When `devMode` is unset, it defaults to `process.env.NODE_ENV !== "production"`.
-- `logLevel` overrides `minLevel` on the logger.
-
-Handler-leak warning: >20 handlers on a single event emits a dev warning.
+Handler-leak warning: >20 handlers on a single event emits a dev warning — unsubscribe (or pass
+an `AbortSignal`) when your component unmounts.
 
 ## `validateSdkOptions`
 
-```typescript
-import { validateSdkOptions } from "@lizuz/mini-app-sdk";
-
-validateSdkOptions({ miniAppId: "" }); // throws with details
-```
+Host-side helper that throws with details on a malformed SDK config (e.g. empty `miniAppId`).
+Not called from mini apps.

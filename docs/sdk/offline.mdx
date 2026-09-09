@@ -6,31 +6,28 @@ sidebar_label: Offline Queue
 
 # Offline Queue
 
+> **Host-installed.** The offline queue is a plugin the **host** installs on the SDK before handing
+> it to your mini app. There is nothing to import or construct — mini apps never see the SDK
+> package. This page describes the behavior you can rely on.
+
 Queue capability-gated requests while the host is unreachable and replay them when connectivity returns.
 
-## Plugin
+## Behavior
 
-```typescript
-import { createOfflineQueuePlugin } from "@lizuz/mini-app-sdk";
-
-const offline = createOfflineQueuePlugin({
-  allowlist: ["storage", "api", "navigation"], // default
-  maxEntries: 50,
-  ttlMs: 5 * 60 * 1000, // 5 min
-});
-
-sdk.usePlugin(offline);
-```
-
-Install before `initialize`. The plugin registers middleware that, on `connection.lost` / `navigator.onLine === false`, enqueues matching requests instead of failing. On `connection.established` / `online`, entries are flushed in order. Expired or overflowed entries are pruned.
-
-## Options
+The host configures the queue with an allowlist (default `["storage", "api", "navigation"]`),
+a cap (default 50 entries), and a TTL (default 5 min):
 
 | Option | Default | Meaning |
 |---|---|---|
 | `allowlist` | `["storage","api","navigation"]` | Namespaces to queue |
 | `maxEntries` | `50` | Drop oldest beyond this |
 | `ttlMs` | `300000` | Drop entries older than this |
+
+When `connection.lost` fires (or `navigator.onLine === false`), matching requests are enqueued
+instead of failing. On `connection.established` / `online`, entries flush in order. Expired or
+overflowed entries are pruned. Subscribe to `connection.lost` / `connection.established`
+(see [Events](/docs/sdk/events)) to reconcile your UI — re-fetch config or flags after a
+reconnect.
 
 The plugin is a normal `SdkPlugin` - see [Plugins](/docs/sdk/plugins).
 

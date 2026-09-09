@@ -113,7 +113,7 @@ export function PackageJsonBlock() {
     <CodeBlock language="json">
       {`{
   "devDependencies": {
-    "${pkg}": "1.0.10",
+    "${pkg}": "1.1.2",
     "react": "^19.0.0",
     "react-router": "^8.3.0"
   }

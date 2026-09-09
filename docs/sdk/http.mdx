@@ -71,15 +71,14 @@ for await (const chunk of builder.iterate()) {
 
 ### `stream(params)` (Chat Streaming)
 
-Streams a generic LLM chat completion through the host proxy. Each chunk contains a `text` fragment.
+Streams a generic LLM completion through the host proxy. Each chunk contains a `text` fragment.
+Messages are plain `{ role, content }` objects — there is no `ChatMessages` helper:
 
 ```typescript
-import { ChatMessages } from "@lizuz/mini-app-sdk";
-
 const stream = sdk.http.stream({
   messages: [
-    ChatMessages.system("You are a helpful government assistant."),
-    ChatMessages.user("How do I renew my vehicle tax?"),
+    { role: "system", content: "You are a helpful government assistant." },
+    { role: "user", content: "How do I renew my vehicle tax?" },
   ],
 });
 
@@ -134,12 +133,31 @@ Success payloads are mapped via `mapPayload`: 4xx throws `HttpClientError` (not 
 
 ## Helpers
 
-```typescript
-import { ChatMessages } from "@lizuz/mini-app-sdk";
+Build message arrays as plain objects typed by `ChatMessage` (from `@lizuz/mini-app-types`):
 
-ChatMessages.system("You are a helpful assistant.");
-ChatMessages.user("How do I renew my license?");
-ChatMessages.assistant("Here is how...");
+```typescript
+import type { ChatMessage } from "@lizuz/mini-app-types";
+
+const messages: ChatMessage[] = [
+  { role: "system", content: "You are a helpful assistant." },
+  { role: "user", content: "How do I renew my license?" },
+  { role: "system", content: "Here is how..." },
+];
 ```
 
 `ModelCompletionOptions` / `ChatRequestOptions` are documented in `types/chat.types.ts`.
+
+## WebSocket - `websocket(params)`
+
+Opens a live `WebSocket` through the host proxy (the host owns the socket; your app receives a
+standard browser `WebSocket` to attach handlers to):
+
+```typescript
+const socket = await sdk.http.websocket({ url: "wss://api.sewa.gov.np/v1/updates" });
+socket.onmessage = (event) => {
+  console.log("Update:", event.data);
+};
+// socket.close() when done
+```
+
+**Signature:** `websocket(params: HttpGetParams): Promise<WebSocket>`

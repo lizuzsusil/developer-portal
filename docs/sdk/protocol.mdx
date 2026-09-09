@@ -6,7 +6,10 @@ sidebar_label: Protocol & Handshake
 
 # Protocol & Handshake
 
-The SDK and host speak a versioned message protocol over the transport. Every message carries a channel, protocol version, and capability negotiation on first contact.
+> **Background reading for vendors.** The handshake, wire envelope, and version constants below are
+> owned by the host and the SDK. What vendors need from this page: the SDK performs a handshake
+> carrying your `miniAppId` and requested capabilities, and calls to namespaces the host did not
+> grant throw `CAPABILITY_NOT_SUPPORTED` (see [Errors](/docs/sdk/errors)).
 
 ## Constants
 

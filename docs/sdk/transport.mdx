@@ -6,7 +6,11 @@ sidebar_label: Transport
 
 # Transport
 
-The SDK is transport-agnostic. The default is `postMessage` + `CustomEvent`; other transports can be supplied at construction.
+> **Host-owned.** The SDK is transport-agnostic, but the transport is chosen and constructed by
+> the host shell — mini apps never construct or configure it. This page is background reading so
+> you understand what runs underneath `sdk.*`.
+
+The default is `postMessage` + `CustomEvent`; other transports can be supplied by the host at construction.
 
 ## Interface
 
@@ -31,25 +35,15 @@ interface Transport {
 
 ## Origin Pinning
 
-`DefaultTransport` learns the host origin on the first valid message and pins it (`allowedOrigin`). Subsequent messages from other origins are dropped. Options:
-
-```typescript
-import { DefaultTransport } from "@lizuz/mini-app-sdk";
-
-const transport = new DefaultTransport({
-  allowedOrigin: "https://shell.sewa.gov.np", // pin upfront, or leave undefined to learn
-  allowCustomEvent: true,   // accept CustomEvent fallback (Flutter WebView)
-  warnOnBroadcast: true,
-});
-```
+`DefaultTransport` learns the host origin on the first valid message and pins it (`allowedOrigin`). Subsequent messages from other origins are dropped. It accepts `allowedOrigin` (pin upfront, or leave undefined to learn), `allowCustomEvent` (CustomEvent fallback for Flutter WebView), and `warnOnBroadcast` — all set by the host, not by mini apps.
 
 ## Custom Transport
 
-Pass any `Transport` via the SDK options (advanced):
+Custom transports are a host-shell concern, passed via the SDK options at construction:
 
 ```typescript
-// Handled internally by PlatformSDKProvider;
-// normal mini apps never construct the transport directly.
+// Host-side only. Normal mini apps never construct the transport directly —
+// the PlatformSDKProvider reads the already-connected instance from window.__GSA_SDK__.
 ```
 
 See `transport/transport.types.ts` for `TransportDebugInfo` and `DefaultTransportOptions`.

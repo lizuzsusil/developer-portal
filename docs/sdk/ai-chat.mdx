@@ -24,12 +24,10 @@ Both modules are gated by the **`http`** capability during handshake.
 Streams a generic LLM completion through the host network proxy. Use this for general-purpose AI chat that does not require GIC-specific tool calling or SSE event types.
 
 ```typescript
-import { ChatMessages } from "@lizuz/mini-app-sdk";
-
 const stream = sdk.http.stream({
   messages: [
-    ChatMessages.system("You are a helpful government tax assistant."),
-    ChatMessages.user("How do I renew my vehicle tax?"),
+    { role: "system", content: "You are a helpful government tax assistant." },
+    { role: "user", content: "How do I renew my vehicle tax?" },
   ],
 });
 

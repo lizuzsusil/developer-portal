@@ -11,7 +11,7 @@ import { TypesPackageName, InstallCommandTabs, ReactGovSdkImportBlock, PackageJs
 
 <FrameworkBadge framework="react" status="active" />
 
-> **Package:** `@sewa/framework-react` - internal workspace package at `packages/framework-react`. This guide documents the production-ready React integration pattern for Sewa mini apps.
+> **Package:** no framework runtime package — React + react-router from npm, types from the shared types package, and the host-injected SDK at runtime. (`@sewa/framework-react` in `packages/framework-react` is an internal workspace package used by the portal itself — mini apps must not install it.) This guide documents the production-ready React integration pattern for Sewa mini apps.
 
 React is the production-ready framework for Sewa mini apps. This single guide covers the whole flow: scaffolding a react-vite project, declaring host-injected types, exporting the `mount` lifecycle, wiring the SDK provider and hooks, and building the ES library the host loads. The pattern is a Vite ES-library build, host-injected SDK via `window.__GSA_SDK__`, and a `PlatformSDKProvider` with strict lifecycle handling.
 
@@ -445,7 +445,7 @@ my-mini-app/
 - [ ] Types package installed with your package manager (pnpm / npm / yarn / bun)
 - [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }`
-- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates on the `granted` permission state
+- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates children on the `ready` phase
 - [ ] `src/App.tsx` composes `HashRouter`, `PlatformSDKProvider`, and the root component
 - [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
 - [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`

@@ -28,18 +28,20 @@ Common `SdkError.code` values: `HANDSHAKE_FAILED`, `CAPABILITY_NOT_SUPPORTED`, `
 
 ## Guards
 
-```typescript
-import { isSdkError, isTimeout, isRetryable, isHandshakeError, isTransportError, getErrorCode } from "@lizuz/mini-app-sdk";
+Error classes and guard helpers (`isTimeout`, `isRetryable`, …) live in the SDK runtime, which
+mini apps never import. Branch on the error shape instead — every SDK failure carries a `code`
+and usually a `retryable` flag:
 
+```typescript
 try {
   await sdk.auth.getUser();
 } catch (err) {
-  if (isTimeout(err)) { /* retry or show spinner */ }
-  if (isRetryable(err)) { /* safe to retry */ }
-  console.log(getErrorCode(err)); // string | undefined
+  const code = (err as { code?: string } | null)?.code;
+  const retryable = (err as { retryable?: boolean } | null)?.retryable === true;
+  if (code === "REQUEST_CANCELLED" || code === "STREAM_CANCELLED") return; // unmount path
+  if (code === "TIMEOUT" || retryable) { /* retry or show spinner */ }
+  console.log(code); // string | undefined
 }
 ```
 
-`isAuthError` covers `AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`.
-
-`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake.
+`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake — gate such calls with `sdk.permissions` / `sdk.device.isSupported()` first (see [Permissions](/docs/sdk/permissions)). Auth-family codes (`AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`) arrive the same way, on `err.code`.

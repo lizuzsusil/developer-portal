@@ -63,11 +63,12 @@ if (sdk.device.isSupported("biometric")) {
 
 ### `location(options?)`
 
-Requests device location coordinates.
+Requests device location coordinates. Options carry only `reason` — see the `status`-switch
+pattern at the top of this page (never branch on a boolean):
 
 ```typescript
-const loc = await sdk.device.location({ highAccuracy: true });
-if (loc.granted) {
+const loc = await sdk.device.location({ reason: "To view your current location" });
+if (loc.status === "granted") {
   console.log("Latitude:", loc.data.latitude, "Longitude:", loc.data.longitude);
 }
 ```
@@ -77,9 +78,9 @@ if (loc.granted) {
 Triggers native camera capture.
 
 ```typescript
-const result = await sdk.device.camera({ quality: 0.8 });
-if (result.granted) {
-  const photoUri = result.data.imageUri;
+const result = await sdk.device.camera({ reason: "To capture a photo for verification" });
+if (result.status === "granted") {
+  const photoUrl = result.data.url;
 }
 ```
 
@@ -124,7 +125,7 @@ Triggers native TouchID / FaceID / Fingerprint prompt.
 
 ```typescript
 const bio = await sdk.device.biometric({ reason: "Authorize payment" });
-if (bio.granted && bio.data.authenticated) {
+if (bio.status === "granted" && bio.data?.success) {
   // Proceed with authorized operation
 }
 ```
@@ -135,7 +136,7 @@ Queries active network connection state.
 
 ```typescript
 const net = await sdk.device.network();
-console.log("Connected:", net.connected, "Type:", net.type);
+console.log("Online:", net.online, "Type:", net.type);
 ```
 
 ### `info()`
@@ -144,7 +145,7 @@ Returns hardware, OS, and screen dimensions.
 
 ```typescript
 const info = await sdk.device.info();
-console.log(info.model, info.osVersion, info.screenWidth);
+console.log(info.deviceModel, info.osVersion, info.screenWidth);
 ```
 
 ### `share(options)`
@@ -174,7 +175,16 @@ await sdk.device.haptics("light");
 
 Requests push-notification permission / token (device-scoped). For app-level push, use [`sdk.notifications`](/docs/sdk/notifications) instead.
 
-### `review()`
+### `review()` — reserved, not yet implemented
 
-Prompts the system app-store review dialog (where supported).
+`review` is a reserved action name (app-store review dialog) but the SDK module exposes no
+`review()` method yet — calling `sdk.device.review()` will fail. Guard with a `typeof` check and
+treat it as upcoming:
+
+```typescript
+const maybeReview = (sdk.device as { review?: () => Promise<void> }).review;
+if (typeof maybeReview === "function") {
+  await maybeReview();
+}
+```
 
