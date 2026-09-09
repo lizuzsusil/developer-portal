@@ -145,23 +145,23 @@ const config: Config = {
           title: "Framework Guides",
           items: [
             {
-              label: "React Integration (Active)",
+              label: "React Integration",
               to: "/docs/integration/react",
             },
             {
-              label: "Vue.js Integration (Active)",
+              label: "Vue 3 Integration",
               to: "/docs/integration/vue",
             },
             {
-              label: "Angular NG Integration (Active)",
+              label: "Angular Integration",
               to: "/docs/integration/angular",
             },
             {
-              label: "Svelte Integration (Active)",
+              label: "Svelte Integration",
               to: "/docs/integration/svelte",
             },
             {
-              label: "Solid Integration (Active)",
+              label: "Solid Integration",
               to: "/docs/integration/solid",
             },
           ],

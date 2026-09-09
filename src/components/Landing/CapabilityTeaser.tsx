@@ -37,20 +37,20 @@ function CapabilityCard({ capability }: { capability: Capability }) {
     <Link key={c.title} to={c.href} className="portal-card p-[22px_20px]! no-underline">
       <div className="mb-3 flex items-center gap-3">
         <span className="landing-feature-icon--lg" aria-hidden><PhIcon name={c.icon} /></span>
-        <code className="text-[1rem] font-extrabold text-[var(--color-text-primary)]">{c.title}</code>
-        <span className="cap-arrow ml-auto inline-flex text-[1rem] text-[var(--landing-step-color)]" aria-hidden><PhIcon name="arrow-right" /></span>
+        <span className="text-[1rem] font-extrabold text-text-primary">{c.title}</span>
+        <span className="cap-arrow ml-auto inline-flex text-[1rem] text-(--landing-step-color)" aria-hidden><PhIcon name="arrow-right" /></span>
       </div>
-      <div className="mb-[10px] flex flex-wrap gap-1.5">
+      <div className="mb-2.5 flex flex-wrap gap-1.5">
         {c.methods.map((m) => (
           <code
             key={m}
-            className="rounded-full border border-[var(--color-border-decorative)] bg-[var(--color-surface-sunken)] px-[9px] py-[3px] text-[0.72rem] font-semibold whitespace-nowrap text-[var(--color-text-secondary)]"
+            className="rounded-full border border-border-decorative bg-surface-sunken px-2.25 py-0.75 text-[0.72rem] font-semibold whitespace-nowrap text-text-secondary"
           >
             {m}
           </code>
         ))}
       </div>
-      <span className="text-[0.88rem] leading-[1.55] text-[var(--color-text-secondary)]">{translate({ id: c.descId, message: c.desc, description: `Capability ${c.title} description` })}</span>
+      <span className="text-[0.88rem] leading-[1.55] text-text-secondary">{translate({ id: c.descId, message: c.desc, description: `Capability ${c.title} description` })}</span>
     </Link>
   );
 }
@@ -61,7 +61,7 @@ export function CapabilityTeaser() {
       <div className="container">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="mb-1.5 text-[0.74rem] font-bold uppercase tracking-[0.08em] text-[var(--color-text-secondary)]">
+            <div className="mb-1.5 text-[0.74rem] font-bold uppercase tracking-[0.08em] text-text-secondary">
               <Translate id="homepage.capability.kicker" description="Capability kicker">Capability catalog</Translate>
             </div>
             <Heading as="h2" className="m-0 text-[1.4rem] font-extrabold tracking-[-0.015em]">
@@ -72,7 +72,7 @@ export function CapabilityTeaser() {
             to="/docs/sdk/core"
             id="homepage.capability.cta"
             description="Capability CTA"
-            className="text-[0.9rem] font-semibold text-[var(--color-text-link)]"
+            className="text-[0.9rem] font-semibold text-text-link"
           >
             {"Full SDK reference {arrow}"}
           </ArrowLink>
@@ -84,13 +84,13 @@ export function CapabilityTeaser() {
           ))}
         </div>
 
-        <div className="mt-[22px] flex flex-wrap items-center gap-2.5 rounded-[14px] border border-[var(--color-border-decorative)] bg-[var(--color-surface-sunken)] px-5 py-[14px] text-[0.88rem] text-[var(--color-text-secondary)]">
-          <span className="font-semibold text-[var(--color-text-primary)]"><Translate id="homepage.capability.alsoAvailable" description="Capability also">Also available:</Translate></span>
+        <div className="mt-5.5 flex flex-wrap items-center gap-2.5 rounded-[14px] border border-border-decorative bg-surface-sunken px-5 py-3.5 text-[0.88rem] text-text-secondary">
+          <span className="font-semibold text-text-primary"><Translate id="homepage.capability.alsoAvailable" description="Capability also">Also available:</Translate></span>
           {MORE_NAMESPACES.map((o) => (
             <Link
               key={o.label}
               to={o.href}
-              className="rounded-full border border-[var(--color-border-decorative)] bg-[var(--color-surface-card)] px-3 py-1 text-[0.82rem] font-semibold text-[var(--color-text-link)] no-underline"
+              className="rounded-full border border-border-decorative bg-surface-card px-3 py-1 text-[0.82rem] font-semibold text-text-link no-underline"
             >
               {o.label}
             </Link>
@@ -100,7 +100,7 @@ export function CapabilityTeaser() {
               to="/docs/sdk/core"
               id="homepage.capability.browseAll"
               description="Capability browse"
-              className="font-bold text-[var(--color-text-link)]"
+              className="font-bold text-text-link"
             >
               {"Browse all 14 namespaces {arrow}"}
             </ArrowLink>

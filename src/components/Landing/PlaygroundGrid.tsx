@@ -64,13 +64,13 @@ export function PlaygroundGrid() {
                             <span className="mb-2.5 block text-[1.1rem] font-extrabold text-text-primary">
                                 {card.title}
                             </span>
-                            <p className="mb-4 flex-1 text-[0.9rem] leading-relaxed text-text-secondary">
+                            <p className="flex-1 text-[0.9rem] leading-relaxed text-text-secondary">
                                 {translate({ id: card.descId, message: card.desc, description: `${card.title} description` })}
                             </p>
-                            <span className="inline-flex items-center gap-1.5 text-[0.88rem] font-bold text-text-link">
+                            <div className="flex items-center justify-end gap-1.5 text-[0.88rem] font-bold text-text-link mt-4">
                                 {translate({ id: card.ctaId, message: card.cta, description: `${card.title} CTA` })}
                                 <PhIcon name="arrow-right" />
-                            </span>
+                            </div>
                         </Link>
                     ))}
                 </div>
