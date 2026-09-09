@@ -358,12 +358,16 @@
     "message": "Type-safe with {package}",
     "description": "Hero badge"
   },
+  "homepage.hero.code.badge": {
+    "message": "ES module · host loads on demand",
+    "description": "Hero code badge"
+  },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib {arrow} ES module",
+    "message": "vite build --lib {arrow} dist/manifest.json + ES module",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "Scaffold in 4 steps {arrow}",
+    "message": "4 steps to ship {arrow}",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {

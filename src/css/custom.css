@@ -80,6 +80,7 @@
   --ifm-font-size-xxl: 24px;
   --ifm-code-font-size: 95%;
   --ifm-font-family-base: var(--font-family-base);
+  --ifm-font-family-monospace: var(--font-family-monospace);
   --ifm-line-height-base: 1.7;
   --docusaurus-highlighted-code-line-bg: rgba(26, 86, 214, 0.08);
   --ifm-hero-background-color: var(--neutral-900);
@@ -329,7 +330,18 @@ html.plugin-pages .footer .container {
   font-weight: 600 !important;
 }
 
-/* Code blocks */
+/* Code blocks - keep monospace, never Open Sans */
+.prism-code,
+pre,
+code,
+kbd,
+samp,
+tt,
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: var(--font-family-monospace) !important;
+}
+
 .prism-code {
   border-radius: var(--radius-lg) !important;
   border: 1px solid var(--color-border-decorative) !important;
@@ -721,6 +733,17 @@ button,
   font-size: 1rem;
   line-height: 1.5;
   font-weight: 600;
+}
+
+/* Ensure all non-code text uses Open Sans */
+html,
+body,
+button,
+input,
+select,
+textarea,
+.markdown *:not(pre):not(code):not(kbd):not(samp) {
+  font-family: var(--font-family-base);
 }
 
 /* Landing page animations */

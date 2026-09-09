@@ -358,12 +358,16 @@
     "message": "වර්ග-ආරක්ෂිත {package} සමඟ",
     "description": "Hero badge"
   },
+  "homepage.hero.code.badge": {
+    "message": "ES මොඩියුලය · සත්කාරකය ඉල්ලුම මත පූරණය කරයි",
+    "description": "Hero code badge"
+  },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib {arrow} ES මොඩියුලය",
+    "message": "vite build --lib {arrow} dist/manifest.json + ES මොඩියුලය",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "පියවර 4 කින් සකසන්න {arrow}",
+    "message": "යැවීමට පියවර 4 {arrow}",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {

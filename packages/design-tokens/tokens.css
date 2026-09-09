@@ -3,6 +3,8 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
+  --font-family-base: "Open Sans", sans-serif;
+  --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   /* Primitive - Gold */
   --gold-50: #fffef2;
   --gold-100: #fff8d6;
@@ -436,6 +438,7 @@
   --color-feedback-info-subtle: var(--color-feedback-info-subtle);
 
   --font-sans: var(--font-family-base);
+  --font-mono: var(--font-family-monospace);
 
   --radius-none: var(--radius-none);
   --radius-sm: var(--radius-sm);
@@ -457,7 +460,22 @@ body {
 }
 
 :root {
-  --font-family-base: "Google Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-family-base: "Open Sans", sans-serif;
+  --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ifm-font-family-base: var(--font-family-base);
+  --ifm-font-family-monospace: var(--font-family-monospace);
+}
+
+/* Code blocks must NOT use Open Sans - keep monospace */
+pre,
+code,
+kbd,
+samp,
+tt,
+.prism-code,
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: var(--font-family-monospace) !important;
 }
 
 ::selection {

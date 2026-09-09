@@ -97,7 +97,7 @@
       radial-gradient(900px 500px at 0% 0%, rgba(139, 92, 246, 0.12), transparent 55%),
       #0b0b0f;
     color: #f5f5f5;
-    font-family: "Inter", var(--ifm-font-family-base, system-ui), -apple-system, "Segoe UI", sans-serif;
+    font-family: "Open Sans", var(--ifm-font-family-base, system-ui), -apple-system, "Segoe UI", sans-serif;
     font-size: 16px;
     line-height: 1.5;
     text-align: left;
@@ -114,6 +114,10 @@
   .hp-root *:focus-visible {
     outline: 2px solid #6366f1;
     outline-offset: 2px;
+  }
+
+  .hp-root :is(pre, code, kbd, samp, tt, code[class*="language-"], pre[class*="language-"]) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
   }
 }
 

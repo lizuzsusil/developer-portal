@@ -71,36 +71,45 @@ function HeroCodePanel() {
   return (
     <div className="flex items-center justify-center">
       <div className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[var(--hero-code-border)] bg-[var(--hero-code-bg)] shadow-[0_25px_60px_rgba(0,0,0,0.18),0_0_0_1px_rgba(255,255,255,0.05)]">
+        {/* window chrome */}
         <div className="flex items-center gap-1.5 border-b border-[var(--hero-code-header-border)] bg-[var(--hero-code-header-bg)] px-[18px] py-[14px] text-[0.82rem] text-[var(--hero-code-header-text)]">
           <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
           <span className="h-3 w-3 rounded-full bg-[#ffbd2e]" />
           <span className="h-3 w-3 rounded-full bg-[#28c940]" />
           <span className="ml-[10px] font-mono text-[0.8rem] text-[var(--hero-code-header-text)]">src/main.tsx</span>
+          <span className="ml-auto hidden items-center gap-1.5 rounded-full border border-[var(--hero-code-header-border)] bg-[var(--hero-code-bg)] px-2.5 py-1 text-[0.7rem] font-semibold text-[var(--hero-code-header-text)] sm:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <Translate id="homepage.hero.code.badge" description="Hero code badge">ES module · host loads on demand</Translate>
+          </span>
         </div>
+        {/* relevant, copy-paste correct — mirrors docs/getting-started.mdx step 2 */}
         <pre className="m-0 overflow-auto bg-[var(--hero-code-bg)] px-[18px] py-5 text-[0.84rem] leading-[1.7] text-[var(--hero-code-text)]">
-          <code>{`// No SDK npm install — host injects it
-import type { MiniAppSdkInterface } from "${typesPackage}";
+          <code>{`// Host injects SDK — you only install types: pnpm add -D ${typesPackage}
+// Build outputs manifest.json + ES module the host loads on demand
+import { createRoot } from "react-dom/client";
+import App from "./App";
 
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
-  const sdk = window.__GSA_SDK__!;
-
-  // type-safe from day one
-  const user = await sdk.auth.getUser();
-  const res  = await sdk.device.location();
-
-  render(<App user={user} />, container);
-  return { unmount() { /* cleanup */ } };
+  const root = createRoot(container);
+  // honor deep-link when host provides it
+  if (runtime?.initialPath) location.hash = \`#\${runtime.initialPath}\`;
+  root.render(<App />);
+  return { unmount() { root.unmount(); } };
 }`}</code>
         </pre>
-        <div className="flex items-center justify-between border-t border-[var(--hero-code-footer-border)] bg-[var(--hero-code-header-bg)] px-[18px] py-3 text-[0.82rem]">
-          <span className="font-mono text-[var(--hero-code-footer-text)]"><Translate id="homepage.hero.code.footer" description="Hero code footer" values={{ arrow: <PhIcon name="arrow-right" /> }}>{"vite build --lib {arrow} ES module"}</Translate></span>
+        <div className="flex items-center justify-between gap-3 border-t border-[var(--hero-code-footer-border)] bg-[var(--hero-code-header-bg)] px-[18px] py-3 text-[0.82rem]">
+          <span className="font-mono text-[var(--hero-code-footer-text)]">
+            <Translate id="homepage.hero.code.footer" description="Hero code footer" values={{ arrow: <PhIcon name="arrow-right" /> }}>
+              {"vite build --lib {arrow} dist/manifest.json + ES module"}
+            </Translate>
+          </span>
           <ArrowLink
             to="/docs/getting-started"
             id="homepage.hero.code.craft"
             description="Hero code craft"
-            className="font-semibold text-[var(--hero-code-link)] no-underline"
+            className="shrink-0 font-semibold text-[var(--hero-code-link)] no-underline"
           >
-            {"Scaffold in 4 steps {arrow}"}
+            {"4 steps to ship {arrow}"}
           </ArrowLink>
         </div>
       </div>

@@ -358,12 +358,16 @@
     "message": "வகை-பாதுகாப்பானது {package} உடன்",
     "description": "Hero badge"
   },
+  "homepage.hero.code.badge": {
+    "message": "ES தொகுதி · ஹோஸ்ட் தேவைக்கேற்ப ஏற்றுகிறது",
+    "description": "Hero code badge"
+  },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib {arrow} ES தொகுதி",
+    "message": "vite build --lib {arrow} dist/manifest.json + ES தொகுதி",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "4 படிகளில் உருவாக்கவும் {arrow}",
+    "message": "அனுப்ப 4 படிகள் {arrow}",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {

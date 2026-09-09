@@ -1,6 +1,5 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
 
 /* Host Playground embed: scoped preflight + widget layout. Imported here, and
    after the two lines above, so the `theme` and `utilities` cascade layers are
@@ -9,6 +8,9 @@
 
 :root {
   --font-family-base: "Open Sans", sans-serif;
+  --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ifm-font-family-base: var(--font-family-base);
+  --ifm-font-family-monospace: var(--font-family-monospace);
 
   /* Primitive - Gold */
   --gold-50: #fffef2;
@@ -499,6 +501,7 @@
   --color-feedback-info-subtle: var(--color-feedback-info-subtle);
 
   --font-sans: var(--font-family-base);
+  --font-mono: var(--font-family-monospace);
 
   --radius-none: var(--radius-none);
   --radius-sm: var(--radius-sm);
@@ -549,4 +552,18 @@ textarea:focus-visible,
 .skip-link:focus {
   left: var(--space-16);
   top: var(--space-16);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Code blocks - must NOT use Open Sans; use monospace stack          */
+/* ------------------------------------------------------------------ */
+pre,
+code,
+kbd,
+samp,
+tt,
+.prism-code,
+code[class*="language-"],
+pre[class*="language-"] {
+  font-family: var(--font-family-monospace) !important;
 }
