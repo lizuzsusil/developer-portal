@@ -15,7 +15,7 @@ export function PlaygroundTeaser() {
               <Translate id="homepage.playground.title" description="Playground title">Try the SDK before you ship</Translate>
             </Heading>
             <p className="m-0 mb-5 text-[0.94rem] leading-[1.65] text-text-secondary">
-              <Translate id="homepage.playground.description" description="Playground description">Call any sdk.* method with a mock transport, inspect request/response shapes, and copy the snippet into your mini app. Built from the SDK playground package — no extra install.</Translate>
+              <Translate id="homepage.playground.description" description="Playground description">Call any sdk.* method with a mock transport, inspect request/response shapes, and copy the snippet into your mini app. Built from the SDK playground package - no extra install.</Translate>
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/docs/playground" className="inline-block cursor-pointer rounded-[12px] border border-border-default bg-action-primary px-5 py-2.5 text-center text-[0.875rem] font-bold text-action-primary-foreground no-underline">

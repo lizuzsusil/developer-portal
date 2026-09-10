@@ -27,7 +27,7 @@ await sdk.batch([{ namespace, action, payload }]); // batch via host or parallel
 | `mapPayload` | - | Transform success payload; used by `http` to map `HttpResult` → `HttpClientError` / `HttpServerError` |
 | `dedupe` | `false` | 50 ms window coalesces identical reads |
 
-**Dedup allowlist** (11 idempotent reads): `auth.getUser`, `permissions.has`, `flags.isEnabled`, `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
+**Dedup allowlist** (11 idempotent reads): `auth.getUser`, `permissions.has` (deprecated), `flags.isEnabled`, `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
 
 ## Retry
 
@@ -44,7 +44,7 @@ Retryable = `TimeoutError` or `SdkError` with `retryable: true` (5xx via `HttpSe
 
 ## Middleware
 
-Middleware (`sdk.use`) is available on the injected instance but rarely needed in mini apps —
+Middleware (`sdk.use`) is available on the injected instance but rarely needed in mini apps -
 prefer the typed `sdk.*` wrappers. It is primarily a host/test extension point.
 
 ```typescript

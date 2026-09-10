@@ -1,4 +1,4 @@
-# Host + Mini App in the Same Window (No SDK) — Communication Flow
+# Host + Mini App in the Same Window (No SDK) - Communication Flow
 
 A blueprint for wiring a **host app** and a **mini app** in the **same browser
 window** where the mini app is mounted in a **Shadow DOM** and there is **no
@@ -33,7 +33,7 @@ module** bundled with the mini app:
 | SDK reads `window.__GSA_SDK__` seeded by the host | The mini app reads **config values** passed at invocation time (global, closure param, or a host-published global) |
 | SDK exposes `query({namespace, action, payload})` | The client exposes the same shape but without handshake/capability acknowledgement |
 
-So "no SDK" ≠ "no client at all". You still need **some transport code** — it is just
+So "no SDK" ≠ "no client at all". You still need **some transport code** - it is just
 small, written once per project, and compiled into every mini app.
 
 ---
@@ -102,7 +102,7 @@ Rules:
 
 ## 4. Step-by-step implementation (new project)
 
-### Step 1 — Stand up the two projects
+### Step 1 - Stand up the two projects
 
 ```
 myproject/
@@ -128,7 +128,7 @@ myproject/
     └── vite.config.ts
 ```
 
-### Step 2 — Mini app: the host-client module (no-SDK core)
+### Step 2 - Mini app: the host-client module (no-SDK core)
 
 This is the ~100-line module that replaces the entire SDK in the mini app. The
 mini app's `main.tsx` uses it for RPC calls and event subscriptions:
@@ -247,7 +247,7 @@ void (async () => {
 })();
 ```
 
-### Step 3 — Host: the message router (no-SDK core)
+### Step 3 - Host: the message router (no-SDK core)
 
 ```ts
 // host/src/platform/message-router.ts
@@ -356,7 +356,7 @@ export function broadcast(type: string, payload: unknown): void {
 }
 ```
 
-### Step 4 — Host: bootstrap the mini app (loader + Shadow DOM)
+### Step 4 - Host: bootstrap the mini app (loader + Shadow DOM)
 
 Mirror the loader flow, but with no SDK script injection:
 
@@ -366,7 +366,7 @@ export interface PlaygroundConfig {
   name: string
   manifestUrl: string         // base URL of the built mini app
   iconUrl?: string
-  sdkVersion: string          // unused when no SDK — drop the field
+  sdkVersion: string          // unused when no SDK - drop the field
 }
 
 export async function loadAndMountMiniApp(
@@ -384,7 +384,7 @@ export async function loadAndMountMiniApp(
   const styles = manifest.bundle.styles ?? [];
   const files = manifest.bundle.files ?? [];
 
-  // 2. Download each listed file via fetch (.js, .css, assets) — no zip, no hash
+  // 2. Download each listed file via fetch (.js, .css, assets) - no zip, no hash
   const frecords = await Promise.all(
     files.map(async (file: string) => {
       const fr = await fetch(`${base}/${file}`);
@@ -452,7 +452,7 @@ Add a tiny UI in the host for vendors:
 
 Toggling Location off ⇒ `isActionAllowed("device","location")` returns `false` ⇒
 host replies `PERMISSION_DENIED` and the `handshake` response omits the capability.
-No SDK code changes required — the host's capability store (capabilities.ts) is the
+No SDK code changes required - the host's capability store (capabilities.ts) is the
 single source of truth.
 
 ---
@@ -465,7 +465,7 @@ Three transport patterns, pick one:
    Both host and mini app communicate over the same window object with `target`
    filtering. Works in Shadow DOM because the shadow root is in the same DOM tree.
 
-2. **Global function calls** — viable only if host and mini app ship in the
+2. **Global function calls** - viable only if host and mini app ship in the
    same origin (which they do here). The host can publish `window.__HOST_RPC__`
    directly:
    ```ts
@@ -476,7 +476,7 @@ Three transport patterns, pick one:
    The mini app then does `window.__HOST_RPC__.call("auth","getUser")`.
    Cheaper and simpler but lacks the origin/log/trace the message router gives you.
 
-3. **Custom Event / BroadcastChannel** — if the mini app and host are in different
+3. **Custom Event / BroadcastChannel** - if the mini app and host are in different
    browser tabs or windows, replace `window.postMessage` with
    `new BroadcastChannel("myapp-platform")`. Same wire format, different transport.
 
@@ -496,7 +496,7 @@ export interface MyAppConfig {
   miniAppId: string;
   hostOrigin: string;
   protocolVersion: string;
-  sdkVersion?: string;   // deprecated without SDK — keep for backward compat
+  sdkVersion?: string;   // deprecated without SDK - keep for backward compat
 }
 
 export function readConfig(): MyAppConfig {
@@ -511,7 +511,7 @@ export function readConfig(): MyAppConfig {
 
 If the mini app is evaluated in an isolated context (e.g., inside a worker or iframe
 in another project), you can instead pass config **by invocation**:
-`moduleExports.mount(container, configParam)` — the host supplies `config` (same shape
+`moduleExports.mount(container, configParam)` - the host supplies `config` (same shape
 as `RemoteLoadResult.config` from host-platform's `loader.ts`).
 
 ---
@@ -538,7 +538,7 @@ t=10 ms  host changes theme                          → broadcasts event → mi
 
 1. **Shadow DOM + Same-window `postMessage`:** `e.source` for same-window
    `window.postMessage` is the **same `Window` object** or `null`. Always resolve to
-   `window` when `e.source` is falsy — do not assume `e.source` is the mini app's
+   `window` when `e.source` is falsy - do not assume `e.source` is the mini app's
    shadow window (there isn't one).
 
 2. **Asset rewrites**: the mini app's CSS/JS may reference `./logo.svg` or `/assets/...`
@@ -546,7 +546,7 @@ t=10 ms  host changes theme                          → broadcasts event → mi
    each asset and **rewrite the references** in the entry code and CSS (the same
    `rewriteAssetReferences` helper from the referenced playground).
 
-3. **Handshake must always be enabled** — it is the only way the mini app proves it
+3. **Handshake must always be enabled** - it is the only way the mini app proves it
    can reach the host. If the router rejects it, every subsequent RPC will silently
    time out.
 
@@ -556,7 +556,7 @@ t=10 ms  host changes theme                          → broadcasts event → mi
 5. **No `node_modules` cross-project imports**: if host and mini app are separate
    npm workspaces, **do not** import the mini app's source directly; use the
    manifest-URL + blob-evaluation flow. If you actually want same-repo co-bundling,
-   you can skip the manifest and just `import` the mini app's `main.tsx` — but then
+   you can skip the manifest and just `import` the mini app's `main.tsx` - but then
    there's no `postMessage` at all, you can just call functions directly. Use the
    manifest flow when the mini app is a **separate project** (the stated use case).
 
@@ -620,18 +620,18 @@ cd miniapp && npm run dev     # miniapp on :5174
 
 ---
 
-## Appendix A — Differences vs. the referenced playground
+## Appendix A - Differences vs. the referenced playground
 
 | Aspect | Referenced (with SDK) | This blueprint (no SDK) |
 |---|---|---|
 | SDK script | `injectScript(sdk.url)` loads `sewa-sdk.min.js` | No script; the mini app bundles `host-client.ts` instead |
 | Seed globals | `__GSA_SDK__` + `__GSA_HOST_DESCRIPTOR__` | Single `__MYAPP_CONFIG__` (or `mount(container, configParam)` invocation) |
-| Handshake | SDK's `handshake.connect` — SDK replies | Mini app's `host-client` does `request("handshake","connect")` |
+| Handshake | SDK's `handshake.connect` - SDK replies | Mini app's `host-client` does `request("handshake","connect")` |
 | Capability source | SDK's named `getHandshakeCapabilities` | Host's `capabilities.ts` (drawer + `isActionAllowed`) |
 | Event bus | SDK's `EventBus` | Mini app's `eventBusSubscribe` + host's `broadcast` |
 | Isolation | Shadow DOM (unchanged) | Shadow DOM (unchanged) |
 
-## Appendix B — "But the SDK already calls host"...
+## Appendix B - "But the SDK already calls host"...
 
 The referenced SDK, when it boots, *initiates* the `handshake.connect` call. Without
 an SDK, that responsibility moves to the mini app's own `host-client` module. From the

@@ -72,7 +72,7 @@ for await (const chunk of builder.iterate()) {
 ### `stream(params)` (Chat Streaming)
 
 Streams a generic LLM completion through the host proxy. Each chunk contains a `text` fragment.
-Messages are plain `{ role, content }` objects — there is no `ChatMessages` helper:
+Messages are plain `{ role, content }` objects - there is no `ChatMessages` helper:
 
 ```typescript
 const stream = sdk.http.stream({

@@ -1,6 +1,6 @@
 /**
  * Mock host implementations for all SDK RPCs.
- * Separate file as requested — pre-defined device APIs and others that
+ * Separate file as requested - pre-defined device APIs and others that
  * only succeed when their capability toggle is true.
  *
  * Mirrors `shell/src/platform/services/device.ts` and `rpc-server.ts:registerMethods`
@@ -77,7 +77,7 @@ class CapabilityError extends Error {
 function ensureAllowed(namespace: string, action: string) {
   if (!isActionAllowed(namespace, action)) {
     throw new CapabilityError(
-      `${namespace}.${action} not allowed — enable "${namespace}${action ? '.' + action : ''}" in Capabilities drawer`,
+      `${namespace}.${action} not allowed - enable "${namespace}${action ? '.' + action : ''}" in Capabilities drawer`,
     )
   }
 }
@@ -93,7 +93,7 @@ export async function handleMockRequest(
   moduleId?: string,
 ): Promise<unknown> {
   const key = `${namespace}.${action}`
-  // Always allow handshake — handled separately — but guard others
+  // Always allow handshake - handled separately - but guard others
   if (namespace !== 'handshake') {
     ensureAllowed(namespace, action)
   }
@@ -104,7 +104,7 @@ export async function handleMockRequest(
       return { type: 'web' as const, appearance: null }
     }
 
-    // ----- appearance (delegates to host appearance store — see src/lib/appearance.ts) -----
+    // ----- appearance (delegates to host appearance store - see src/lib/appearance.ts) -----
     case 'appearance.getTheme': {
       return getTheme()
     }
@@ -154,11 +154,13 @@ export async function handleMockRequest(
       return {}
     }
 
-    // ----- permissions -----
+    // ----- permissions (deprecated) -----
     case 'permissions.has': {
+      console.warn('[deprecated] permissions.has is deprecated and will be removed in a future major version')
       return false
     }
     case 'permissions.list': {
+      console.warn('[deprecated] permissions.list is deprecated and will be removed in a future major version')
       return []
     }
 
@@ -399,7 +401,7 @@ export async function handleMockRequest(
     case 'api.request': {
       const p = payload as { method?: string; path?: string; endpoint?: string; body?: unknown; headers?: Record<string, string> } | undefined
       const path = p?.path ?? p?.endpoint ?? '/api/mock'
-      // Mock — echo back
+      // Mock - echo back
       return { status: 200, data: { mocked: true, path, body: p?.body }, headers: {} }
     }
 
@@ -436,7 +438,7 @@ export async function handleMockRequest(
     }
 
     default: {
-      // Unknown method — still check capability, then return generic ok
+      // Unknown method - still check capability, then return generic ok
       // so the mini app doesn't hang waiting for a response
       return { status: 'ok' as const, protocolVersion: '1.0.0', capabilities: null }
     }

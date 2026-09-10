@@ -63,7 +63,7 @@ if (sdk.device.isSupported("biometric")) {
 
 ### `location(options?)`
 
-Requests device location coordinates. Options carry only `reason` — see the `status`-switch
+Requests device location coordinates. Options carry only `reason` - see the `status`-switch
 pattern at the top of this page (never branch on a boolean):
 
 ```typescript
@@ -175,10 +175,10 @@ await sdk.device.haptics("light");
 
 Requests push-notification permission / token (device-scoped). For app-level push, use [`sdk.notifications`](/docs/sdk/notifications) instead.
 
-### `review()` — reserved, not yet implemented
+### `review()` - reserved, not yet implemented
 
 `review` is a reserved action name (app-store review dialog) but the SDK module exposes no
-`review()` method yet — calling `sdk.device.review()` will fail. Guard with a `typeof` check and
+`review()` method yet - calling `sdk.device.review()` will fail. Guard with a `typeof` check and
 treat it as upcoming:
 
 ```typescript

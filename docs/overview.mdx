@@ -10,20 +10,20 @@ The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (Web and 
 
 ## Architecture at a Glance
 
-- **Host shell** — owns the window lifecycle, navigation, theming, and permissions. It fetches your bundle via `manifest.json`, mounts it into an isolated container, and unmounts it when the user leaves.
-- **Mini app** — your UI and logic. You ship only your code; the SDK runtime is not bundled. The host calls your exported `mount` to render and `unmount` to clean up.
-- **SDK bridge** — every `sdk.*` call (auth, storage, device, etc.) is forwarded to the host over a secured RPC channel and the result is returned to your app.
+- **Host shell** - owns the window lifecycle, navigation, theming, and permissions. It fetches your bundle via `manifest.json`, mounts it into an isolated container, and unmounts it when the user leaves.
+- **Mini app** - your UI and logic. You ship only your code; the SDK runtime is not bundled. The host calls your exported `mount` to render and `unmount` to clean up.
+- **SDK bridge** - every `sdk.*` call (auth, storage, device, etc.) is forwarded to the host over a secured RPC channel and the result is returned to your app.
 
 ## Security Model
 
 Capabilities are granted at handshake. On first SDK use the host replies with the allowed set; calls outside that set throw `CAPABILITY_NOT_SUPPORTED` and never reach the host. Details in [Protocol & Handshake](/docs/sdk/protocol).
 
-The RPC channel itself is host-owned (origin-pinned `postMessage` bridge, Flutter `CustomEvent` fallback) and requires no vendor configuration — you just call `sdk.*`. Background in [Transport](/docs/sdk/transport) and lifecycle in [SDK Core](/docs/sdk/core).
+The RPC channel itself is host-owned (origin-pinned `postMessage` bridge, Flutter `CustomEvent` fallback) and requires no vendor configuration - you just call `sdk.*`. Background in [Transport](/docs/sdk/transport) and lifecycle in [SDK Core](/docs/sdk/core).
 
 ## Next Steps
 
-- [Getting Started](/docs/getting-started) — minimal scaffold (types, `mount`, build, manifest)
-- [SDK Reference](/docs/sdk/core) — all namespaces and lifecycle
+- [Getting Started](/docs/getting-started) - minimal scaffold (types, `mount`, build, manifest)
+- [SDK Reference](/docs/sdk/core) - all namespaces and lifecycle
 - Framework guides: [React](/docs/integration/react), [Vue](/docs/integration/vue), [Angular](/docs/integration/angular), [Svelte](/docs/integration/svelte), [Solid](/docs/integration/solid)
-- [SDK Playground](/docs/playground) — try `sdk.*` calls in the docs
-- [Host Playground](/docs/host-playground) — load your built mini app in a sandbox host
+- [SDK Playground](/docs/playground) - try `sdk.*` calls in the docs
+- [Host Playground](/docs/host-playground) - load your built mini app in a sandbox host

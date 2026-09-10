@@ -16,7 +16,7 @@ import {TypesPackageName, InstallCommandBlock, ImportCodeBlock} from '@site/src/
 
 ## පූර්ව අවශ්‍යතා
 
-SDK ක්‍රියාත්මක කිරීම සත්කාරක-සපයනු ලැබේ — ඔබේ යෙදුම සම්පාදන-කාල ආරක්ෂාව සඳහා වර්ග පැකේජය පමණක් ස්ථාපනය කරයි:
+SDK ක්‍රියාත්මක කිරීම සත්කාරක-සපයනු ලැබේ - ඔබේ යෙදුම සම්පාදන-කාල ආරක්ෂාව සඳහා වර්ග පැකේජය පමණක් ස්ථාපනය කරයි:
 
 <InstallCommandBlock />
 
@@ -25,7 +25,7 @@ SDK ක්‍රියාත්මක කිරීම සත්කාරක-ස�
 ```mermaid
 flowchart LR
     A["වර්ග පැකේජය<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["global.d.ts<br/>declare global Window.__GSA_SDK__"]
-    B --> C["ඔබේ කේතය<br/>sdk.auth.getUser() — සම්පූර්ණයෙන් ටයිප් කර ඇත"]
+    B --> C["ඔබේ කේතය<br/>sdk.auth.getUser() - සම්පූර්ණයෙන් ටයිප් කර ඇත"]
     D["සත්කාරක කවචය<br/>(CDN / native bridge)"] -->|"ක්‍රියාත්මක අවස්ථාවේදී එන්නත් කිරීම"| E["window.__GSA_SDK__"]
     E --> C
 ```
@@ -42,7 +42,7 @@ flowchart LR
 
 ## 2. ඇතුල්වීමේ ස්ථානය (`main.tsx`)
 
-`mount` ශ්‍රිතයක් අපනයනය කරන්න — පරිශීලකයා කුඩා යෙදුම විවෘත කරන විට සත්කාරකය එය DOM කන්ටේනරයක් සහ විකල්ප `initialPath` සමඟ අමතයි. `window.__GSA_SDK__` ක්‍රියාත්මක අවස්ථාවේදී කියවනු ලැබේ.
+`mount` ශ්‍රිතයක් අපනයනය කරන්න - පරිශීලකයා කුඩා යෙදුම විවෘත කරන විට සත්කාරකය එය DOM කන්ටේනරයක් සහ විකල්ප `initialPath` සමඟ අමතයි. `window.__GSA_SDK__` ක්‍රියාත්මක අවස්ථාවේදී කියවනු ලැබේ.
 
 ## 3. Vite ගොඩනැගීම (`vite.config.ts`)
 
@@ -50,4 +50,4 @@ flowchart LR
 
 ## 4. ඉවත් කිරීම
 
-SDK අවස්ථාවට සාමාන්‍ය සත්කාරක-එන්නත් කළ භාවිතයේදී අතින් `destroy()` අවශ්‍ය නොවේ — `PlatformSDKProvider` සංරචකය ඉවත් කරන විට `AbortController` හරහා පිරිසිදු කරයි.
+SDK අවස්ථාවට සාමාන්‍ය සත්කාරක-එන්නත් කළ භාවිතයේදී අතින් `destroy()` අවශ්‍ය නොවේ - `PlatformSDKProvider` සංරචකය ඉවත් කරන විට `AbortController` හරහා පිරිසිදු කරයි.

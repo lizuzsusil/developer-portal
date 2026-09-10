@@ -72,7 +72,7 @@ interface HandshakeAckPayload {
 ## Capability Gating
 
 ```typescript
-// SDK_CAPABILITIES = auth, permissions, flags, config, navigation, storage,
+// SDK_CAPABILITIES = auth, permissions (deprecated), flags, config, navigation, storage,
 //                    platform, device, api, http, gic-chat, appearance, notifications, links
 sdk.capabilities        // string[] granted by host
 sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)

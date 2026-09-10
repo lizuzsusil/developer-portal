@@ -1,7 +1,7 @@
 import React from "react";
 import BrowserOnly from "@docusaurus/BrowserOnly";
 
-// Canonical source is `packages/host-playground/src` — the very same shell the
+// Canonical source is `packages/host-playground/src` - the very same shell the
 // standalone Vite app renders. Loaded browser-only: the playground reads
 // `localStorage` for the last config, installs a `message` listener for the SDK
 // handshake and mounts vendor bundles into a Shadow DOM, none of which exist

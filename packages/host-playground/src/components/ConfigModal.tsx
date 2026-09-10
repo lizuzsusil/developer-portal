@@ -137,7 +137,7 @@ export default function ConfigModal({ open, initial, onSubmit, onClose }: Props)
       {/* backdrop */}
       <div className="absolute inset-0 bg-[#06060a]/75 backdrop-blur-xs" onClick={onClose} />
 
-      {/* card — larger, minimal */}
+      {/* card - larger, minimal */}
       <div className="relative flex max-h-full w-full max-w-160 flex-col overflow-hidden rounded-[20px] border border-neutral-800 bg-[#0f0f12] shadow-[0_24px_64px_-16px_rgba(0,0,0,0.9)]">
         {/* subtle top accent */}
         <div className="h-px w-full bg-linear-to-r from-transparent via-indigo-500/40 to-transparent" />
@@ -242,11 +242,11 @@ export default function ConfigModal({ open, initial, onSubmit, onClose }: Props)
                     <circle cx="12" cy="12" r="9" />
                     <path strokeLinecap="round" d="M12 8v4M12 16h.01" />
                   </svg>
-                  Base directory of the built app — we fetch <span className="font-mono text-neutral-400">manifest.json</span> from here
+                  Base directory of the built app - we fetch <span className="font-mono text-neutral-400">manifest.json</span> from here
                 </p>
               </div>
 
-              {/* capabilities multiselect — dropdown to hide/show */}
+              {/* capabilities multiselect - dropdown to hide/show */}
               <div className="rounded-xl border border-neutral-800 bg-neutral-900/30">
                 <button
                   type="button"

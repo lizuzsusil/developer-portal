@@ -11,9 +11,9 @@ import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
 
 <FrameworkBadge framework="svelte" status="active" />
 
-> **Package:** no framework runtime package — Svelte 5 + `svelte-spa-router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Svelte integration pattern for Sewa mini apps, verified against `mini-apps/svelte-mini-app`.
+> **Package:** no framework runtime package - Svelte 5 + `svelte-spa-router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Svelte integration pattern for Sewa mini apps, verified against `mini-apps/svelte-mini-app`.
 
-Svelte is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling — expressed with Svelte 5 idioms (runes, `writable`/`derived` stores, hash-location `Router`). Feature state lives in the `MiniAppState` rune class rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
+Svelte is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling - expressed with Svelte 5 idioms (runes, `writable`/`derived` stores, hash-location `Router`). Feature state lives in the `MiniAppState` rune class rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
 
 ---
 
@@ -42,13 +42,13 @@ Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the stores
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set (`SdkDeviceLocationResult`, `SdkDeviceCameraResult`, `SdkDeviceGalleryResult`, `SdkDeviceFileResult`, `SdkDeviceDownloadResult`, `SdkDeviceContactResult`, `SdkFileModule`, `SdkDeviceBiometricResult`, …) plus `window.__GSA_SDK__`.
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set (`SdkDeviceLocationResult`, `SdkDeviceCameraResult`, `SdkDeviceGalleryResult`, `SdkDeviceFileResult`, `SdkDeviceDownloadResult`, `SdkDeviceContactResult`, `SdkFileModule`, `SdkDeviceBiometricResult`, …) plus `window.__GSA_SDK__`.
 
 ---
 
 ## 3. Entry Points
 
-### `main.ts` — host-callable mount
+### `main.ts` - host-callable mount
 
 ```typescript
 // src/main.ts
@@ -97,10 +97,10 @@ if (import.meta.env.DEV) {
 
 Two details differ from React and both matter:
 
-- **Svelte's own `mount`/`unmount`** (`import { mount as svelteMount } from "svelte"`) boots the root component into the host-provided container — no `createRoot` equivalent needed, and remounts never share state. `unmount` additionally stops the hash mirror so no listener leaks across remounts.
+- **Svelte's own `mount`/`unmount`** (`import { mount as svelteMount } from "svelte"`) boots the root component into the host-provided container - no `createRoot` equivalent needed, and remounts never share state. `unmount` additionally stops the hash mirror so no listener leaks across remounts.
 - **The hash is seeded before `svelteMount`** for the same reason as Vue: the router snapshots the start location at initialization. Seeding uses `history.replaceState` (fires no events, so the host back-trap stays quiet) and updates the `currentPath` mirror directly.
 
-### `App.svelte` — phase gating + router shell
+### `App.svelte` - phase gating + router shell
 
 ```svelte
 <script lang="ts">
@@ -137,25 +137,25 @@ Two details differ from React and both matter:
 {/if}
 ```
 
-The root component is the Svelte counterpart of the provider gate: SDK failure → `LoadError`, SDK loading → placeholder, ready → sidebar shell + `<Router {routes} />` from `svelte-spa-router`. There is no separate error-boundary component — phase gating plus per-page error states cover it.
+The root component is the Svelte counterpart of the provider gate: SDK failure → `LoadError`, SDK loading → placeholder, ready → sidebar shell + `<Router {routes} />` from `svelte-spa-router`. There is no separate error-boundary component - phase gating plus per-page error states cover it.
 
 ---
 
 ## 4. Core state
 
-`stores/` + `miniapp/` hold platform wiring and domain state — no route definitions, no markup.
+`stores/` + `miniapp/` hold platform wiring and domain state - no route definitions, no markup.
 
 ### SDK stores (`stores/sdk.ts`)
 
-`sdkInstance` / `sdkUser` / `sdkPhase` (`loading | ready | error`) / `sdkError` writables plus a derived `isSdkReady`. `initSdk(signal?)` polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, fetches the user, and publishes — identical to the React provider. `getSdkOrThrow()` is the guarded accessor feature code calls (the counterpart of React's `usePlatformSDK` throw-outside-provider).
+`sdkInstance` / `sdkUser` / `sdkPhase` (`loading | ready | error`) / `sdkError` writables plus a derived `isSdkReady`. `initSdk(signal?)` polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, fetches the user, and publishes - identical to the React provider. `getSdkOrThrow()` is the guarded accessor feature code calls (the counterpart of React's `usePlatformSDK` throw-outside-provider).
 
 ### Appearance & i18n
 
-`stores/appearance.ts` holds a writable `appearanceState` (seeded with `en-LK` / `en` / `light` defaults), subscribes to `sdkInstance` to seed from `sdk.appearance.state()` and forward `sdk.appearance.subscribe()` updates, and exposes derived `localeState` / `themeState`. `lib/i18n.ts` derives `language` and a `tStore` lookup from `localeState` over the `en` / `si` / `ta` JSON dictionaries with `en` fallback and `{param}` interpolation — same contract as every other framework.
+`stores/appearance.ts` holds a writable `appearanceState` (seeded with `en-LK` / `en` / `light` defaults), subscribes to `sdkInstance` to seed from `sdk.appearance.state()` and forward `sdk.appearance.subscribe()` updates, and exposes derived `localeState` / `themeState`. `lib/i18n.ts` derives `language` and a `tStore` lookup from `localeState` over the `en` / `si` / `ta` JSON dictionaries with `en` fallback and `{param}` interpolation - same contract as every other framework.
 
 ### Feature state (`miniapp/state.svelte.ts`)
 
-`MiniAppState` is a `$state` rune class owning every tab's signals and SDK/browser actions (location, camera, gallery, files, downloads, contacts, biometric, license HTTP, chat navigation) — a 1:1 port of the React shell's hoisted state. Methods are arrow-function fields so they stay bound when passed as props. The module exports the app-lifetime singleton `miniApp`, which the thin `src/pages/*` wrappers bind to tab props — so tab state survives route changes exactly like the React shell's hoisted state.
+`MiniAppState` is a `$state` rune class owning every tab's signals and SDK/browser actions (location, camera, gallery, files, downloads, contacts, biometric, license HTTP, chat navigation) - a 1:1 port of the React shell's hoisted state. Methods are arrow-function fields so they stay bound when passed as props. The module exports the app-lifetime singleton `miniApp`, which the thin `src/pages/*` wrappers bind to tab props - so tab state survives route changes exactly like the React shell's hoisted state.
 
 ---
 
@@ -167,11 +167,11 @@ Single source of truth for the route, mirrored from `window.location.hash`: `nor
 
 ### Programmatic navigation (`router/navigation.ts`)
 
-Forward navigation uses `history.pushState` — **never** `location.hash = ...`. In Chrome, assigning `location.hash` fires a `popstate` event in addition to `hashchange`; the host shell traps `popstate` for its back-button sentinel, so the spurious pop arrives while the host's `canGoBack` is still stale and the mini app pops straight back to `/`. `pushState` fires no events, so `goTo()` updates the `currentPath` mirror and dispatches `hashchange` manually (the same technique `svelte-spa-router`'s own `replace()` uses). History entries carry an incrementing `idx` in state, mirroring hash-history semantics the host sentinel expects. `consumeForwardFlag()` lets host-sync tell forward navigations apart from pops; `replaceTo()` and `stepBack()` delegate to the router's `replace()` / `pop()`.
+Forward navigation uses `history.pushState` - **never** `location.hash = ...`. In Chrome, assigning `location.hash` fires a `popstate` event in addition to `hashchange`; the host shell traps `popstate` for its back-button sentinel, so the spurious pop arrives while the host's `canGoBack` is still stale and the mini app pops straight back to `/`. `pushState` fires no events, so `goTo()` updates the `currentPath` mirror and dispatches `hashchange` manually (the same technique `svelte-spa-router`'s own `replace()` uses). History entries carry an incrementing `idx` in state, mirroring hash-history semantics the host sentinel expects. `consumeForwardFlag()` lets host-sync tell forward navigations apart from pops; `replaceTo()` and `stepBack()` delegate to the router's `replace()` / `pop()`.
 
 ### Route table (`app/routes.ts`)
 
-`navItems` (sidebar path/label/icon per tab) plus the `svelte-spa-router` table — a hash-based equivalent of React's `<Routes>`:
+`navItems` (sidebar path/label/icon per tab) plus the `svelte-spa-router` table - a hash-based equivalent of React's `<Routes>`:
 
 ```typescript
 // src/app/routes.ts
@@ -195,17 +195,17 @@ export const routes: Record<string, Component> = {
 
 ### Host sync (`router/host-sync.ts`)
 
-`startHostSync()` (started from `App.svelte`, stopped on unmount) subscribes to `currentPath` and emits `navigation.route.changed` with `canGoBack` derived from "is the route root?", calling the optional `sdk.navigation.router.push` bridge **only on forward (PUSH) navigations** — never on POP, so the host stack can't desync. It re-syncs when the SDK becomes ready (pushes that happened before the bridge existed) and answers `navigation.back.requested` via `handleBackPress()`, which acks the bridge then pops exactly one in-app route. Every bridge call is `try/catch` + `?.` guarded because some mobile hosts don't implement the router bridge. A `routerLog` store (newest-first, max 50) surfaces bridge activity in the Router tab.
+`startHostSync()` (started from `App.svelte`, stopped on unmount) subscribes to `currentPath` and emits `navigation.route.changed` with `canGoBack` derived from "is the route root?", calling the optional `sdk.navigation.router.push` bridge **only on forward (PUSH) navigations** - never on POP, so the host stack can't desync. It re-syncs when the SDK becomes ready (pushes that happened before the bridge existed) and answers `navigation.back.requested` via `handleBackPress()`, which acks the bridge then pops exactly one in-app route. Every bridge call is `try/catch` + `?.` guarded because some mobile hosts don't implement the router bridge. A `routerLog` store (newest-first, max 50) surfaces bridge activity in the Router tab.
 
-### Sidebar routing — always navigate through `goTo()`
+### Sidebar routing - always navigate through `goTo()`
 
-`components/Sidebar.svelte` renders plain `<button>`s whose click handler calls `goTo(path)` — never raw hash writes. Every tap produces a real `pushState` entry plus mirror/router update in every host, so navigation can neither bypass the router nor depend on action-attachment subtleties. Active state derives from the `$currentPath` mirror (root matches `/` exactly; other entries match exactly or as a `path/` prefix for nested router pages).
+`components/Sidebar.svelte` renders plain `<button>`s whose click handler calls `goTo(path)` - never raw hash writes. Every tap produces a real `pushState` entry plus mirror/router update in every host, so navigation can neither bypass the router nor depend on action-attachment subtleties. Active state derives from the `$currentPath` mirror (root matches `/` exactly; other entries match exactly or as a `path/` prefix for nested router pages).
 
 ---
 
 ## 6. Vite Build
 
-Same library contract as every other framework — Svelte plugin, `SvelteMiniApp` lib name, `framework: "svelte"` in the emitted manifest:
+Same library contract as every other framework - Svelte plugin, `SvelteMiniApp` lib name, `framework: "svelte"` in the emitted manifest:
 
 ```typescript
 // vite.config.ts
@@ -246,7 +246,7 @@ export default defineConfig({
 });
 ```
 
-The `createManifest` plugin is a straight port of the React one: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "svelte"`. As everywhere, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies — the bundle ships zero SDK code.
+The `createManifest` plugin is a straight port of the React one: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "svelte"`. As everywhere, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies - the bundle ships zero SDK code.
 
 ---
 
@@ -275,17 +275,17 @@ The reference dependency set (`mini-apps/svelte-mini-app/package.json`):
 }
 ```
 
-Only the types package carries SDK typings — the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. Build with `tsc -b && vite build`, and validate templates with `svelte-check --tsconfig ./tsconfig.app.json`.
+Only the types package carries SDK typings - the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. Build with `tsc -b && vite build`, and validate templates with `svelte-check --tsconfig ./tsconfig.app.json`.
 
 ---
 
 ## 8. Essential folder structure
 
-The canonical Svelte layout for a mini app — entry contract, SDK stores, router, and build manifest. Only the load-bearing files are shown; presentational pieces live beside their page:
+The canonical Svelte layout for a mini app - entry contract, SDK stores, router, and build manifest. Only the load-bearing files are shown; presentational pieces live beside their page:
 
 ```
 svelte-mini-app/
-├── index.html              # Vite dev entry — single <div id="app">
+├── index.html              # Vite dev entry - single <div id="app">
 ├── package.json            # dependencies + scripts (dev on :3003)
 ├── vite.config.ts          # Vite lib mode + manifest plugin
 ├── svelte.config.js        # vite plugin config
@@ -318,7 +318,7 @@ svelte-mini-app/
 - [ ] `initSdk` polls `window.__GSA_SDK__` and `App.svelte` gates on `sdkPhase`
 - [ ] Each page binds the `miniApp` rune singleton (state survives route changes)
 - [ ] Sidebar and programmatic navigation go through `goTo()` (`pushState`, never raw hash writes)
-- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 - [ ] `vite.config.ts` builds an ES library + host manifest (`framework: "svelte"`)
 - [ ] `dist/manifest.json` lists the entry and file payload
 - [ ] Build passes (`tsc -b` + vite build; `svelte-check` clean)

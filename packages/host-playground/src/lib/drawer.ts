@@ -1,8 +1,8 @@
 /**
  * Capabilities drawer open/close state.
  *
- * Holds the current value (not just an event stream) so late subscribers —
- * the header's toggle button, which mounts independently of the drawer —
+ * Holds the current value (not just an event stream) so late subscribers -
+ * the header's toggle button, which mounts independently of the drawer -
  * start in sync instead of guessing.
  */
 let open = false

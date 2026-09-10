@@ -6,7 +6,7 @@ import type { SdkSource } from '../types'
  *
  * IMPORTANT: this module must stay free of top-level `await`. It is imported
  * by the Docusaurus-embedded playground, where a top-level await turns the
- * whole chunk into an async module — a registry hiccup (offline, rate limit,
+ * whole chunk into an async module - a registry hiccup (offline, rate limit,
  * blocked network) would then take the entire docs page down, and the static
  * build would hit the network on every render. Instead we ship a static list
  * and refresh it lazily in the browser via `loadSdkSources()`.
@@ -14,7 +14,7 @@ import type { SdkSource } from '../types'
 const CDN_TEMPLATE = 'https://cdn.jsdelivr.net/npm/@lizuz/sewa-sdk@{version}/dist/sewa-sdk.min.js'
 const REGISTRY_URL = 'https://registry.npmjs.org/@lizuz%2Fsewa-sdk'
 
-/** Newest first — same ordering `loadSdkSources()` produces once npm answers. */
+/** Newest first - same ordering `loadSdkSources()` produces once npm answers. */
 export const FALLBACK_SDK_VERSIONS = ['1.0.9', '1.0.8', '1.0.7', '1.0.6', '1.0.4']
 
 export function sdkSourceFor(version: string): SdkSource {
@@ -60,7 +60,7 @@ export async function getSdkPublishedVersions(): Promise<string[]> {
 let pending: Promise<SdkSource[]> | null = null
 
 /**
- * Live version list, fetched once per page and cached. Never rejects — falls
+ * Live version list, fetched once per page and cached. Never rejects - falls
  * back to {@link SDK_SOURCES} so the dropdown always has something usable.
  */
 export function loadSdkSources(): Promise<SdkSource[]> {

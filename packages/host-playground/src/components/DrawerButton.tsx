@@ -3,7 +3,7 @@ import { isDrawerOpen, subscribeDrawer, toggleDrawer } from '../lib/drawer'
 import { Settings2Icon } from 'lucide-react'
 
 export default function DrawerButton() {
-  // Mirror the shared drawer state instead of tracking a private copy — the
+  // Mirror the shared drawer state instead of tracking a private copy - the
   // drawer also closes via Escape and its own X button, and a private copy
   // would drift out of sync and need two clicks to reopen.
   const [open, setOpen] = useState(() => isDrawerOpen())

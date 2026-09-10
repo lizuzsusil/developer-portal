@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Host Playground — embedded (Docusaurus) styles
+   Host Playground - embedded (Docusaurus) styles
    ==========================================================================
 
    The standalone Vite app pulls in the full Tailwind bundle, preflight
@@ -8,7 +8,7 @@
    Docusaurus/Infima keeps its own base styles. Without preflight, utilities
    such as `border-neutral-800` set a border *colour* but never a width or
    style, `<button>` keeps its native grey chrome, and every heading and
-   paragraph inherits Infima's margins — the playground renders, but looks
+   paragraph inherits Infima's margins - the playground renders, but looks
    broken.
 
    So we ship the handful of preflight rules the playground actually relies
@@ -18,7 +18,7 @@
        docusaurus.infima < ... < properties < theme < utilities
 
    which means these resets beat Infima's element styles while still losing to
-   any Tailwind utility on the element itself — exactly what preflight does.
+   any Tailwind utility on the element itself - exactly what preflight does.
    This file is @imported from `src/css/main.css` right after the two Tailwind
    imports so that `theme` and `utilities` are always registered in that order,
    whatever order the bundler emits the chunks in.
@@ -90,7 +90,7 @@
     display: none !important;
   }
 
-  /* Base surface — the standalone app puts this on <body> (src/index.css). */
+  /* Base surface - the standalone app puts this on <body> (src/index.css). */
   .hp-root {
     background:
       radial-gradient(1200px 600px at 70% -10%, rgba(99, 102, 241, 0.14), transparent 60%),

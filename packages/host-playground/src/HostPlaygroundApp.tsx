@@ -13,8 +13,8 @@ import PlaygroundHeader from './components/PlaygroundHeader'
 import RightDrawer from './components/RightDrawer'
 
 /**
- * The playground shell — header, sandbox board, capabilities drawer and setup
- * modal — with no router involved.
+ * The playground shell - header, sandbox board, capabilities drawer and setup
+ * modal - with no router involved.
  *
  * The standalone app used to drive this through `HashRouter` (`/` -> Home,
  * `/playground` -> board) and passed the config through `location.state`.
@@ -28,7 +28,7 @@ import RightDrawer from './components/RightDrawer'
 interface Props {
   mode?: PlaygroundMode
   /**
-   * Prefills the setup form. Nothing is loaded until it is submitted — the
+   * Prefills the setup form. Nothing is loaded until it is submitted - the
    * sandbox always starts empty. Falls back to the last submitted config.
    */
   initialConfig?: PlaygroundConfig
@@ -52,7 +52,7 @@ export default function HostPlaygroundApp({
   /**
    * The mini app currently in the sandbox. Always starts empty, even when a
    * previous session is remembered: reloading the page must not silently
-   * remount whatever was last tested — you would be looking at a bundle you
+   * remount whatever was last tested - you would be looking at a bundle you
    * did not ask for, possibly from a different app or an older build.
    */
   const [activeConfig, setActiveConfig] = useState<PlaygroundConfig>(EMPTY_CONFIG)
@@ -71,8 +71,8 @@ export default function HostPlaygroundApp({
   /**
    * Remount trigger for the board. `token` forces a fresh `MiniAppBoard`;
    * `refresh` re-downloads the bundle instead of reading the cached copy.
-   * Submitting the form uses the cache — it is keyed on the manifest's file
-   * list, so a rebuild invalidates it by itself — while "Reload" always
+   * Submitting the form uses the cache - it is keyed on the manifest's file
+   * list, so a rebuild invalidates it by itself - while "Reload" always
    * refetches, for vendors whose filenames are not content-hashed.
    */
   const [reload, setReload] = useState({ token: 0, refresh: false })

@@ -11,7 +11,7 @@ import type { SdkSource } from '../types'
  *  - `window.__GSA_SDK__` = { miniAppId, timeout, retryAttempts, retryDelayMs, maxRetryDelayMs, targetOrigin }
  *  - `window.__GSA_HOST_DESCRIPTOR__` = { type, version, capabilities, sdkVersion }
  * The SDK overwrites `window.__GSA_SDK__` with the live instance after load
- * and reads the descriptor separately — do not merge them.
+ * and reads the descriptor separately - do not merge them.
  */
 
 export const MESSAGE_CHANNEL = 'gov-platform-sdk'
@@ -53,7 +53,7 @@ export function buildHostDescriptor(
     version: protocolVersion,
     capabilities: [
       'auth',
-      'permissions',
+      'permissions', // @deprecated - retained for backward compatibility only
       'flags',
       'config',
       'navigation',
@@ -75,12 +75,12 @@ export function buildHostDescriptor(
 
 /**
  * The SDK's handshake response expects these fields (pulled from the
- * minified code — `completeHandshake`/`Y` validators):
+ * minified code - `completeHandshake`/`Y` validators):
  *   - status: 'ok' or 'rejected'
  *   - capabilities: string[] (a subset of the SDK's NAMESPACES)
  *   - protocolVersion: string (major version must match "1")
  * The mini app then manually probes `config.getAll`, `platform.getType`,
- * then `appearance.getTheme` — the host should respond to those, otherwise
+ * then `appearance.getTheme` - the host should respond to those, otherwise
  * the SDK's `runInitializeSequence` hangs on `getTheme`.
  */
 export function parseMessage(data: unknown): {

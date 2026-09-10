@@ -11,11 +11,11 @@ import { TypesPackageName, InstallCommandTabs, ReactGovSdkImportBlock, PackageJs
 
 <FrameworkBadge framework="react" status="active" />
 
-> **Package:** no framework runtime package — React + react-router from npm, types from the shared types package, and the host-injected SDK at runtime. (`@sewa/framework-react` in `packages/framework-react` is an internal workspace package used by the portal itself — mini apps must not install it.) This guide documents the production-ready React integration pattern for Sewa mini apps.
+> **Package:** no framework runtime package - React + react-router from npm, types from the shared types package, and the host-injected SDK at runtime. (`@sewa/framework-react` in `packages/framework-react` is an internal workspace package used by the portal itself - mini apps must not install it.) This guide documents the production-ready React integration pattern for Sewa mini apps.
 
 React is the production-ready framework for Sewa mini apps. This single guide covers the whole flow: scaffolding a react-vite project, declaring host-injected types, exporting the `mount` lifecycle, wiring the SDK provider and hooks, and building the ES library the host loads. The pattern is a Vite ES-library build, host-injected SDK via `window.__GSA_SDK__`, and a `PlatformSDKProvider` with strict lifecycle handling.
 
-> **Important — no runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your app only needs the **types** package (`<TypesPackageName />`) as a dev dependency for compile-time safety. The `platform.runtime` / `platform.sdk` constraints in `manifest.json` are matched **host-side** by the loader; they are metadata, not a bundle dependency.
+> **Important - no runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your app only needs the **types** package (`<TypesPackageName />`) as a dev dependency for compile-time safety. The `platform.runtime` / `platform.sdk` constraints in `manifest.json` are matched **host-side** by the loader; they are metadata, not a bundle dependency.
 
 ---
 
@@ -43,7 +43,7 @@ pnpm add -D @vitejs/plugin-react @tailwindcss/vite tailwindcss
 
 <ReactGovSdkImportBlock />
 
-Only <code><TypesPackageName /></code> is a dev dependency - there is no `npm install` for the runtime SDK. No runtime import is needed — the host provides the instance at load time. The type declaration is the bridge between the host's runtime and your application's type checker.
+Only <code><TypesPackageName /></code> is a dev dependency - there is no `npm install` for the runtime SDK. No runtime import is needed - the host provides the instance at load time. The type declaration is the bridge between the host's runtime and your application's type checker.
 
 ---
 
@@ -109,10 +109,10 @@ The mini app uses `HashRouter` - `main.tsx`'s `applyInitialHash` normalizes an o
 
 ### Why does initialPath exist?
 
-A mini app cannot use the real URL — the host shell owns browser history and the address bar. So mini apps route on the hash fragment (`HashRouter`) or fully in memory. That leaves one question: **how does the mini app learn which screen to boot on?**
+A mini app cannot use the real URL - the host shell owns browser history and the address bar. So mini apps route on the hash fragment (`HashRouter`) or fully in memory. That leaves one question: **how does the mini app learn which screen to boot on?**
 
-- **Deep links need a channel.** A push notification, a home-screen shortcut, or one mini app navigating to another (`sdk.navigation.navigate` with a target route) must be able to open a specific screen — not always home. `initialPath` is that channel: the route the host wants the mini app to boot on.
-- **The hash can't be that channel.** `window.location.hash` is global, shared, mutable state. If the host shell uses hash routing itself, pre-writing the mini app's route into the hash corrupts host navigation — host and mini app fight over one fragment. An explicit function argument carries the same intent with no global side effects.
+- **Deep links need a channel.** A push notification, a home-screen shortcut, or one mini app navigating to another (`sdk.navigation.navigate` with a target route) must be able to open a specific screen - not always home. `initialPath` is that channel: the route the host wants the mini app to boot on.
+- **The hash can't be that channel.** `window.location.hash` is global, shared, mutable state. If the host shell uses hash routing itself, pre-writing the mini app's route into the hash corrupts host navigation - host and mini app fight over one fragment. An explicit function argument carries the same intent with no global side effects.
 
 Resolution order in `applyInitialHash` reflects this priority:
 
@@ -307,7 +307,7 @@ export function useHostRouter() {
 }
 ```
 
-Key difference vs. the simplified version: instead of maintaining a `depthRef` counter, it derives `canGoBack` from whether the current route is the root. Router calls are guarded with `?.` because some mobile hosts don't implement the router bridge — absence of a bridge must not crash rendering.
+Key difference vs. the simplified version: instead of maintaining a `depthRef` counter, it derives `canGoBack` from whether the current route is the root. Router calls are guarded with `?.` because some mobile hosts don't implement the router bridge - absence of a bridge must not crash rendering.
 
 ---
 
@@ -383,7 +383,7 @@ The emitted `manifest.json` is the contract the host uses to load your app:
 }
 ```
 
-- `platform.runtime` / `platform.sdk` are semver constraints the host matches against its own runtime and SDK versions. They are **metadata for the host loader**, not a runtime dependency your bundle imports. Your bundle ships zero SDK code — the host injects `window.__GSA_SDK__` at runtime.
+- `platform.runtime` / `platform.sdk` are semver constraints the host matches against its own runtime and SDK versions. They are **metadata for the host loader**, not a runtime dependency your bundle imports. Your bundle ships zero SDK code - the host injects `window.__GSA_SDK__` at runtime.
 - `bundle.entry` points to the ES module the host loads (`lib.name` + hash).
 - `bundle.files` lists every asset in `dist` so the host knows the full payload.
 
@@ -414,11 +414,11 @@ Verify `dist/manifest.json` lists your entry and files before uploading the bund
 
 ## 9. Essential folder structure
 
-The canonical react-vite layout for a mini app — entry contract, SDK types, provider layer, and build manifest. Only the load-bearing files are shown; feature tabs and cards live under `components/`:
+The canonical react-vite layout for a mini app - entry contract, SDK types, provider layer, and build manifest. Only the load-bearing files are shown; feature tabs and cards live under `components/`:
 
 ```
 my-mini-app/
-├── index.html              # Vite entry — single <div id="root">
+├── index.html              # Vite entry - single <div id="root">
 ├── package.json            # dependencies + scripts
 ├── vite.config.ts          # Vite lib mode + manifest plugin
 ├── tsconfig.app.json       # app TS config (referenced by tsconfig.json)
@@ -447,7 +447,7 @@ my-mini-app/
 - [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }`
 - [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates children on the `ready` phase
 - [ ] `src/App.tsx` composes `HashRouter`, `PlatformSDKProvider`, and the root component
-- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 - [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
 - [ ] `vite.config.ts` builds an ES library + host manifest via `createManifest()`
 - [ ] `dist/manifest.json` lists the entry and file payload

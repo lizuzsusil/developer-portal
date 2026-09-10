@@ -4,9 +4,9 @@ import HostPlaygroundApp from './HostPlaygroundApp'
 /**
  * The Host Playground as a block inside a documentation page.
  *
- * Renders exactly the same shell as the standalone app — header, sandbox
+ * Renders exactly the same shell as the standalone app - header, sandbox
  * board, capabilities drawer, setup modal, runtime loader, handshake listener
- * and mock handlers — just sized to a frame in the article instead of the
+ * and mock handlers - just sized to a frame in the article instead of the
  * viewport, with a full-screen toggle for when a vendor wants the standalone
  * proportions without leaving the docs.
  *
@@ -59,7 +59,7 @@ export default function HostPlaygroundEmbed({ hint = true }: HostPlaygroundEmbed
       />
       {hint && (
         <p className="hp-embed__hint">
-          Everything runs in your browser — the bundle is fetched from the URL you provide, the SDK from jsDelivr, and the
+          Everything runs in your browser - the bundle is fetched from the URL you provide, the SDK from jsDelivr, and the
           host side is mocked locally. Use the expand button in the sandbox header for the full-screen view
           {fullscreen ? ' (Escape to exit)' : ''}.
         </p>

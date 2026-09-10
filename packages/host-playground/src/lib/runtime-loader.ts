@@ -93,13 +93,13 @@ async function idbSet(db: IDBDatabase, id: string, body: string): Promise<void> 
  *
  * Keying the cache on `application.id` alone was a trap: bundlers emit
  * content-hashed filenames, but the id never changes, so a vendor who rebuilt
- * and redeployed kept being served the copy we downloaded the first time —
+ * and redeployed kept being served the copy we downloaded the first time -
  * silently testing an old build. Folding the manifest's entry/styles/files
  * into the key means a rebuild produces a new key and refetches on its own.
  */
 function bundleFingerprint(entry: string, styles: string[], files: string[]): string {
   const material = [entry, ...styles, ...files].join('|')
-  // djb2 — we only need change detection, not cryptographic strength.
+  // djb2 - we only need change detection, not cryptographic strength.
   let h = 5381
   for (let i = 0; i < material.length; i++) {
     h = ((h << 5) + h + material.charCodeAt(i)) | 0
@@ -157,7 +157,7 @@ interface MiniAppModuleExports {
  *   - Rspack/webpack (the Docusaurus portal) honours `webpackIgnore`; without
  *     it the call is compiled into a context module and every load fails with
  *     "Cannot find module 'blob:http://…'".
- * Both comments must stay — the same file is compiled by both bundlers.
+ * Both comments must stay - the same file is compiled by both bundlers.
  */
 function importModuleUrl(url: string): Promise<MiniAppModuleExports> {
   return import(/* webpackIgnore: true */ /* @vite-ignore */ url) as Promise<MiniAppModuleExports>
@@ -228,7 +228,7 @@ export interface LoadOptions {
    * Backs the "Reload" button. Normal loads read the cache, which is keyed on
    * the manifest's file list (see {@link bundleFingerprint}) so a rebuild
    * invalidates itself; this is the escape hatch for the case that fingerprint
-   * cannot catch — a vendor redeploying different code under unchanged,
+   * cannot catch - a vendor redeploying different code under unchanged,
    * unhashed filenames.
    */
   refresh?: boolean
@@ -237,7 +237,7 @@ export interface LoadOptions {
 /**
  * Loads and mounts the vendor mini app:
  *  1. fetch <base>/manifest.json
- *  2. download each listed file into IndexedDB (per module id) — via manifest.bundle.files
+ *  2. download each listed file into IndexedDB (per module id) - via manifest.bundle.files
  *  3. inject the chosen SDK version's CDN script (handshake channel ready)
  *  4. evaluate entry via Blob URL + mount into Shadow DOM (isolated scope, no CSS clash)
  *
@@ -280,7 +280,7 @@ export async function loadAndMountMiniApp(
     return { ok: false, sdkVersion: cfg.sdkVersion, error: 'manifest missing bundle.entry' }
   }
 
-  // Try cache (new format: JSON {entryCode, styles:[css]}) — fallback to legacy bundleText
+  // Try cache (new format: JSON {entryCode, styles:[css]}) - fallback to legacy bundleText
   const cacheId = `${moduleId}@${bundleFingerprint(entry, styles, files)}`
   const cached = opts.refresh ? null : await idbGet(db, cacheId)
   let entryCode: string | null = null
@@ -294,11 +294,11 @@ export async function loadAndMountMiniApp(
         styleContents = parsed.styles ?? []
         report('Bundle restored from cache', 62)
       } else {
-        // legacy HTML bundleText — invalidate
+        // legacy HTML bundleText - invalidate
         throw new Error('legacy cache')
       }
     } catch {
-      // legacy or corrupted cache — force re-download below
+      // legacy or corrupted cache - force re-download below
       entryCode = null
       styleContents = []
     }
@@ -402,7 +402,7 @@ export async function loadAndMountMiniApp(
     return {
       ok: false,
       sdkVersion: cfg.sdkVersion,
-      error: `Bundle ${entry} must export mount(container) — got ${Object.keys(mountExports).join(', ') || '(none)'}`,
+      error: `Bundle ${entry} must export mount(container) - got ${Object.keys(mountExports).join(', ') || '(none)'}`,
     }
   }
 

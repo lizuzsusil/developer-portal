@@ -29,7 +29,7 @@ Common `SdkError.code` values: `HANDSHAKE_FAILED`, `CAPABILITY_NOT_SUPPORTED`, `
 ## Guards
 
 Error classes and guard helpers (`isTimeout`, `isRetryable`, …) live in the SDK runtime, which
-mini apps never import. Branch on the error shape instead — every SDK failure carries a `code`
+mini apps never import. Branch on the error shape instead - every SDK failure carries a `code`
 and usually a `retryable` flag:
 
 ```typescript
@@ -44,4 +44,4 @@ try {
 }
 ```
 
-`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake — gate such calls with `sdk.permissions` / `sdk.device.isSupported()` first (see [Permissions](/docs/sdk/permissions)). Auth-family codes (`AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`) arrive the same way, on `err.code`.
+`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake - gate such calls with `sdk.device.isSupported()` (or the deprecated `sdk.permissions`, see [Permissions](/docs/sdk/permissions) - deprecated) first. Auth-family codes (`AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`) arrive the same way, on `err.code`.

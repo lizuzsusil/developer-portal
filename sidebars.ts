@@ -33,7 +33,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         "sdk/auth",
-        "sdk/permissions",
+        "sdk/permissions", // @deprecated - retained for backward compatibility, will be removed in future major
         "sdk/flags",
         "sdk/config",
         "sdk/navigation",

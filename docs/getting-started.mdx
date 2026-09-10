@@ -33,7 +33,7 @@ No runtime import - types are erased at build.
 The host loads your bundle as an ES module and calls `mount`. Honor the optional `runtime.initialPath` when present (deep links) and return an `unmount` handle:
 
 ```typescript
-// src/main.ts — shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
+// src/main.ts - shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
   // render your app into `container` - e.g. createRoot(container).render(<App />)
   // if `runtime?.initialPath` is set, route there on first render

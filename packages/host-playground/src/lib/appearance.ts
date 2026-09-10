@@ -1,10 +1,10 @@
 /**
  * Minimal host appearance controller for the playground.
  * Mirrors `shell/src/platform/appearance-controller.ts` but without
- * cookies/EventBus — it owns theme + locale, writes `data-theme`/`dir`/`lang`
+ * cookies/EventBus - it owns theme + locale, writes `data-theme`/`dir`/`lang`
  * to the DOM, and broadcasts `appearance.theme.changed` /
  * `appearance.locale.changed` to mini apps that subscribed via
- * `event.subscribe`. No mini-app code change needed — the SDK's
+ * `event.subscribe`. No mini-app code change needed - the SDK's
  * `appearance.getTheme()` + `eventBus.subscribe("appearance.theme.changed")`
  * pattern (the `useTheme()` hook you posted) just works.
  *
@@ -59,7 +59,7 @@ let localeState: LocaleState = readLocale()
  * Element the appearance state is reflected onto.
  *
  * Standalone: `<html>`, exactly like the production shell.
- * Embedded in the docs: the playground's own root element — writing
+ * Embedded in the docs: the playground's own root element - writing
  * `data-theme` / `dir` / `lang` to `<html>` there would flip the entire
  * Docusaurus site (it drives its own light/dark off `<html data-theme>`),
  * so `HostPlaygroundApp` calls `setAppearanceRoot()` on mount to contain it.
@@ -82,7 +82,7 @@ function applyDom() {
 }
 
 // ---------------------------------------------------------------------------
-// Event subscription bookkeeping — per mini-app `event.subscribe` payload
+// Event subscription bookkeeping - per mini-app `event.subscribe` payload
 // ---------------------------------------------------------------------------
 
 type SubKey = string // moduleId
@@ -143,7 +143,7 @@ function broadcast(type: string, payload: unknown) {
 }
 
 // ---------------------------------------------------------------------------
-// Public API — mirrors AppearanceController
+// Public API - mirrors AppearanceController
 // ---------------------------------------------------------------------------
 
 export function getTheme(): ThemeState {
@@ -200,7 +200,7 @@ if (typeof window !== 'undefined' && window.matchMedia) {
 }
 
 // ---------------------------------------------------------------------------
-// Local subscribers — the playground header keeps its toggle in sync without
+// Local subscribers - the playground header keeps its toggle in sync without
 // polling `getTheme()` on an interval.
 // ---------------------------------------------------------------------------
 

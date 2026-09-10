@@ -389,7 +389,7 @@ export default function RightDrawer() {
       <div className="shrink-0 border-t border-neutral-800/80 bg-[#101014] px-5 py-3">
         <div className="flex items-center gap-2 text-[10px] text-neutral-600">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          Changes apply to next request — reload mini-app to re-handshake
+          Changes apply to next request - reload mini-app to re-handshake
         </div>
       </div>
     </aside>

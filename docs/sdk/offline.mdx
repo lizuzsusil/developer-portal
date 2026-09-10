@@ -7,7 +7,7 @@ sidebar_label: Offline Queue
 # Offline Queue
 
 > **Host-installed.** The offline queue is a plugin the **host** installs on the SDK before handing
-> it to your mini app. There is nothing to import or construct — mini apps never see the SDK
+> it to your mini app. There is nothing to import or construct - mini apps never see the SDK
 > package. This page describes the behavior you can rely on.
 
 Queue capability-gated requests while the host is unreachable and replay them when connectivity returns.
@@ -26,7 +26,7 @@ a cap (default 50 entries), and a TTL (default 5 min):
 When `connection.lost` fires (or `navigator.onLine === false`), matching requests are enqueued
 instead of failing. On `connection.established` / `online`, entries flush in order. Expired or
 overflowed entries are pruned. Subscribe to `connection.lost` / `connection.established`
-(see [Events](/docs/sdk/events)) to reconcile your UI — re-fetch config or flags after a
+(see [Events](/docs/sdk/events)) to reconcile your UI - re-fetch config or flags after a
 reconnect.
 
 The plugin is a normal `SdkPlugin` - see [Plugins](/docs/sdk/plugins).

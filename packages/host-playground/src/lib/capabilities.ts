@@ -1,5 +1,5 @@
 /**
- * Central capability store — single source of truth for drawer toggles
+ * Central capability store - single source of truth for drawer toggles
  * and host RPC gating. Mirrors the shell's capability resolution
  * (packages/host-platform/src/rpc/capabilities.ts) but driven by the
  * playground drawer instead of a signed registry manifest.
@@ -178,8 +178,8 @@ export const OTHER_CAPABILITIES: Capability[] = [
   },
   {
     id: 'permissions',
-    name: 'Permissions',
-    description: 'Query host permissions.',
+    name: 'Permissions [Deprecated]',
+    description: '[Deprecated] Query host permissions - will be removed in a future major version.',
     enabled: true,
     namespace: 'permissions',
   },
@@ -249,7 +249,7 @@ export function subscribeCapabilities(listener: Listener): () => void {
 }
 
 // ---------------------------------------------------------------------------
-// Gating helpers — used by mock-handlers / runtime-loader
+// Gating helpers - used by mock-handlers / runtime-loader
 // ---------------------------------------------------------------------------
 
 const CORE_NAMESPACES = new Set(CORE_CAPABILITIES.map((c) => c.namespace))

@@ -11,15 +11,15 @@ import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
 
 <FrameworkBadge framework="angular" status="active" />
 
-> **Package:** no framework runtime package — Angular + Router from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Angular integration pattern for Sewa mini apps.
+> **Package:** no framework runtime package - Angular + Router from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Angular integration pattern for Sewa mini apps.
 
-Angular is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting the `mount` lifecycle, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling — expressed with Angular idioms (standalone components, signals, `providedIn: "root"` services, hash-location router). State lives in feature services rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
+Angular is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting the `mount` lifecycle, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling - expressed with Angular idioms (standalone components, signals, `providedIn: "root"` services, hash-location router). State lives in feature services rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
 
 ---
 
 ## 1. Scaffold a project
 
-There is no `create-vite` template for this stack, so scaffold manually — project files, then the exact dependency set:
+There is no `create-vite` template for this stack, so scaffold manually - project files, then the exact dependency set:
 
 ```bash
 mkdir my-mini-app && cd my-mini-app
@@ -109,7 +109,7 @@ export function unmount(container: HTMLElement): void {
 Three details differ from React/Vue and all three matter:
 
 - **`mount` is async** (`createApplication` returns a promise). The host ignores the return value and uses the module-level `unmount(container)` export instead.
-- **`unmount` is a real export**, tracked per container in a `WeakMap`. `ApplicationRef.destroy()` plus host-node removal is the only leak-free teardown — unlike React/Vue, DOM removal alone is not enough.
+- **`unmount` is a real export**, tracked per container in a `WeakMap`. `ApplicationRef.destroy()` plus host-node removal is the only leak-free teardown - unlike React/Vue, DOM removal alone is not enough.
 - **The router is fresh per mount** (`provideRouter` inside `createApplication`), so remounts never share router state.
 
 ### `app.component.ts` - phase gating
@@ -139,13 +139,13 @@ export class AppComponent {
 }
 ```
 
-Global render errors are captured by `MiniAppErrorHandler implements ErrorHandler` (provided in `main.ts`) into `ErrorStore` — the Angular counterpart of the React error boundary.
+Global render errors are captured by `MiniAppErrorHandler implements ErrorHandler` (provided in `main.ts`) into `ErrorStore` - the Angular counterpart of the React error boundary.
 
 ---
 
 ## 4. Core services
 
-`core/` holds platform wiring only — no UI, no feature logic. All services are `providedIn: "root"` singletons.
+`core/` holds platform wiring only - no UI, no feature logic. All services are `providedIn: "root"` singletons.
 
 ### `SdkService` - SDK lifecycle
 
@@ -153,7 +153,7 @@ Polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_RE
 
 ### `AppearanceService` - theme/locale sync
 
-Holds `locale` / `theme` computed signals seeded from `sdk.appearance.state()`. An `effect` starts the `sdk.appearance.subscribe()` subscription the moment the SDK signal becomes ready — no lifecycle-ordering assumptions — and unsubscribes on destroy.
+Holds `locale` / `theme` computed signals seeded from `sdk.appearance.state()`. An `effect` starts the `sdk.appearance.subscribe()` subscription the moment the SDK signal becomes ready - no lifecycle-ordering assumptions - and unsubscribes on destroy.
 
 ### `I18nService` - locale dictionaries
 
@@ -161,13 +161,13 @@ Loads the `en` / `si` / `ta` JSON dictionaries, selects by `locale.language` wit
 
 ### `HostRouterService` - bidirectional navigation sync
 
-Subscribes to `router.events`, emits `navigation.route.changed` with `canGoBack` derived from "is the route root?", syncs immediately on start when booting off-root (deep link), and answers `navigation.back.requested` via `Location.back()`. Every `sdk.navigation.router.*` call is guarded with `?.` because some mobile hosts don't implement the router bridge. Advantage over React/Vue: PUSH vs POP uses Angular's native `NavigationStart.navigationTrigger` (`'imperative'` vs `'popstate'`) — no approximation needed. It is instantiated by the shell, so sync is active exactly while the app is mounted.
+Subscribes to `router.events`, emits `navigation.route.changed` with `canGoBack` derived from "is the route root?", syncs immediately on start when booting off-root (deep link), and answers `navigation.back.requested` via `Location.back()`. Every `sdk.navigation.router.*` call is guarded with `?.` because some mobile hosts don't implement the router bridge. Advantage over React/Vue: PUSH vs POP uses Angular's native `NavigationStart.navigationTrigger` (`'imperative'` vs `'popstate'`) - no approximation needed. It is instantiated by the shell, so sync is active exactly while the app is mounted.
 
 ---
 
 ## 5. Feature segregation
 
-Each screen is a folder with a stateful service plus thin components — the service owns signals and SDK/browser calls, the component only binds `svc.x()` and `(click)="svc.method()"`. Presentational cards take data via `@Input` (icons as `LucideIconData`) and emit via `@Output`:
+Each screen is a folder with a stateful service plus thin components - the service owns signals and SDK/browser calls, the component only binds `svc.x()` and `(click)="svc.method()"`. Presentational cards take data via `@Input` (icons as `LucideIconData`) and emit via `@Output`:
 
 ```typescript
 // src/features/location/location.service.ts (shape)
@@ -198,11 +198,11 @@ export class LocationComponent {
 }
 ```
 
-Because services are singletons, tab state survives route changes exactly like the React shell's hoisted state — while each feature stays independently understandable and testable.
+Because services are singletons, tab state survives route changes exactly like the React shell's hoisted state - while each feature stays independently understandable and testable.
 
 ### Router table
 
-`src/app.routes.ts` mirrors the React route table one-to-one (hash location comes from `withHashLocation()` in `main.ts`), including its quirks — `/images` and `/router` have sidebar entries but no route, so they fall through to the catch-all:
+`src/app.routes.ts` mirrors the React route table one-to-one (hash location comes from `withHashLocation()` in `main.ts`), including its quirks - `/images` and `/router` have sidebar entries but no route, so they fall through to the catch-all:
 
 ```typescript
 export const appRoutes: Routes = [
@@ -214,7 +214,7 @@ export const appRoutes: Routes = [
 ];
 ```
 
-Sidebar links use `routerLink` + `routerLinkActive` — Angular intercepts these natively, so the hash-desync trap that bites raw anchors cannot occur.
+Sidebar links use `routerLink` + `routerLinkActive` - Angular intercepts these natively, so the hash-desync trap that bites raw anchors cannot occur.
 
 ---
 
@@ -286,17 +286,17 @@ The `createManifest` plugin is a straight port: it reads Vite's manifest, finds 
 }
 ```
 
-Only the types package carries SDK typings — the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. (`@angular/build` + `@angular/compiler-cli` are required by the Vite plugin and `ngc`.)
+Only the types package carries SDK typings - the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. (`@angular/build` + `@angular/compiler-cli` are required by the Vite plugin and `ngc`.)
 
 ---
 
 ## 8. Essential folder structure
 
-The canonical Angular layout — platform wiring, one folder per screen, shell, and build manifest. Only the load-bearing files are shown; presentational cards live beside their feature:
+The canonical Angular layout - platform wiring, one folder per screen, shell, and build manifest. Only the load-bearing files are shown; presentational cards live beside their feature:
 
 ```
 angular-mini-app/
-├── index.html              # Vite dev entry — single <app-root>
+├── index.html              # Vite dev entry - single <app-root>
 ├── package.json            # dependencies + scripts
 ├── vite.config.ts          # dev server config
 ├── vite.lib.config.ts      # production lib build (ngc-out entry)
@@ -332,5 +332,5 @@ angular-mini-app/
 - [ ] `SdkService` polls `window.__GSA_SDK__`; `AppComponent` gates on `phase()`
 - [ ] Each feature owns a root service (signals survive route changes); components stay thin
 - [ ] Sidebar uses `routerLink` (never raw hash writes)
-- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 - [ ] `vite build` pipeline passes (`ngc` typecheck + emit, manifest lists entry/files)

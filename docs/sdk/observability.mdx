@@ -43,7 +43,7 @@ Call `diagnose()` when `sdk.getMetrics().totalFailures` spikes or the host repor
 
 ## Tracing - opt-in `Tracer`
 
-Tracing is host-configured: the host injects a `Tracer` (default is a no-op tracer — no
+Tracing is host-configured: the host injects a `Tracer` (default is a no-op tracer - no
 allocation, no behavior change) when bridging to OpenTelemetry/Datadog. Spans cover
 `rpc.handshake`, `rpc.request`, and `rpc.stream`, with `namespace`, `action`, `traceId`,
 `retryCount`, and `bytes` attributes. Mini apps never touch this; the useful part for vendors

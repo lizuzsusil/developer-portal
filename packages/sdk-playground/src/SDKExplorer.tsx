@@ -67,11 +67,12 @@ if (isAuth) {
     id: "permissions-has",
     module: "permissions",
     method: "has",
-    signature: 'sdk.permissions.has(permission: string): Promise<boolean>',
-    description: "Checks if the mini app has been granted a specific permission.",
+    signature: 'sdk.permissions.has(permission: string): Promise<boolean> [Deprecated]',
+    description: "[Deprecated] sdk.permissions is deprecated and will be removed in a future major version. Checks if the mini app has been granted a specific permission.",
     paramsExample: '"camera"',
     returnType: "Promise<boolean>",
-    snippet: `const canUseCamera = await sdk.permissions.has("camera");
+    snippet: `// @deprecated sdk.permissions.has is deprecated - will be removed in future major
+const canUseCamera = await sdk.permissions.has("camera");
 if (canUseCamera) {
   const capture = await sdk.device.camera();
 }`,
@@ -82,11 +83,12 @@ if (canUseCamera) {
     id: "permissions-list",
     module: "permissions",
     method: "list",
-    signature: "sdk.permissions.list(): Promise<string[]>",
-    description: "Returns all permissions granted to this mini app.",
+    signature: "sdk.permissions.list(): Promise<string[]> [Deprecated]",
+    description: "[Deprecated] sdk.permissions is deprecated and will be removed in a future major version. Returns all permissions granted to this mini app.",
     paramsExample: "None",
     returnType: "Promise<string[]>",
-    snippet: `const permissions = await sdk.permissions.list();
+    snippet: `// @deprecated sdk.permissions.list is deprecated - will be removed in future major
+const permissions = await sdk.permissions.list();
 // ["camera", "location", "storage", "biometric"]`,
     mockResponse: ["camera", "location", "storage", "biometric"],
     category: "core",

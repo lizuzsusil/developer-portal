@@ -1,7 +1,7 @@
 import type { PlaygroundConfig } from '../types'
 import { DEFAULT_SDK_VERSION } from './sdk-sources'
 
-/** Nothing configured yet — the sandbox shows its empty state. */
+/** Nothing configured yet - the sandbox shows its empty state. */
 export const EMPTY_CONFIG: PlaygroundConfig = {
   name: '',
   manifestUrl: '',

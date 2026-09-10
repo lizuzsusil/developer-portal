@@ -14,16 +14,16 @@ interface Capability {
 }
 
 const CAPABILITIES: Capability[] = [
-  { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout — citizen identity", icon: "lock-key", descId: "homepage.capability.auth.desc", methods: ["getUser()", "isAuthenticated()", "logout()"] },
+  { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout - citizen identity", icon: "lock-key", descId: "homepage.capability.auth.desc", methods: ["getUser()", "isAuthenticated()", "logout()"] },
   { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "device-mobile", descId: "homepage.capability.device.desc", methods: ["location()", "camera()", "gallery()"] },
   { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "globe", descId: "homepage.capability.http.desc", methods: ["post()", "stream()", "getStream()"] },
   { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "database", descId: "homepage.capability.storage.desc", methods: ["setJson()", "getMany()", "scoped()"] },
   { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "palette", descId: "homepage.capability.appearance.desc", methods: ["getTheme()", "getLocale()", "subscribe()"] },
-  { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText — AI chat gateway", icon: "sparkle", descId: "homepage.capability.gicChat.desc", methods: ["startSession()", "streamText()"] },
+  { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText - AI chat gateway", icon: "sparkle", descId: "homepage.capability.gicChat.desc", methods: ["startSession()", "streamText()"] },
 ];
 
 const MORE_NAMESPACES: { label: string; href: string }[] = [
-  { label: "permissions", href: "/docs/sdk/permissions" },
+  { label: "permissions (deprecated)", href: "/docs/sdk/permissions" },
   { label: "flags", href: "/docs/sdk/flags" },
   { label: "navigation", href: "/docs/sdk/navigation" },
   { label: "notifications", href: "/docs/sdk/notifications" },

@@ -19,7 +19,7 @@ function ThemeToggle() {
 
   useEffect(() => {
     const sync = () => setTheme(getTheme())
-    // `setThemePreference` notifies directly — no polling needed. `storage`
+    // `setThemePreference` notifies directly - no polling needed. `storage`
     // and `focus` still cover changes made in another tab.
     const unsubscribe = subscribeAppearance(sync)
     window.addEventListener('storage', sync)
@@ -39,7 +39,7 @@ function ThemeToggle() {
         toggleTheme()
         setTheme(getTheme())
       }}
-      title={`Switch to ${isDark ? 'light' : 'dark'} — mini app will receive appearance.theme.changed`}
+      title={`Switch to ${isDark ? 'light' : 'dark'} - mini app will receive appearance.theme.changed`}
       aria-label={`Toggle theme, current ${theme.mode}`}
       className="inline-flex items-center gap-1.5 rounded-full border border-neutral-700/70 bg-neutral-900/60 px-3 py-1.5 text-xs font-medium text-neutral-300 transition-colors hover:border-neutral-600 hover:text-white"
     >
@@ -112,7 +112,7 @@ export default function PlaygroundHeader({ config, onLoadApp, onReload }: Props)
           {/* Primary action: point the sandbox at a different mini app. */}
           <button
             onClick={onLoadApp}
-            title="Load a different mini app — change the URL, SDK version or capabilities"
+            title="Load a different mini app - change the URL, SDK version or capabilities"
             className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3.5 text-xs font-semibold text-black transition-colors hover:bg-neutral-200"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

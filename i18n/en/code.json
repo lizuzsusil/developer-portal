@@ -339,7 +339,7 @@
     "description": "Hero title line 2"
   },
   "homepage.hero.subtitle": {
-    "message": "Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime — you just declare types and export",
+    "message": "Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime - you just declare types and export",
     "description": "Hero subtitle"
   },
   "homepage.hero.cta.getStarted": {

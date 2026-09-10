@@ -1,22 +1,35 @@
 ---
 id: permissions
-title: Permissions Module (sdk.permissions)
-sidebar_label: sdk.permissions
+title: Permissions Module (sdk.permissions) [Deprecated]
+sidebar_label: sdk.permissions (Deprecated)
 ---
+import Admonition from '@theme/Admonition';
 
-# Permissions Module (`sdk.permissions`)
+# Permissions Module (`sdk.permissions`) - Deprecated
+
+<Admonition type="danger" title="Deprecated">
+The `sdk.permissions` module is **deprecated** and will be removed in a future major version.
+Permissions are now handled via host capability gating and device guards - gate calls with `sdk.device.isSupported()` or check `sdk.capabilities` instead.
+This page is retained for backward compatibility only; new code should not use `sdk.permissions`.
+</Admonition>
 
 The `sdk.permissions` module enables mini apps to query permissions granted to the mini app by the platform host shell.
+
+> **Deprecation notice:** `sdk.permissions.has()` and `sdk.permissions.list()` will be removed. Migrate to capability-based checks.
 
 ---
 
 ## Public Methods
 
-### `has(permission)`
+### `has(permission)` - Deprecated
+
+<Admonition type="warning" title="Deprecated">
+`permissions.has()` is deprecated and will be removed in a future major version.
+</Admonition>
 
 Checks if a specific permission has been granted.
 
-- **Signature**: `has(permission: string): Promise<boolean>`
+- **Signature**: `has(permission: string): Promise<boolean>` - **Deprecated**
 - **Example**:
 
 ```typescript
@@ -26,11 +39,15 @@ if (locationAllowed) {
 }
 ```
 
-### `list()`
+### `list()` - Deprecated
+
+<Admonition type="warning" title="Deprecated">
+`permissions.list()` is deprecated and will be removed in a future major version.
+</Admonition>
 
 Retrieves a list of all permissions currently granted to this mini app.
 
-- **Signature**: `list(): Promise<string[]>`
+- **Signature**: `list(): Promise<string[]>` - **Deprecated**
 
 ```typescript
 const permissions = await sdk.permissions.list();

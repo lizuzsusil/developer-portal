@@ -8,7 +8,7 @@ sidebar_label: Reliability
 
 > **Host-configured, informational for vendors.** Heartbeat, circuit breaker, and adaptive timeout
 > are tuned by the host via SDK options your mini app never passes. Read this to understand the
-> behavior you observe (`connection.lost`, `CIRCUIT_OPEN`, background retries) — not to configure it.
+> behavior you observe (`connection.lost`, `CIRCUIT_OPEN`, background retries) - not to configure it.
 
 Heartbeat, circuit breaker, and adaptive timeout keep the mini app resilient against host stalls.
 
@@ -23,7 +23,7 @@ Events: `connection.lost` / `connection.established` - see [Events](/docs/sdk/ev
 
 The host configures the circuit breaker (threshold / window / open duration). States:
 `closed → open → halfOpen`. While `open`, requests throw `CIRCUIT_OPEN` without hitting the
-transport — treat it like a retryable error (see [Errors](/docs/sdk/errors)).
+transport - treat it like a retryable error (see [Errors](/docs/sdk/errors)).
 
 ## Adaptive Timeout
 

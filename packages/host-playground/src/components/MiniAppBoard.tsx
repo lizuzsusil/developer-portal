@@ -9,7 +9,7 @@ interface Props {
   sdk: SdkSource
   /** Opens the setup modal from the empty state. */
   onConfigure?: () => void
-  /** Bypass the IndexedDB copy of the bundle — see `LoadOptions.refresh`. */
+  /** Bypass the IndexedDB copy of the bundle - see `LoadOptions.refresh`. */
   refresh?: boolean
 }
 
@@ -34,7 +34,7 @@ export default function MiniAppBoard({ config, sdk, onConfigure, refresh = false
 
   useEffect(() => {
     const node = ref.current
-    // Nothing configured yet — the empty state renders instead, and we avoid
+    // Nothing configured yet - the empty state renders instead, and we avoid
     // fetching an empty URL only to report it back as a load failure.
     if (!node || !configured) return
     let cancelled = false

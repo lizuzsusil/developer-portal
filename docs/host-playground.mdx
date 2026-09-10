@@ -20,8 +20,8 @@ our actual host do. Also you can maintain the capabilites from inside the sandbo
 ## Using the sandbox
 
 1. Click **Load app** in the playground header (or **Configure mini app** in the empty sandbox) to open setup.
-2. Enter a **Display name** and the **Frontend URL** — the base directory that serves your `manifest.json`.
-3. Pick an **SDK version**. The list is fetched live from the `@lizuz/sewa-sdk` npm registry (the SDK bundle the **host** loads via jsDelivr — mini apps never install it); the newest release is preselected.
+2. Enter a **Display name** and the **Frontend URL** - the base directory that serves your `manifest.json`.
+3. Pick an **SDK version**. The list is fetched live from the `@lizuz/sewa-sdk` npm registry (the SDK bundle the **host** loads via jsDelivr - mini apps never install it); the newest release is preselected.
 4. Expand **Capabilities** to choose what the host grants. Core capabilities are always on; anything you leave off
    answers `PERMISSION_DENIED`.
 5. **Test & load app** fetches the manifest, downloads the bundle, injects the SDK, and mounts your `mount()` export.
@@ -30,19 +30,19 @@ Once it is running you can toggle capabilities live in the **Capabilities** draw
 to see your app receive `appearance.theme.changed` / `appearance.locale.changed`. The expand button gives you the
 full-screen standalone proportions; `Escape` returns to the article.
 
-To try a **different** mini app, hit **Load another app** — the form opens with your current settings, and **Clear**
+To try a **different** mini app, hit **Load another app** - the form opens with your current settings, and **Clear**
 empties the name and URL for a fresh one. The **↻ reload** button next to it re-downloads the app currently in the
 sandbox and remounts it with whatever capabilities are toggled on right now, which is what you want after redeploying
 a new build.
 
-The sandbox always starts empty when you open or refresh this page — it never remounts your last app behind your back
-— but it does remember your last settings, so coming back is **Load app** → **Test & load app**.
+The sandbox always starts empty when you open or refresh this page - it never remounts your last app behind your back
+- but it does remember your last settings, so coming back is **Load app** → **Test & load app**.
 
 ## Preparing your mini app
 
-1. Build as an **ES library** that exports `mount(container, runtime?)` (returning `{ unmount() }` — except Angular, which exports a separate `unmount(container)`). `runtime` is optional - accept and honor `runtime.initialPath` when the host provides it.
+1. Build as an **ES library** that exports `mount(container, runtime?)` (returning `{ unmount() }` - except Angular, which exports a separate `unmount(container)`). `runtime` is optional - accept and honor `runtime.initialPath` when the host provides it.
    See [Getting Started](./getting-started.mdx).
-2. Emit a `manifest.json` at the build output root — the full host-discovery contract:
+2. Emit a `manifest.json` at the build output root - the full host-discovery contract:
 
    ```json
    {
@@ -68,7 +68,7 @@ The sandbox always starts empty when you open or refresh this page — it never 
 
    The playground fetches `<Frontend URL>/manifest.json`, then every file in `bundle.files`.
    `platform.runtime` / `platform.sdk` are version constraints the host matches against its own
-   versions — they are metadata, not a bundle dependency (your bundle ships zero SDK code).
+   versions - they are metadata, not a bundle dependency (your bundle ships zero SDK code).
 
 3. Host the `dist/` folder (Vercel, Netlify, S3, …) **with CORS enabled**. The docs site fetches from a different
    origin, so your mini app must send `Access-Control-Allow-Origin` for `manifest.json`, `*.js`, `*.css` and assets.
@@ -89,16 +89,16 @@ For S3/CloudFront, set the bucket CORS rule and forward the `Access-Control-Allo
 
 ## How it works
 
-Everything runs in your browser — no upload, no account, no server-side build.
+Everything runs in your browser - no upload, no account, no server-side build.
 
-- **Runtime** — `packages/host-playground/src/lib/runtime-loader.ts`. `loadAndMountMiniApp()` fetches the manifest,
+- **Runtime** - `packages/host-playground/src/lib/runtime-loader.ts`. `loadAndMountMiniApp()` fetches the manifest,
   downloads `bundle.files` (caching them in IndexedDB), publishes assets as blob URLs, injects the selected SDK from
   jsDelivr, evaluates your entry via a Blob module URL, and calls `mount()` inside a Shadow DOM so your CSS and the
   docs' CSS cannot collide.
-- **Host RPC** — `lib/mock-handlers.ts` answers every `sdk.*` call with a deterministic stub, gated by
+- **Host RPC** - `lib/mock-handlers.ts` answers every `sdk.*` call with a deterministic stub, gated by
   `lib/capabilities.ts`. The handshake advertises exactly the capabilities you toggled on.
-- **Appearance** — `lib/appearance.ts` owns the sandbox's theme and locale and broadcasts change events to subscribed
+- **Appearance** - `lib/appearance.ts` owns the sandbox's theme and locale and broadcasts change events to subscribed
   mini apps. Embedded, it writes to the playground's own root element, so toggling the sandbox theme does not change
   the docs theme.
-- **Source of truth** — `packages/host-playground`. The standalone Vite app and this embed render the identical
+- **Source of truth** - `packages/host-playground`. The standalone Vite app and this embed render the identical
   `HostPlaygroundApp` shell; only the framing differs.

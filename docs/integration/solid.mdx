@@ -11,9 +11,9 @@ import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
 
 <FrameworkBadge framework="solid" status="active" />
 
-> **Package:** no framework runtime package — Solid + `@solidjs/router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Solid integration pattern for Sewa mini apps, verified against `mini-apps/solid-mini-app`.
+> **Package:** no framework runtime package - Solid + `@solidjs/router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Solid integration pattern for Sewa mini apps, verified against `mini-apps/solid-mini-app`.
 
-Solid is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and a provider component with strict lifecycle handling — expressed with Solid idioms (signals, `createContext`/`useContext`, `<Show>`, `onMount`/`onCleanup`, `HashRouter` + `useLocation`/`useNavigate`).
+Solid is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and a provider component with strict lifecycle handling - expressed with Solid idioms (signals, `createContext`/`useContext`, `<Show>`, `onMount`/`onCleanup`, `HashRouter` + `useLocation`/`useNavigate`).
 
 ---
 
@@ -42,7 +42,7 @@ Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provid
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
 
 ```typescript
 // src/global.d.ts
@@ -79,7 +79,7 @@ export {};
 
 ## 3. Entry Points
 
-### `main.tsx` — host-callable mount
+### `main.tsx` - host-callable mount
 
 ```typescript
 // src/main.tsx
@@ -118,10 +118,10 @@ export function mount(
 
 Two details differ from React and both matter:
 
-- **Solid's `render()` returns a `dispose` function** — that *is* the unmount. No `createRoot` equivalent is needed, and remounts never share state.
-- **The hash is seeded before `render()`** for the same reason as Vue: the router snapshots the start location at initialization, so applying `initialPath` afterwards would be overwritten by the initial navigation resolving to `/`. Unlike the Vue/Svelte entries, the reference app has no `import.meta.env.DEV` self-bootstrap — during development serve the app through `index.html` as usual.
+- **Solid's `render()` returns a `dispose` function** - that *is* the unmount. No `createRoot` equivalent is needed, and remounts never share state.
+- **The hash is seeded before `render()`** for the same reason as Vue: the router snapshots the start location at initialization, so applying `initialPath` afterwards would be overwritten by the initial navigation resolving to `/`. Unlike the Vue/Svelte entries, the reference app has no `import.meta.env.DEV` self-bootstrap - during development serve the app through `index.html` as usual.
 
-### `App.tsx` — router shell with provider
+### `App.tsx` - router shell with provider
 
 ```tsx
 // src/App.tsx
@@ -150,7 +150,7 @@ export default function App() {
 }
 ```
 
-Routing is a single catch-all `Route path="/*"`: tab switching happens inside `components/MiniApp/index.tsx` with `<Show when={location.pathname === "/chat"}>` blocks driven by `useLocation()`. Unknown paths fall back to `TabHome`; `/router/*` renders the nested `TabRouter`. `ErrorBoundary` wraps Solid's built-in `ErrorBoundary` and renders `LoadError` on any render crash — the counterpart of the React class boundary.
+Routing is a single catch-all `Route path="/*"`: tab switching happens inside `components/MiniApp/index.tsx` with `<Show when={location.pathname === "/chat"}>` blocks driven by `useLocation()`. Unknown paths fall back to `TabHome`; `/router/*` renders the nested `TabRouter`. `ErrorBoundary` wraps Solid's built-in `ErrorBoundary` and renders `LoadError` on any render crash - the counterpart of the React class boundary.
 
 ---
 
@@ -197,23 +197,23 @@ export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
 }
 ```
 
-`PlatformSDKProvider.tsx` owns a `createSignal<ProviderState>`, populates it in `onMount` (with `onCleanup` abort semantics mirroring React's `AbortController`), and gates rendering on three `<Show>` phases — identical to the React provider:
+`PlatformSDKProvider.tsx` owns a `createSignal<ProviderState>`, populates it in `onMount` (with `onCleanup` abort semantics mirroring React's `AbortController`), and gates rendering on three `<Show>` phases - identical to the React provider:
 
-1. **loading** — polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
-2. **ready** — provides state, mounts the renderless `PlatformSDKRuntime` component (which runs `useHostRouter()`), and renders children.
-3. **error** — renders `LoadError` with the failure message.
+1. **loading** - polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
+2. **ready** - provides state, mounts the renderless `PlatformSDKRuntime` component (which runs `useHostRouter()`), and renders children.
+3. **error** - renders `LoadError` with the failure message.
 
 ---
 
 ## 5. Hooks
 
-### `usePlatformSDK` — guarded access
+### `usePlatformSDK` - guarded access
 
 Shown in §4. Throws outside the provider and returns a non-null `sdk`, exactly like React's hook.
 
-### `useAppearance` — theme/locale sync
+### `useAppearance` - theme/locale sync
 
-Keeps a `createSignal<AppearanceState>` seeded from `sdk.appearance.state()`, refreshes it in a `createEffect` once the SDK is ready, and subscribes — unsubscribing via `onCleanup`. Returns getter-backed `{ locale, theme }`, so components read `theme.mode` reactively:
+Keeps a `createSignal<AppearanceState>` seeded from `sdk.appearance.state()`, refreshes it in a `createEffect` once the SDK is ready, and subscribes - unsubscribing via `onCleanup`. Returns getter-backed `{ locale, theme }`, so components read `theme.mode` reactively:
 
 ```typescript
 // src/hooks/useAppearance.ts
@@ -241,19 +241,19 @@ export function useAppearance(): UseAppearanceResult {
 }
 ```
 
-### `useHostRouter` — bidirectional navigation sync
+### `useHostRouter` - bidirectional navigation sync
 
-Same responsibilities as the React hook — emit `navigation.route.changed` with `canGoBack` derived from "is the route root?", answer `navigation.back.requested` by navigating back one step, and guard every `sdk.navigation.router.*` call with `?.` because some mobile hosts don't implement the router bridge. Solid-specific notes:
+Same responsibilities as the React hook - emit `navigation.route.changed` with `canGoBack` derived from "is the route root?", answer `navigation.back.requested` by navigating back one step, and guard every `sdk.navigation.router.*` call with `?.` because some mobile hosts don't implement the router bridge. Solid-specific notes:
 
-- Reactivity comes from `createEffect` tracking `location.pathname` (not a `location.key` dependency) — the effect re-runs on every path change, with a `lastPath`/`previousPath` pair for first-navigation dedupe.
+- Reactivity comes from `createEffect` tracking `location.pathname` (not a `location.key` dependency) - the effect re-runs on every path change, with a `lastPath`/`previousPath` pair for first-navigation dedupe.
 - `@solidjs/router` exposes no navigation-type API, so unlike React there is no PUSH-vs-POP distinction: every non-root change informs the host via `sdk.navigation.router?.push?.(true)`.
 - It runs inside the renderless `PlatformSDKRuntime` child of the provider, so back-button sync is always active once the SDK is ready.
 
-### Sidebar routing — `<A>` intercepts natively
+### Sidebar routing - `<A>` intercepts natively
 
-`components/Sidebar.tsx` uses `<A href={path}>` from `@solidjs/router` with `end={path === "/"}` and active state from `useLocation().pathname`. Solid's router intercepts these clicks natively, so the hash-desync trap that bites raw anchors cannot occur — no `navigate()` slot plumbing (cf. the Vue guide) is needed. Sidebar taps only close the drawer on mobile.
+`components/Sidebar.tsx` uses `<A href={path}>` from `@solidjs/router` with `end={path === "/"}` and active state from `useLocation().pathname`. Solid's router intercepts these clicks natively, so the hash-desync trap that bites raw anchors cannot occur - no `navigate()` slot plumbing (cf. the Vue guide) is needed. Sidebar taps only close the drawer on mobile.
 
-### `useT` — locale dictionaries
+### `useT` - locale dictionaries
 
 Loads the `en` / `si` / `tam` JSON dictionaries (the `tam.json` file is keyed as `ta`), selects by `locale.language`, falls back to `en` then to the key, and interpolates `{param}` placeholders. Returns a getter-backed `language` plus `t(key, params)`.
 
@@ -261,7 +261,7 @@ Loads the `en` / `si` / `tam` JSON dictionaries (the `tam.json` file is keyed as
 
 ## 6. Vite Build
 
-Same library contract as React — Solid plugin instead of the React plugin, and `framework: "solid"` in the emitted manifest:
+Same library contract as React - Solid plugin instead of the React plugin, and `framework: "solid"` in the emitted manifest:
 
 ```typescript
 // vite.config.ts
@@ -307,7 +307,7 @@ export default defineConfig({
 });
 ```
 
-The `createManifest` plugin is a straight port of the React one: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "solid"`. As on React, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies — the bundle ships zero SDK code. (`lib.name` only affects the output filename; the reference app keeps the historical `RevenueMiniApp` name.)
+The `createManifest` plugin is a straight port of the React one: it reads Vite's manifest, finds the entry, collects all `dist` files, and writes the host-discovery `manifest.json` with `framework: "solid"`. As on React, `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle dependencies - the bundle ships zero SDK code. (`lib.name` only affects the output filename; the reference app keeps the historical `RevenueMiniApp` name.)
 
 ### Router table
 
@@ -338,17 +338,17 @@ The reference dependency set (`mini-apps/solid-mini-app/package.json`):
 }
 ```
 
-Only the types package carries SDK typings — the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. Build with `tsc -b && vite build`.
+Only the types package carries SDK typings - the runtime SDK (`MiniAppSdk`) comes from the host shell, never `npm install` it. Build with `tsc -b && vite build`.
 
 ---
 
 ## 8. Essential folder structure
 
-The canonical Solid layout for a mini app — entry contract, SDK state, signals, and build manifest. Only the load-bearing files are shown; feature tabs live under `components/`:
+The canonical Solid layout for a mini app - entry contract, SDK state, signals, and build manifest. Only the load-bearing files are shown; feature tabs live under `components/`:
 
 ```
 solid-mini-app/
-├── index.html              # Vite entry — single <div id="root">
+├── index.html              # Vite entry - single <div id="root">
 ├── package.json            # dependencies + scripts (dev on :3010)
 ├── vite.config.ts          # Vite lib mode + manifest plugin
 ├── tsconfig.app.json       # app TS config (referenced by tsconfig.json)
@@ -378,7 +378,7 @@ solid-mini-app/
 - [ ] Hash is seeded before `render()`; single catch-all `Route path="/*"` with `<Show>` tab switching
 - [ ] Sidebar navigates via `<A>` (never raw hash writes)
 - [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates children on ready
-- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 - [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
 - [ ] `vite.config.ts` builds an ES library + host manifest (`framework: "solid"`)
 - [ ] `dist/manifest.json` lists the entry and file payload

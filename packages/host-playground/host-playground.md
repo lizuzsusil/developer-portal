@@ -1,8 +1,8 @@
-# Host Playground — Vendor-Testable Mini App Sandbox (React + Vite)
+# Host Playground - Vendor-Testable Mini App Sandbox (React + Vite)
 
 A lightweight "playground" host that lets a mini-app developer (vendor) point at
 their own mini app's **manifest URL**, fill in their app's name + icon, pick the
-SDK version to test against, and watch their app mount inside the host — without
+SDK version to test against, and watch their app mount inside the host - without
 touching the existing Next.js shell or its signed-registry / zip-download pipeline.
 
 This playground uses the **directory/manifest URL flow** (the "old style" of
@@ -34,14 +34,14 @@ capability grants, no event bus – just enough to confirm the handshake works.
 Everything error-prone already lives in `@sewa/runtime-loader` (the *old* `load()` path):
 directory-based file download, IndexedDB caching, blob-URL evaluation, and Shadow-DOM
 mount. The playground **imports it as a workspace package and calls
-`loader.load(...)`** — the same call the shell's pre-installed / fallback flow makes,
+`loader.load(...)`** - the same call the shell's pre-installed / fallback flow makes,
 which fetches `baseUrl/manifest.json` and then each listed file individually.
 
 Reuse from `@sewa/host-platform`:
 
 - `createHostPlatform` (+ `PostMessageTransport`) for the postMessage channel, **only**
   for the initial handshake (`handshake` message + ack). No method registration, no
-  capability gating, no event bridge — the `RpcServer` is created with `allowedOrigins:
+  capability gating, no event bridge - the `RpcServer` is created with `allowedOrigins:
   ["*"]` and never gets any custom methods.
 - `NAMESPACES.HANDSHAKE` / `PROTOCOL_VERSION` so the wire stays compatible.
 
@@ -87,7 +87,7 @@ After "Test", the playground switches to a two-pane view:
 | +--------------------+ +-------------------------------------+ |
 ```
 
-No in-app UI driving is needed; the vendor just confirms the app *renders* — which
+No in-app UI driving is needed; the vendor just confirms the app *renders* - which
 means the load + mount pipeline worked.
 
 ---
@@ -173,7 +173,7 @@ export default defineConfig({
 
 ### 4.4 `playground/index.html` + `src/main.tsx`
 
-Standard Vite React entry — single root `<div id="root">`, then
+Standard Vite React entry - single root `<div id="root">`, then
 `createRoot(document.getElementById("root")!).render(<App />)`.
 
 ---
@@ -215,7 +215,7 @@ const bundleUrl = normalizeBaseUrl(cfg.manifestUrl);
  * Available SDK bundles, keyed by version. The vendor chooses one; the host seeds
  * the global and injects that script so its first handshake can be observed.
  *
- * `local` always resolves to `/sdk/sewa-sdk.min.js` — a bundled copy in
+ * `local` always resolves to `/sdk/sewa-sdk.min.js` - a bundled copy in
  * `playground/public/sdk/` so the playground works offline.
  */
 export interface SdkSource {
@@ -253,7 +253,7 @@ export interface LaunchResult {
 /**
  * Loads the mini app via the *directory* pipeline (baseUrl/manifest.json + per-file
  * downloads into IndexedDB), booted under the chosen SDK, and mounts into the right
- * pane. No capability grants, no RPC methods, no event bus — just the initial
+ * pane. No capability grants, no RPC methods, no event bus - just the initial
  * handshake between the vendor's SDK and the host, which is all the playground needs
  * to prove the pipeline works.
  */
@@ -268,7 +268,7 @@ export async function launchMiniApp(
   const loader = createRuntimeLoader({ maxModules: 2 });
   const result = await loader.load(
     moduleId,
-    bundleUrl,               // baseUrl — the loader fetches baseUrl/manifest.json,
+    bundleUrl,               // baseUrl - the loader fetches baseUrl/manifest.json,
                              // then each file listed there
     1,                       // version pin
     { retryAttempts: 3 },
@@ -277,13 +277,13 @@ export async function launchMiniApp(
     return { ok: false, error: result.error ?? "Failed to load plugin bundle" };
   }
 
-  // 2. Boot the chosen SDK against the module — handshake only
+  // 2. Boot the chosen SDK against the module - handshake only
   const src = resolveSdkSource(cfg.sdkVersion);
   if (src) {
     await loadMiniAppSdk(moduleId, {
       source: src.url,
       sdkVersion: cfg.sdkVersion,
-      // No capabilities or services passed — the SDK self-identifies; the host
+      // No capabilities or services passed - the SDK self-identifies; the host
       // only confirms the connect/handshake.
     });
   }
@@ -295,7 +295,7 @@ export async function launchMiniApp(
 ```
 
 The key difference vs. the spec's previous iteration: **no `bundleHash`, no
-`loadBundle`**, just `loader.load(moduleId, baseUrl, version, {retryAttempts})` —
+`loadBundle`**, just `loader.load(moduleId, baseUrl, version, {retryAttempts})` -
 the same call the shell's `MiniAppContainer` makes with `source="fallback"`.
 
 ---
@@ -311,7 +311,7 @@ the playground includes the same dev-server middleware pattern from the shell:
 - The loader is constructed with a `fetcher` that rewrites each file URL to the
   proxy path, mirroring `shell/src/lib/modules-api.ts:134-137`.
 
-This is the *file-level* proxy — not the `.zip` proxy the previous draft described.
+This is the *file-level* proxy - not the `.zip` proxy the previous draft described.
 It only kicks in when the vendor's origin has no CORS headers. All integrity concerns
 are moot since the playground skips hash verification.
 
@@ -328,7 +328,7 @@ Vendor mini-app bundle
         POSTs handshake on MESSAGE_CHANNEL
    Host (playground)
         └─ listens on that channel and returns a `handshakeAck`
-        (only the ack — no RPC, no event bus, no capability gating)
+        (only the ack - no RPC, no event bus, no capability gating)
 ```
 
 That one round-trip is the *only* SDK interaction the playground implements. The
@@ -346,7 +346,7 @@ A vendor who opens the playground should be able to:
 2. Paste the **manifest base URL** of their built app's `dist` folder.
 3. *(Optional)* paste an **icon URL** to show next to the name.
 4. Pick an **SDK version** from the dropdown.
-5. Click **Test** — the host:
+5. Click **Test** - the host:
    - fetches `baseUrl/manifest.json`
    - downloads each listed file (JS entry, CSS, assets) directly
    - caches them in IndexedDB under `<moduleId>` (old-style directory cache)
@@ -354,7 +354,7 @@ A vendor who opens the playground should be able to:
    - evaluates the entry via `import(blobUrl)`
    - mounts the app in the right pane (Shadow DOM)
    - boots the chosen SDK version and completes the **first handshake**
-6. **Reload** / **Clear cache** (left pane) — replay the pipeline; the cache is
+6. **Reload** / **Clear cache** (left pane) - replay the pipeline; the cache is
    per-origin + per-version, so re-opening the same app after clearing cache forces
    a fresh download.
 
@@ -374,23 +374,23 @@ A vendor who opens the playground should be able to:
 
 ## 10. What stays untouched
 
-- `@sewa/runtime-loader` and `@sewa/host-platform` — **no changes**.
-- The Next.js shell and its signed-registry/zip pipeline — **no changes**.
+- `@sewa/runtime-loader` and `@sewa/host-platform` - **no changes**.
+- The Next.js shell and its signed-registry/zip pipeline - **no changes**.
 - The playground only *uses* these packages and adds (optionally) a small dev-server
   file-level CORS proxy.
 
 ---
 
-## Appendix A — What was removed vs. the previous draft
+## Appendix A - What was removed vs. the previous draft
 
 | Removed | Why |
 |---|---|
 | `.zip` download, hash verify, `unzip`, `loadBundle` | Spec is now *directory/manifest-URL* flow |
 | `bundleHash` form field + verification | No hashing in the old style |
 | Full RPC methods, capability grants, event bus | Only the **first handshake** is implemented |
-| Manifest **registry** integration (`/api/manifests`) | Not needed — the vendor types the manifest URL directly |
+| Manifest **registry** integration (`/api/manifests`) | Not needed - the vendor types the manifest URL directly |
 
-## Appendix B — What was added / changed
+## Appendix B - What was added / changed
 
 | Added / changed | Why |
 |---|---|

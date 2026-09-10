@@ -9,7 +9,7 @@ export function PlaygroundGrid() {
         {
             title: "SDK Playground",
             to: "/docs/playground",
-            desc: "Try every sdk.* method against a mock transport. No local setup — runs inside the docs site.",
+            desc: "Try every sdk.* method against a mock transport. No local setup - runs inside the docs site.",
             descId: "homepage.integrations.playground.desc",
             cta: "Open playground",
             ctaId: "homepage.integrations.playground.cta",
