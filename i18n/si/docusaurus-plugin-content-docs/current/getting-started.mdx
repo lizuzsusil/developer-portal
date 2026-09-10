@@ -24,7 +24,7 @@ SDK ක්‍රියාත්මක කිරීම සත්කාරක-ස�
 
 ```mermaid
 flowchart LR
-    A["වර්ග පැකේජය<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["gov-sdk.d.ts<br/>declare global Window.__GSA_SDK__"]
+    A["වර්ග පැකේජය<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["global.d.ts<br/>declare global Window.__GSA_SDK__"]
     B --> C["ඔබේ කේතය<br/>sdk.auth.getUser() — සම්පූර්ණයෙන් ටයිප් කර ඇත"]
     D["සත්කාරක කවචය<br/>(CDN / native bridge)"] -->|"ක්‍රියාත්මක අවස්ථාවේදී එන්නත් කිරීම"| E["window.__GSA_SDK__"]
     E --> C
@@ -34,9 +34,9 @@ flowchart LR
 
 ---
 
-## 1. වර්ග ප්‍රකාශන (`gov-sdk.d.ts`)
+## 1. වර්ග ප්‍රකාශන (`global.d.ts`)
 
-සත්කාරකය එන්නත් කරන ගෝලීයයන් TypeScript දැන ගැනීම සඳහා ප්‍රකාශ කරන්න. මෙය [`test-mini-app/src/gov-sdk.d.ts`](/si/docs/getting-started) වෙතින් ගත් ගොනුවයි:
+සත්කාරකය එන්නත් කරන ගෝලීයයන් TypeScript දැන ගැනීම සඳහා ප්‍රකාශ කරන්න. මෙය [`test-mini-app/src/global.d.ts`](/si/docs/getting-started) වෙතින් ගත් ගොනුවයි:
 
 <ImportCodeBlock />
 

@@ -426,7 +426,7 @@ my-mini-app/
 └── src/
     ├── main.tsx            # ← mount(container, runtime?)
     ├── App.tsx             # ← HashRouter + PlatformSDKProvider + shell
-    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── global.d.ts        # ← host-injected SDK typings
     ├── routes.ts           # route definitions
     ├── index.css           # Tailwind + custom styles
     ├── components/         # tabs, shell, ErrorBoundary, Loader, LoadError
@@ -443,7 +443,7 @@ my-mini-app/
 ## Checklist
 
 - [ ] Types package installed with your package manager (pnpm / npm / yarn / bun)
-- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }`
 - [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates children on the `ready` phase
 - [ ] `src/App.tsx` composes `HashRouter`, `PlatformSDKProvider`, and the root component

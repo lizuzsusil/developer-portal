@@ -4,34 +4,26 @@ title: Platform Overview
 sidebar_label: Platform Overview
 ---
 
-import {TypesPackageName, InstallCommandTabs} from '@site/src/components/TypesPackage';
-
 # Platform Overview
 
-The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (web and Flutter). The host loads each mini app as an ES module, injects the SDK at `window.__GSA_SDK__`, and mediates all privileged operations over an RPC bridge.
+The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (Web and Flutter). The host loads each mini app as an ES module, injects the SDK at `window.__GSA_SDK__`, and mediates all privileged operations over an RPC bridge.
 
-## Runtime Model
+## Architecture at a Glance
 
-- **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime?)` - see [`Getting Started`](/docs/getting-started) and the [Sewa Platform repo](https://github.com/anomalyco/sewa-platform). `runtime` is optional: hosts that deep-link pass `{ initialPath }`, others pass nothing.
-- **SDK injection**: The host sets `window.__GSA_SDK__` before calling `mount`. No `npm install` of the SDK.
-- **Types**: install the type package with your preferred manager:
+- **Host shell** — owns the window lifecycle, navigation, theming, and permissions. It fetches your bundle via `manifest.json`, mounts it into an isolated container, and unmounts it when the user leaves.
+- **Mini app** — your UI and logic. You ship only your code; the SDK runtime is not bundled. The host calls your exported `mount` to render and `unmount` to clean up.
+- **SDK bridge** — every `sdk.*` call (auth, storage, device, etc.) is forwarded to the host over a secured RPC channel and the result is returned to your app.
 
-<InstallCommandTabs />
+## Security Model
 
-## Capability Negotiation
+Capabilities are granted at handshake. On first SDK use the host replies with the allowed set; calls outside that set throw `CAPABILITY_NOT_SUPPORTED` and never reach the host. Details in [Protocol & Handshake](/docs/sdk/protocol).
 
-On first use the SDK performs a handshake (`handshake.connect`) carrying `miniAppId`, `sdkVersion`, `protocolVersion`, and the requested capability list. The host replies with the granted set. Ungranted capabilities throw `CAPABILITY_NOT_SUPPORTED`.
-
-See [Protocol & Handshake](/docs/sdk/protocol) for the wire format.
-
-## Transport
-
-`DefaultTransport` uses `postMessage` + `CustomEvent (gov-platform-event)` with origin pinning. Alternatives (`WebSocketTransport`, `BroadcastTransport`, `MessagePortTransport`, `SsrTransport`) are documented in [Transport](/docs/sdk/transport).
+The RPC channel itself is host-owned (origin-pinned `postMessage` bridge, Flutter `CustomEvent` fallback) and requires no vendor configuration — you just call `sdk.*`. Background in [Transport](/docs/sdk/transport) and lifecycle in [SDK Core](/docs/sdk/core).
 
 ## Next Steps
 
-- [Getting Started](/docs/getting-started) - scaffold a mini app
-- [SDK Reference](/docs/sdk/core) - all namespaces
+- [Getting Started](/docs/getting-started) — minimal scaffold (types, `mount`, build, manifest)
+- [SDK Reference](/docs/sdk/core) — all namespaces and lifecycle
 - Framework guides: [React](/docs/integration/react), [Vue](/docs/integration/vue), [Angular](/docs/integration/angular), [Svelte](/docs/integration/svelte), [Solid](/docs/integration/solid)
-- [SDK Playground](/docs/playground) - try `sdk.*` calls in the docs
-- [Host Playground](/docs/host-playground) - load your built mini app in a sandbox host
+- [SDK Playground](/docs/playground) — try `sdk.*` calls in the docs
+- [Host Playground](/docs/host-playground) — load your built mini app in a sandbox host

@@ -34,7 +34,7 @@ npm install vue-router lucide-vue-next
 npm install -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
 ```
 
-Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8.
+Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8.
 
 ---
 
@@ -42,7 +42,7 @@ Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the provi
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `gov-sdk.d.ts` serves React and Vue apps alike.
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React and Vue apps alike.
 
 ---
 
@@ -343,7 +343,7 @@ vue-mini-app/
     ├── router.ts           # ← per-mount hash-history factory
     ├── routes.ts           # sidebar nav items
     ├── index.css           # Tailwind + custom styles
-    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── global.d.ts        # ← host-injected SDK typings
     ├── components/         # tabs, cards, shell, provider, Sidebar
     ├── composables/        # usePlatformSDK, useAppearance, useHostRouter, useT
     ├── plugins/            # sdk.ts (SdkKey injection wiring)
@@ -357,7 +357,7 @@ vue-mini-app/
 ## Checklist
 
 - [ ] Scaffolded `vue-ts` plus `vue-router`, `lucide-vue-next`, Tailwind, and the types package
-- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.ts` exports `mount(container, runtime?)` returning `{ unmount() }`
 - [ ] Router is created per mount via the factory — never a shared singleton
 - [ ] Sidebar and links navigate via `navigate()`, never raw hash writes

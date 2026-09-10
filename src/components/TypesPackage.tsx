@@ -62,7 +62,7 @@ export function ImportCodeBlock() {
   const pkg = useTypesPackage();
   return (
     <CodeBlock language="typescript">
-      {`// src/gov-sdk.d.ts
+      {`// src/global.d.ts
 import type {
   MiniAppSdkInterface,
   PlatformUser,
@@ -75,7 +75,7 @@ declare global {
   type SdkPlatformUser = PlatformUser;
 
   interface Window {
-    __GSA_SDK__?: MiniAppSdk; // set by host before mount()
+    __GSA_SDK__?: MiniAppSdk;
   }
 }`}
     </CodeBlock>
@@ -86,7 +86,7 @@ export function ReactGovSdkImportBlock() {
   const pkg = useTypesPackage();
   return (
     <CodeBlock language="typescript">
-      {`// src/gov-sdk.d.ts
+      {`// src/global.d.ts
 import type { MiniAppSdkInterface, PlatformUser } from "${pkg}";
 
 declare global {

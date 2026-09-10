@@ -8,135 +8,50 @@ import {TypesPackageName, InstallCommandTabs, ImportCodeBlock} from '@site/src/c
 
 # Getting Started
 
-The Sewa Mini App SDK is **injected by the host shell** at runtime via `window.__GSA_SDK__`. You do not `npm install` the SDK itself. Instead, your mini app depends on the shared type package for development, and the host provides the live SDK instance when your app is mounted inside the container.
+The SDK is **injected by the host shell** at `window.__GSA_SDK__` before your app mounts. You do **not** install the SDK runtime. Your app depends only on the shared types package for type-checking; the host provides the live instance at runtime.
 
-See the [React Integration Guide](/docs/integration/react) for the full step-by-step creation guide.
-
----
+> Framework-specific, copy-pasteable walkthroughs live in [React](/docs/integration/react), [Vue](/docs/integration/vue), [Angular](/docs/integration/angular), [Svelte](/docs/integration/svelte), and [Solid](/docs/integration/solid). This page is the framework-agnostic scaffold.
 
 ## Prerequisites
 
-The SDK runtime is host-provided - your app installs only the type package for compile-time safety:
+Add the types package as a dev dependency:
 
 <InstallCommandTabs />
 
-The types package is your single source of truth. Host, SDK, and mini app all agree on `PlatformMessage`, `MiniAppSdkInterface`, `SdkEventMap`, `PlatformUser`, `AppearanceState`, and `Device*` result types from one place. Adding the dev dependency gives you the full `sdk.*` surface without any runtime bundle cost — this is why the runtime does **not** need to be installed or imported by your mini app.
+That gives you `MiniAppSdkInterface`, `PlatformMessage`, `SdkEventMap`, and all namespace result types with no runtime cost.
 
----
+## 1. Declare the Injected SDK (`global.d.ts`)
 
-## 1. Type Declarations (`gov-sdk.d.ts`)
-
-Declare the globals that the host injects so TypeScript knows about them. This is the canonical `gov-sdk.d.ts` shape:
+So TypeScript knows about the host-injected global:
 
 <ImportCodeBlock />
 
-`MiniAppSdkInterface` covers every namespace (`sdk.auth`, `sdk.device`, `sdk.http`, `sdk.appearance`, `sdk.gicChat`, `sdk.debug`, `sdk.getMetrics`, …), `request`/`requestSafe`/`batch`, `on`/`once`/`events`/`emit`, `use`/`usePlugin`/`registerModule`, and the `SdkEventMap` event catalog. Types for hooks follow directly:
+No runtime import - types are erased at build.
+
+## 2. Export the Mount Entry
+
+The host loads your bundle as an ES module and calls `mount`. Honor the optional `runtime.initialPath` when present (deep links) and return an `unmount` handle:
 
 ```typescript
-// src/hooks/usePlatformSDK.ts - typed via the global
-import { useContext } from "react";
-import { SDKContext } from "../context/SDKContext";
-
-export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
-  const ctx = useContext(SDKContext);
-  if (!ctx.sdk) throw new Error("usePlatformSDK must be used within PlatformSDKProvider");
-  return { ...ctx, sdk: ctx.sdk };
-}
-```
-
-There is no SDK runtime package to install — the host shell loads `@lizuz/sewa-sdk` itself (via CDN script tag) and injects the live instance at `window.__GSA_SDK__` before calling your `mount()`. Never `npm install` or `import` the SDK runtime in a mini app. Types come from <TypesPackageName /> and are erased at build.
-
----
-
-## 2. Entry Point (`main.tsx`)
-
-Export a `mount` function - the host calls it with a DOM container and may pass an optional `runtime` object (`{ initialPath }`) to deep-link into a route:
-
-```typescript
-// src/main.tsx
-import type { Root } from "react-dom/client";
-import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
-
-/** Sets the initial hash so HashRouter starts at the host-provided path. */
-function applyInitialHash(initialPath?: string) {
-  if (!initialPath) return;
-  const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
-  if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
-    window.location.replace(`#${normalized}`);
-  }
-}
-
+// src/main.ts — shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
-  const root: Root = createRoot(container);
-  applyInitialHash(runtime?.initialPath);
-  root.render(<App />);
-  return { unmount() { root.unmount(); } };
+  // render your app into `container` - e.g. createRoot(container).render(<App />)
+  // if `runtime?.initialPath` is set, route there on first render
+  return { unmount() { /* teardown your framework tree */ } };
 }
 ```
 
-No direct SDK import - the provider reads `window.__GSA_SDK__` at runtime. `runtime` is optional: honor `runtime.initialPath` when the host provides it, otherwise `HashRouter` starts from the current hash. If the host already set the hash (deep link) it is left untouched. See the [React Integration Guide](/docs/integration/react#why-does-initialpath-exist) for why this parameter exists and why it is named `initialPath`.
+The host owns the SDK instance and destroys it. your app only cleans up its own render tree.
 
----
+## 3. Build as a Library
 
-## 3. Vite Build (`vite.config.ts`)
+Build an ES library and emit the `manifest.json` the host uses for discovery. The `platform` constraints inside the manifest are host-side version metadata, not a bundle dependency.
 
-Build as a library so the host can load your bundle as a module:
+See your framework guide for the complete `vite.config.ts` + `createManifest` setup:
+[React](/docs/integration/react#6-vite-build) · [Vue](/docs/integration/vue#6-vite-build) · [Svelte](/docs/integration/svelte#6-vite-build) - same contract, different framework plugins.
 
-```typescript
-// vite.config.ts
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import { createManifest } from "./src/utils/createManifest.ts";
+## 4. Verify
 
-export default defineConfig({
-  plugins: [
-    react({ jsxRuntime: "automatic" }),
-    tailwindcss(),
-    createManifest(),
-  ],
-  define: { "process.env.NODE_ENV": JSON.stringify("production") },
-  build: {
-    target: "chrome89",
-    manifest: "manifest.json",
-    outDir: "dist",
-    cssCodeSplit: true,
-    lib: {
-      entry: "./src/main.tsx",
-      name: "RevenueMiniApp",
-      formats: ["es"],
-      fileName: () => "[name][hash].js",
-    },
-    rollupOptions: {
-      output: {
-        codeSplitting: false,
-        format: "es",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash][extname]",
-      },
-    },
-  },
-  server: {
-    host: "0.0.0.0",
-    cors: true,
-    headers: { "Access-Control-Allow-Origin": "*" },
-  },
-});
-```
+Build your application with your framework's build step and confirm `dist/manifest.json` contains `bundle.entry` and `bundle.files` pointing to the emitted assets. Then load the bundle in the [Host Playground](/docs/host-playground) to ensure it mounts and `sdk.*` calls resolve.
 
-The `createManifest` plugin writes the host-discovery `manifest.json`. The `platform` section records `runtime` / `sdk` semver constraints the host matches against its own versions.
-
-### Is the runtime needed to initialize the app?
-
-No. The bundle imports **no runtime module**. The host injects `window.__GSA_SDK__`; the `platform` fields in the manifest are metadata for the host loader, not a bundle dependency. During development you can run the app without the host — the provider's retry loop simply keeps polling until the SDK global appears.
-
----
-
-## 4. Teardown
-
-Nothing to do: the host owns the SDK instance and destroys it. Your app only needs to return
-`{ unmount() }` from `mount()` (or export `unmount(container)` on Angular) so the host can
-unmount your framework tree — the `PlatformSDKProvider` aborts its polling via
-`AbortController` as part of that. Never call `sdk.destroy()` from a mini app.
+All platform access goes through `sdk.*` - no direct `fetch` to platform endpoints. Capability errors and retries are covered in [Errors](/docs/sdk/errors) and [Reliability](/docs/sdk/reliability).

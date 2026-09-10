@@ -34,7 +34,7 @@ npm install svelte-spa-router "@lucide/svelte"
 npm install -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
 ```
 
-Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the stores (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3003` (`vite --port 3003 --host`) and typechecks templates with `svelte-check --tsconfig ./tsconfig.app.json`.
+Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the stores (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3003` (`vite --port 3003 --host`) and typechecks templates with `svelte-check --tsconfig ./tsconfig.app.json`.
 
 ---
 
@@ -42,7 +42,7 @@ Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the store
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `gov-sdk.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set (`SdkDeviceLocationResult`, `SdkDeviceCameraResult`, `SdkDeviceGalleryResult`, `SdkDeviceFileResult`, `SdkDeviceDownloadResult`, `SdkDeviceContactResult`, `SdkFileModule`, `SdkDeviceBiometricResult`, …) plus `window.__GSA_SDK__`.
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set (`SdkDeviceLocationResult`, `SdkDeviceCameraResult`, `SdkDeviceGalleryResult`, `SdkDeviceFileResult`, `SdkDeviceDownloadResult`, `SdkDeviceContactResult`, `SdkFileModule`, `SdkDeviceBiometricResult`, …) plus `window.__GSA_SDK__`.
 
 ---
 
@@ -301,7 +301,7 @@ svelte-mini-app/
     ├── pages/              # one thin wrapper per route
     ├── components/         # Shell bits: Sidebar, LoadError, Loader, cards
     ├── app.css             # Tailwind + custom styles
-    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── global.d.ts        # ← host-injected SDK typings
     ├── lib/                # createManifest.ts, retry.ts, i18n.ts, types.ts
     ├── vite-env.d.ts       # Vite client types
     └── i18n/               # en / si / ta dictionaries
@@ -312,7 +312,7 @@ svelte-mini-app/
 ## Checklist
 
 - [ ] Svelte 5 + `svelte-spa-router` + `@lucide/svelte` installed; types package as devDependency
-- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.ts` exports `mount(container, runtime?)` returning `{ unmount() }`
 - [ ] Hash is seeded via `replaceState` before mount; mirror started/stopped with app lifetime
 - [ ] `initSdk` polls `window.__GSA_SDK__` and `App.svelte` gates on `sdkPhase`

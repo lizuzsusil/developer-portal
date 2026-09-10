@@ -34,7 +34,7 @@ pnpm add @solidjs/router lucide-solid
 pnpm add -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
 ```
 
-Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3010` (`vite --port 3010 --host`).
+Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3010` (`vite --port 3010 --host`).
 
 ---
 
@@ -42,10 +42,10 @@ Then declare `gov-sdk.d.ts` (§2), write the `mount` entry (§3), wire the provi
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `gov-sdk.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
+Only the types package (`@lizuz/mini-app-types`) is a dev dependency — there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
 
 ```typescript
-// src/gov-sdk.d.ts
+// src/global.d.ts
 import type {
   DeviceBiometricOptions,
   DeviceBiometricResult,
@@ -360,7 +360,7 @@ solid-mini-app/
     ├── store.ts            # ← ProviderState (loading | ready | error)
     ├── routes.ts           # sidebar nav items
     ├── index.css           # Tailwind + custom styles
-    ├── gov-sdk.d.ts        # ← host-injected SDK typings
+    ├── global.d.ts        # ← host-injected SDK typings
     ├── components/         # tabs, MiniApp shell, Sidebar, ErrorBoundary, Loader, LoadError
     ├── hooks/              # usePlatformSDK, useAppearance, useHostRouter, useT
     ├── types/              # shared interfaces (index.ts)
@@ -373,7 +373,7 @@ solid-mini-app/
 ## Checklist
 
 - [ ] Scaffolded `solid-ts` plus `@solidjs/router`, `lucide-solid`, Tailwind, and the types package
-- [ ] `src/gov-sdk.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }` via `render()`/`dispose()`
 - [ ] Hash is seeded before `render()`; single catch-all `Route path="/*"` with `<Show>` tab switching
 - [ ] Sidebar navigates via `<A>` (never raw hash writes)

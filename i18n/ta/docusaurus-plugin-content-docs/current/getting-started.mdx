@@ -24,7 +24,7 @@ SDK இயக்க நேரம் ஹோஸ்ட்-வழங்கப்ப�
 
 ```mermaid
 flowchart LR
-    A["வகை தொகுப்பு<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["gov-sdk.d.ts<br/>declare global Window.__GSA_SDK__"]
+    A["வகை தொகுப்பு<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["global.d.ts<br/>declare global Window.__GSA_SDK__"]
     B --> C["உங்கள் குறியீடு<br/>sdk.auth.getUser() — முழுமையாக வகைப்படுத்தப்பட்டது"]
     D["ஹோஸ்ட் ஷெல்<br/>(CDN / native bridge)"] -->|"இயக்க நேரத்தில் செலுத்தப்பட்டது"| E["window.__GSA_SDK__"]
     E --> C
@@ -34,9 +34,9 @@ flowchart LR
 
 ---
 
-## 1. வகை அறிவிப்புகள் (`gov-sdk.d.ts`)
+## 1. வகை அறிவிப்புகள் (`global.d.ts`)
 
-ஹோஸ்ட் செலுத்தும் உலகளாவியவற்றை TypeScript அறியும் வகையில் அறிவிக்கவும். இது [`test-mini-app/src/gov-sdk.d.ts`](/ta/docs/getting-started) இலிருந்து கோப்பு:
+ஹோஸ்ட் செலுத்தும் உலகளாவியவற்றை TypeScript அறியும் வகையில் அறிவிக்கவும். இது [`test-mini-app/src/global.d.ts`](/ta/docs/getting-started) இலிருந்து கோப்பு:
 
 <ImportCodeBlock />
 
