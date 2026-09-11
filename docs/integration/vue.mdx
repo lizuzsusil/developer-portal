@@ -50,21 +50,22 @@ Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is 
 
 ```typescript
 // src/main.ts
-// src/main.ts
 import { createApp } from "vue";
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import App from "./App.vue";
-import "./index.css";
+import MiniApp from "./components/MiniApp/index.vue";
+import "./style.css";
+import Test from "./components/Test.vue";
 
 const routes = [
   {
-    path: "/", component: App
-  }
-  // add your others routes
+    path: "/", component: MiniApp
+  },
+  {path: '/test', component: Test}
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
 
@@ -121,15 +122,15 @@ Two details differ from React and both matter:
 
 ```vue
 <script setup lang="ts">
+import { RouterView } from "vue-router";
 import ErrorBoundary from "./components/ErrorBoundary.vue";
-import MiniApp from "./components/MiniApp/index.vue";
 import PlatformSDKProvider from "./components/PlatformSDKProvider.vue";
 </script>
 
 <template>
   <ErrorBoundary>
     <PlatformSDKProvider>
-      <MiniApp />
+      <RouterView />
     </PlatformSDKProvider>
   </ErrorBoundary>
 </template>
@@ -162,6 +163,79 @@ export const SdkKey: InjectionKey<SdkState> = Symbol("sdk");
 1. **loading** - polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
 2. **ready** - provides state, mounts a renderless `HostRouterSync` component (which runs `useHostRouter()`), and renders the default slot.
 3. **error** - renders `LoadError` with the failure message.
+
+```vue
+//src/PlatformSDKProvider.vue
+<script setup lang="ts">
+import { onUnmounted, provide, reactive } from "vue";
+import type { SdkState } from "../plugins/sdk";
+import { SdkKey } from "../plugins/sdk";
+import { retry } from "../utils/retry";
+import HostRouterSync from "./HostRouterSync.vue";
+import LoadError from "./LoadError.vue";
+
+const state = reactive<SdkState>({
+  sdk: null,
+  user: null,
+  isReady: false,
+  error: null,
+});
+
+provide(SdkKey, state);
+
+function getSDK(): MiniAppSdk {
+  const instance = window.__GSA_SDK__ ?? null;
+  if (!instance) throw new Error("SDK not available");
+  return instance;
+}
+
+const controller = new AbortController();
+
+async function init() {
+  try {
+    const instance = await retry(() => getSDK(), {
+      maxAttempts: 30,
+      delayMs: 500,
+      signal: controller.signal,
+    });
+    await new Promise<void>((res) => {
+      if (window.__GSA_SDK__) return res();
+      window.addEventListener("__GSA_SDK_READY__", () => res(), {
+        once: true,
+      });
+    });
+    const user = await instance.auth.getUser();
+    if (!controller.signal.aborted) {
+      state.sdk = instance;
+      state.user = user ?? null;
+      state.isReady = true;
+    }
+  } catch (error) {
+    if (!controller.signal.aborted) {
+      state.error =
+        error instanceof Error
+          ? error
+          : new Error("SDK initialization failed");
+    }
+  }
+}
+
+void init();
+
+onUnmounted(() => {
+  controller.abort();
+});
+</script>
+
+<template>
+  <LoadError v-if="state.error" :message="state.error.message" />
+  <div v-else-if="!state.isReady">Connecting to platform...</div>
+  <template v-else>
+    <HostRouterSync />
+    <slot />
+  </template>
+</template>
+```
 
 Cleanup mirrors `AbortController` semantics via `onUnmounted(() => controller.abort())`.
 
