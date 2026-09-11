@@ -170,13 +170,6 @@ export const OTHER_CAPABILITIES: Capability[] = [
     namespace: 'config',
   },
   {
-    id: 'flags',
-    name: 'Feature Flags',
-    description: 'Check feature flags via host.',
-    enabled: true,
-    namespace: 'flags',
-  },
-  {
     id: 'permissions',
     name: 'Permissions [Deprecated]',
     description: '[Deprecated] Query host permissions - will be removed in a future major version.',
@@ -262,6 +255,8 @@ const CORE_NAMESPACES = new Set(CORE_CAPABILITIES.map((c) => c.namespace))
 export function isActionAllowed(namespace: string, action: string): boolean {
   const ns = namespace.trim().toLowerCase()
   const act = action.trim().toLowerCase()
+  // Legacy compat: flags removed from SDK but keep stub for old bundles
+  if (ns === 'flags') return true
   if (CORE_NAMESPACES.has(ns)) return true
 
   for (const cap of capabilityMap.values()) {

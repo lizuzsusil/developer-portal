@@ -27,7 +27,7 @@ await sdk.batch([{ namespace, action, payload }]); // batch via host or parallel
 | `mapPayload` | - | Transform success payload; used by `http` to map `HttpResult` → `HttpClientError` / `HttpServerError` |
 | `dedupe` | `false` | 50 ms window coalesces identical reads |
 
-**Dedup allowlist** (11 idempotent reads): `auth.getUser`, `permissions.has` (deprecated), `flags.isEnabled`, `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
+**Dedup allowlist** (9 idempotent reads): `auth.getUser`, `permissions.has` (deprecated), `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
 
 ## Retry
 

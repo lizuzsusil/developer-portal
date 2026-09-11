@@ -26,7 +26,7 @@ a cap (default 50 entries), and a TTL (default 5 min):
 When `connection.lost` fires (or `navigator.onLine === false`), matching requests are enqueued
 instead of failing. On `connection.established` / `online`, entries flush in order. Expired or
 overflowed entries are pruned. Subscribe to `connection.lost` / `connection.established`
-(see [Events](/docs/sdk/events)) to reconcile your UI - re-fetch config or flags after a
+(see [Events](/docs/sdk/events)) to reconcile your UI - re-fetch config after a
 reconnect.
 
 The plugin is a normal `SdkPlugin` - see [Plugins](/docs/sdk/plugins).

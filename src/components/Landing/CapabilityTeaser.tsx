@@ -24,7 +24,6 @@ const CAPABILITIES: Capability[] = [
 
 const MORE_NAMESPACES: { label: string; href: string }[] = [
   { label: "permissions (deprecated)", href: "/docs/sdk/permissions" },
-  { label: "flags", href: "/docs/sdk/flags" },
   { label: "navigation", href: "/docs/sdk/navigation" },
   { label: "notifications", href: "/docs/sdk/notifications" },
   { label: "links", href: "/docs/sdk/links" },
@@ -102,7 +101,7 @@ export function CapabilityTeaser() {
               description="Capability browse"
               className="font-bold text-text-link"
             >
-              {"Browse all 14 namespaces {arrow}"}
+              {"Browse all 13 namespaces {arrow}"}
             </ArrowLink>
           </span>
         </div>

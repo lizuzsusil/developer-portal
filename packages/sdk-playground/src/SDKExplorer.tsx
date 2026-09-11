@@ -94,34 +94,6 @@ const permissions = await sdk.permissions.list();
     category: "core",
   },
   {
-    id: "flags-isEnabled",
-    module: "flags",
-    method: "isEnabled",
-    signature: 'sdk.flags.isEnabled(flagKey: string): Promise<boolean>',
-    description: "Checks whether a feature flag is enabled for this mini app.",
-    paramsExample: '"new_checkout_flow"',
-    returnType: "Promise<boolean>",
-    snippet: `const isNewFlow = await sdk.flags.isEnabled("new_checkout_flow");
-if (isNewFlow) {
-  renderNewCheckout();
-}`,
-    mockResponse: true,
-    category: "core",
-  },
-  {
-    id: "flags-getAll",
-    module: "flags",
-    method: "getAll",
-    signature: "sdk.flags.getAll(): Promise<Record<string, boolean>>",
-    description: "Returns a dictionary of all active feature flags.",
-    paramsExample: "None",
-    returnType: "Promise<Record<string, boolean>>",
-    snippet: `const flags = await sdk.flags.getAll();
-// { new_ui: true, beta_biometric: true, fast_payment: false }`,
-    mockResponse: { new_ui: true, beta_biometric: true, fast_payment: false },
-    category: "core",
-  },
-  {
     id: "config-get",
     module: "config",
     method: "get",

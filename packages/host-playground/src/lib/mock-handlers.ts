@@ -146,7 +146,7 @@ export async function handleMockRequest(
       return all[k]
     }
 
-    // ----- flags -----
+    // Legacy compat: flags removed from SDK but keep stub for old bundles
     case 'flags.isEnabled': {
       return false
     }
