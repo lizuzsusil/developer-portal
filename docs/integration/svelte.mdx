@@ -5,7 +5,8 @@ sidebar_label: Svelte Integration
 ---
 
 import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
-import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
+import { ReactGovSdkImportBlock, InstallProdCommandTabs, InstallCommandTabs } from "@site/src/components/TypesPackage";
+import { SvelteScaffoldBlock } from "@site/src/components/FrameworkTabs";
 
 # Svelte Integration Guide
 
@@ -21,18 +22,13 @@ Svelte is a supported framework for Sewa mini apps. The pattern mirrors React on
 
 Start from any Svelte + Vite project. From scratch:
 
-```bash
-npm create vite@latest my-mini-app -- --template svelte-ts
-cd my-mini-app
-npm install
-```
+<SvelteScaffoldBlock />
 
 Add routing, icons, Tailwind, and the types package:
 
-```bash
-npm install svelte-spa-router "@lucide/svelte"
-npm install -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
-```
+<InstallProdCommandTabs pkgName = "svelte-spa-router @lucide/svelte" />
+
+<InstallCommandTabs pkgName="tailwindcss @tailwindcss/vite @lizuz/mini-app-types @types/node" />
 
 Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the stores (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3003` (`vite --port 3003 --host`) and typechecks templates with `svelte-check --tsconfig ./tsconfig.app.json`.
 
@@ -149,9 +145,100 @@ The root component is the Svelte counterpart of the provider gate: SDK failure �
 
 `sdkInstance` / `sdkUser` / `sdkPhase` (`loading | ready | error`) / `sdkError` writables plus a derived `isSdkReady`. `initSdk(signal?)` polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, fetches the user, and publishes - identical to the React provider. `getSdkOrThrow()` is the guarded accessor feature code calls (the counterpart of React's `usePlatformSDK` throw-outside-provider).
 
+```typescript
+//stores/sdk.ts
+
+import { derived, get, writable } from "svelte/store";
+import { retry } from "../lib/retry.ts";
+
+export type SdkPhase = "loading" | "ready" | "error";
+
+export const sdkInstance = writable<MiniAppSdk | null>(null);
+export const sdkUser = writable<SdkPlatformUser | null>(null);
+export const sdkPhase = writable<SdkPhase>("loading");
+export const sdkError = writable<Error | null>(null);
+
+export const isSdkReady = derived(sdkPhase, ($p) => $p === "ready");
+
+function getSDK(): MiniAppSdk {
+  const instance = window.__GSA_SDK__ ?? null;
+  if (!instance) throw new Error("SDK not available");
+  return instance;
+}
+
+let started = false;
+
+export async function initSdk(signal?: AbortSignal): Promise<void> {
+  if (started) return;
+  started = true;
+  try {
+    const instance = await retry(() => getSDK(), {
+      maxAttempts: 30,
+      delayMs: 500,
+      signal,
+    });
+    await new Promise<void>((res) => {
+      if (window.__GSA_SDK__) return res();
+      window.addEventListener("__GSA_SDK_READY__", () => res(), { once: true });
+    });
+    const user = await instance.auth.getUser();
+    if (signal?.aborted) return;
+    sdkInstance.set(instance);
+    sdkUser.set((user as SdkPlatformUser | undefined) ?? null);
+    sdkPhase.set("ready");
+  } catch (error) {
+    if (signal?.aborted) return;
+    sdkError.set(
+      error instanceof Error ? error : new Error("SDK initialization failed"),
+    );
+    sdkPhase.set("error");
+  }
+}
+
+export function getSdkOrThrow(): MiniAppSdk {
+  const sdk = get(sdkInstance);
+  if (!sdk) throw new Error("SDK not ready — use within initialized app");
+  return sdk;
+}
+
+
+```
+
 ### Appearance & i18n
 
 `stores/appearance.ts` holds a writable `appearanceState` (seeded with `en-LK` / `en` / `light` defaults), subscribes to `sdkInstance` to seed from `sdk.appearance.state()` and forward `sdk.appearance.subscribe()` updates, and exposes derived `localeState` / `themeState`. `lib/i18n.ts` derives `language` and a `tStore` lookup from `localeState` over the `en` / `si` / `ta` JSON dictionaries with `en` fallback and `{param}` interpolation - same contract as every other framework.
+
+```typescript
+//stores/appearance.ts
+import type { AppearanceState } from "@lizuz/mini-app-types";
+import { derived, writable } from "svelte/store";
+import { sdkInstance } from "./sdk.ts";
+
+const DEFAULT_STATE: AppearanceState = {
+  locale: { locale: "en-LK", language: "en", direction: "ltr" },
+  theme: { preference: "system", mode: "light" },
+};
+
+export const appearanceState = writable<AppearanceState>(DEFAULT_STATE);
+
+sdkInstance.subscribe((sdk) => {
+  if (!sdk) return;
+  try {
+    appearanceState.set(sdk.appearance.state());
+  } catch {
+    // keep defaults when host bridge is unavailable
+  }
+  const unsubscribe = sdk.appearance.subscribe((s: AppearanceState) =>
+    appearanceState.set(s),
+  );
+  void unsubscribe;
+});
+
+export const localeState = derived(appearanceState, ($s) => $s.locale);
+export const themeState = derived(appearanceState, ($s) => $s.theme);
+
+```
+
 
 ### Feature state (`miniapp/state.svelte.ts`)
 
@@ -164,10 +251,135 @@ The root component is the Svelte counterpart of the provider gate: SDK failure �
 ### Location mirror (`router/location.ts`)
 
 Single source of truth for the route, mirrored from `window.location.hash`: `normalizePath` (leading `/`, no trailing slash), `readHashPath` (drops querystrings), `isRootPath`, the `currentPath` writable, `startLocationSync` / `stopLocationSync` (`hashchange` listener, app lifetime), and `seedInitialPath` (host `initialPath` via `history.replaceState`, host-set deep links left alone).
+```typescript
+import { writable } from "svelte/store";
 
+/**
+ * Single source of truth for the mini-app route, mirrored from
+ * `window.location.hash` (the hash router owns the URL; this store is the
+ * reactive view of it for the sidebar, host-sync and pages).
+ *
+ * Paths are normalized: always leading `/`, no trailing slash (except root).
+ */
+export function normalizePath(path: string): string {
+  let p = path || "/";
+  if (!p.startsWith("/")) p = `/${p}`;
+  if (p.length > 1) p = p.replace(/\/+$/, "");
+  return p || "/";
+}
+
+export function readHashPath(): string {
+  if (typeof window === "undefined") return "/";
+  const hash = window.location.hash || "#/";
+  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+  // Drop any querystring (the router exposes it separately as querystring).
+  return normalizePath((raw || "/").split("?")[0]);
+}
+
+export function isRootPath(path: string): boolean {
+  return path === "/" || path === "";
+}
+
+export const currentPath = writable<string>(
+  typeof window === "undefined" ? "/" : readHashPath(),
+);
+
+let listening = false;
+
+function syncFromHash() {
+  currentPath.set(readHashPath());
+}
+
+/** Start mirroring hash changes. Call once per app lifetime (see main.ts). */
+export function startLocationSync(): void {
+  if (listening || typeof window === "undefined") return;
+  listening = true;
+  window.addEventListener("hashchange", syncFromHash);
+}
+
+/** Stop mirroring hash changes. Call on app unmount (see main.ts). */
+export function stopLocationSync(): void {
+  if (!listening || typeof window === "undefined") return;
+  listening = false;
+  window.removeEventListener("hashchange", syncFromHash);
+}
+
+/**
+ * Seed the hash from a host-provided `initialPath` using `replaceState`
+ * (fires no events, so the host back-trap stays quiet). A host-set deep
+ * link is left alone. The mirror is updated directly since no event fires.
+ */
+export function seedInitialPath(initialPath?: string): void {
+  if (typeof window === "undefined" || !initialPath) return;
+  const hash = window.location.hash;
+  if (hash && hash !== "#" && hash.startsWith("#/")) return;
+  const to = normalizePath(initialPath);
+  const state = (history.state ?? {}) as Record<string, unknown>;
+  history.replaceState({ ...state, idx: 0 }, "", `#${to}`);
+  currentPath.set(to);
+}
+
+```
 ### Programmatic navigation (`router/navigation.ts`)
 
 Forward navigation uses `history.pushState` - **never** `location.hash = ...`. In Chrome, assigning `location.hash` fires a `popstate` event in addition to `hashchange`; the host shell traps `popstate` for its back-button sentinel, so the spurious pop arrives while the host's `canGoBack` is still stale and the mini app pops straight back to `/`. `pushState` fires no events, so `goTo()` updates the `currentPath` mirror and dispatches `hashchange` manually (the same technique `svelte-spa-router`'s own `replace()` uses). History entries carry an incrementing `idx` in state, mirroring hash-history semantics the host sentinel expects. `consumeForwardFlag()` lets host-sync tell forward navigations apart from pops; `replaceTo()` and `stepBack()` delegate to the router's `replace()` / `pop()`.
+
+```typescript
+import { pop, replace } from "svelte-spa-router";
+import { currentPath, normalizePath } from "./location.ts";
+
+let forwardPending = 0;
+
+/** Consumed by host-sync for each observed route change. */
+export function consumeForwardFlag(): boolean {
+  if (forwardPending > 0) {
+    forwardPending -= 1;
+    return true;
+  }
+  return false;
+}
+
+function readIndex(): number {
+  const idx = (history.state as { idx?: unknown } | null)?.idx;
+  return typeof idx === "number" ? idx : 0;
+}
+
+/** Seed `idx: 0` on the current entry, preserving URL and host state. */
+function seedIndex(): void {
+  const state = (history.state ?? {}) as Record<string, unknown>;
+  if (typeof state.idx === "number") return;
+  history.replaceState({ ...state, idx: 0 }, "");
+}
+
+/** Forward navigation (sidebar, cards, "push a route"). Notifies the host. */
+export function goTo(path: string): void {
+  const to = normalizePath(path);
+  forwardPending += 1;
+  seedIndex();
+  const nextIdx = readIndex() + 1;
+  history.pushState({ ...(history.state ?? {}), idx: nextIdx }, "", `#${to}`);
+  // pushState fires no events: update the mirror + poke the hash router.
+  currentPath.set(to);
+  window.dispatchEvent(new Event("hashchange"));
+}
+
+/** Replace navigation (unknown-route redirect). Never notifies the host. */
+export function replaceTo(path: string): Promise<void> {
+  return replace(normalizePath(path));
+}
+
+/** Step back inside the mini-app router (host back-presses use this). */
+export function stepBack(): Promise<void> {
+  return pop();
+}
+
+/** Normalizes a runtime-supplied path ("camera", "/camera") to a route path. */
+export function toRoutePath(path: string): string {
+  return normalizePath(path);
+}
+
+```
+
 
 ### Route table (`app/routes.ts`)
 
@@ -196,6 +408,137 @@ export const routes: Record<string, Component> = {
 ### Host sync (`router/host-sync.ts`)
 
 `startHostSync()` (started from `App.svelte`, stopped on unmount) subscribes to `currentPath` and emits `navigation.route.changed` with `canGoBack` derived from "is the route root?", calling the optional `sdk.navigation.router.push` bridge **only on forward (PUSH) navigations** - never on POP, so the host stack can't desync. It re-syncs when the SDK becomes ready (pushes that happened before the bridge existed) and answers `navigation.back.requested` via `handleBackPress()`, which acks the bridge then pops exactly one in-app route. Every bridge call is `try/catch` + `?.` guarded because some mobile hosts don't implement the router bridge. A `routerLog` store (newest-first, max 50) surfaces bridge activity in the Router tab.
+
+```typescript
+import { get, writable } from "svelte/store";
+import { getSdkOrThrow, sdkInstance } from "../stores/sdk.ts";
+import { currentPath, isRootPath } from "./location.ts";
+import { consumeForwardFlag, stepBack } from "./navigation.ts";
+
+export const NAVIGATION_EVENTS = {
+  BACK_REQUESTED: "navigation.back.requested",
+  ROUTE_CHANGED: "navigation.route.changed",
+} as const;
+
+/** Visible in the Router tab ("Bridge activity"). Newest first, max 50. */
+export const routerLog = writable<string[]>([]);
+
+function pushLog(line: string) {
+  routerLog.update((lines) => [line, ...lines].slice(0, 50));
+}
+
+let wired = false;
+
+/**
+ * Keeps the host's back-button policy in sync with this app's history.
+ *
+ * Exact port of test-mini-app's `useHostRouter` semantics:
+ * - emit ROUTE_CHANGED { previous, current, canGoBack } on every change;
+ * - call the optional `navigation.router.push` bridge ONLY on forward (PUSH)
+ *   navigations — never on POP, so the host stack can't desync;
+ * - re-sync when the SDK becomes ready (pushes before the bridge existed);
+ * - answer BACK_REQUESTED by popping exactly one in-app route.
+ */
+export function startHostSync(): () => void {
+  if (wired || typeof window === "undefined") return () => {};
+  wired = true;
+
+  let previous = "";
+  let first = true;
+  let sdkReady = false;
+
+  const emitRoute = (current: string, forward: boolean) => {
+    let sdk: MiniAppSdk | null = null;
+    try {
+      sdk = getSdkOrThrow();
+    } catch {
+      previous = current;
+      return;
+    }
+    const canGoBack = !isRootPath(current);
+    try {
+      sdk.emit(NAVIGATION_EVENTS.ROUTE_CHANGED, {
+        previous,
+        current,
+        canGoBack,
+      });
+      if (forward && !isRootPath(current)) {
+        void sdk.navigation.router?.push?.(true);
+      }
+      pushLog(`route.changed ${previous || "/"} -> ${current}`);
+    } catch {
+      // Mobile hosts may not implement the router bridge — never crash.
+    }
+    previous = current;
+  };
+
+  const unsubPath = currentPath.subscribe((current) => {
+    if (first) {
+      first = false;
+      previous = current;
+      // Deep link at mount: inform the host immediately (React parity).
+      if (!isRootPath(current)) emitRoute(current, true);
+      return;
+    }
+    emitRoute(current, consumeForwardFlag());
+  });
+
+  const unsubSdk = sdkInstance.subscribe((sdk) => {
+    if (!sdk || sdkReady) return;
+    sdkReady = true;
+    // Pushes that happened before the bridge was ready never informed it.
+    const current = get(currentPath);
+    if (!isRootPath(current)) {
+      try {
+        sdk.emit(NAVIGATION_EVENTS.ROUTE_CHANGED, {
+          previous,
+          current,
+          canGoBack: true,
+        });
+        void sdk.navigation.router?.push?.(true);
+      } catch {
+        // optional bridge — ignore
+      }
+      previous = current;
+    }
+    try {
+      return sdk.on(NAVIGATION_EVENTS.BACK_REQUESTED, () => {
+        void handleBackPress();
+      });
+    } catch {
+      return;
+    }
+  });
+
+  return () => {
+    unsubPath();
+    unsubSdk();
+    wired = false;
+  };
+}
+
+/**
+ * Shared back path for host back-requests AND the in-app Back button:
+ * answer the bridge, then pop exactly one route when one exists.
+ */
+export async function handleBackPress(): Promise<void> {
+  const current = get(currentPath);
+  const consumed = !isRootPath(current);
+  let sdk: MiniAppSdk | null = null;
+  try {
+    sdk = getSdkOrThrow();
+  } catch {
+    sdk = null;
+  }
+  try {
+    await sdk?.navigation.router?.back?.(consumed);
+  } catch {
+    // optional bridge — ignore
+  }
+  if (consumed) await stepBack();
+}
+
+```
 
 ### Sidebar routing - always navigate through `goTo()`
 

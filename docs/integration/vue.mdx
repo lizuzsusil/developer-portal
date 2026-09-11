@@ -4,8 +4,10 @@ title: Vue 3 Integration Guide
 sidebar_label: Vue Integration
 ---
 
-import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
-import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
+import { FrameworkBadge} from "@site/src/components/FrameworkBadge";
+import { ReactGovSdkImportBlock, InstallProdCommandTabs, InstallCommandTabs } from "@site/src/components/TypesPackage";
+
+import {ScaffoldTabs} from "@site/src/components/FrameworkTabs";
 
 # Vue 3 Integration Guide
 
@@ -21,18 +23,14 @@ Vue 3 is a supported framework for Sewa mini apps. The pattern mirrors React one
 
 Start from any Vue + Vite project. From scratch:
 
-```bash
-npm create vite@latest my-mini-app -- --template vue-ts
-cd my-mini-app
-npm install
-```
+<ScaffoldTabs framework="vue" />
 
 Add routing, icons, Tailwind, and the types package (`@vitejs/plugin-vue` already ships with the template):
 
-```bash
-npm install vue-router lucide-vue-next
-npm install -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
-```
+<InstallProdCommandTabs pkgName="vue-router lucide-vue-next" />
+
+<InstallCommandTabs pkgName="tailwindcss @tailwindcss/vite @lizuz/mini-app-types @types/node" />
+
 
 Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8.
 
@@ -52,10 +50,23 @@ Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is 
 
 ```typescript
 // src/main.ts
+// src/main.ts
 import { createApp } from "vue";
+import { createRouter, createWebHistory } from "vue-router";
 import App from "./App.vue";
 import "./index.css";
-import { createMiniAppRouter } from "./router";
+
+const routes = [
+  {
+    path: "/", component: App
+  }
+  // add your others routes
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
 
 /** Sets the initial hash so the hash history starts at the host-provided path. */
 function applyInitialHash(initialPath?: string) {
@@ -83,7 +94,6 @@ export function mount(
   applyInitialHash(runtime?.initialPath);
 
   const app = createApp(App);
-  const router = createMiniAppRouter();
   app.use(router);
   app.mount(container);
 
@@ -159,13 +169,14 @@ Cleanup mirrors `AbortController` semantics via `onUnmounted(() => controller.ab
 
 ## 5. Composables
 
+
+
 ### `usePlatformSDK` - guarded access
 
 ```typescript
 // src/composables/usePlatformSDK.ts
 import { inject } from "vue";
-import type { SdkState } from "../plugins/sdk";
-import { SdkKey } from "../plugins/sdk";
+import { SdkKey, type SdkState } from "../plugins/sdk";
 
 export function usePlatformSDK(): SdkState & { sdk: MiniAppSdk } {
   const state = inject(SdkKey, null);
@@ -185,6 +196,125 @@ Keeps a `reactive<AppearanceState>` seeded from `sdk.appearance.state()`, refres
 ### `useHostRouter` - bidirectional navigation sync
 
 Same responsibilities as the React hook - emit `navigation.route.changed` with `canGoBack` derived from "is the route root?", answer `navigation.back.requested` via `router.back()`, and guard every `sdk.navigation.router.*` call with `?.` because some mobile hosts don't implement the router bridge. Two Vue-specific notes:
+
+```typescript
+ //src/composables/useHostRouter.ts
+ import { onMounted, onUnmounted, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { usePlatformSDK } from "./usePlatformSDK";
+
+export const NAVIGATION_EVENTS = {
+  BACK_REQUESTED: "navigation.back.requested",
+  ROUTE_CHANGED: "navigation.route.changed",
+} as const;
+
+function isRootPath(path: string): boolean {
+  return path === "/" || path === "";
+}
+
+export function useHostRouter() {
+  const { sdk, isReady } = usePlatformSDK();
+
+  const route = useRoute();
+  const router = useRouter();
+
+  let popping = false;
+  const initialized = ref(false);
+  const previousPath = ref(route.path);
+
+  function emitRouteChanged(previous: string, current: string) {
+    const canGoBack = !isRootPath(current);
+    sdk.emit(NAVIGATION_EVENTS.ROUTE_CHANGED, {
+      previous,
+      current,
+      canGoBack,
+    });
+    previousPath.value = current;
+    return canGoBack;
+  }
+
+  function syncCurrent(first: boolean, isPop = false) {
+    const current = route.path;
+    if (!sdk) return;
+    if (first) {
+      previousPath.value = current;
+      // Sync host immediately on first mount if not at root (e.g. deep link)
+      if (!isRootPath(current)) {
+        emitRouteChanged(current, current);
+        // Guard: don't crash if the mobile host hasn't
+        // implemented the router bridge.
+        void sdk.navigation.router?.push?.(true);
+      }
+      return;
+    }
+    emitRouteChanged(previousPath.value, current);
+    // Mobile hosts may not implement sdk.navigation.router; guard so that
+    // the absence of a router bridge on the host does not crash rendering.
+    // POPs never push: the host already counted this entry on the way in.
+    if (!isRootPath(current) && !isPop) {
+      void sdk.navigation.router?.push?.(true);
+    }
+  }
+
+  async function goBack() {
+    const consumed = !isRootPath(route.path);
+    await sdk?.navigation.router?.back?.(consumed);
+    if (consumed) {
+      // Mark the in-flight navigation as a POP. The route watcher consumes
+      // and clears the flag, so classification is deterministic — no timers.
+      popping = true;
+      router.back();
+    }
+  }
+
+  // First-mount sync (mirrors the first-navigation branch).
+  onMounted(() => {
+    syncCurrent(true);
+    initialized.value = true;
+  });
+
+  // Keep the host's back-button policy in sync with this app's history,
+  // otherwise the host never knows a route was pushed and exits on back.
+  watch(
+    () => route.fullPath,
+    () => {
+      if (!initialized.value) return;
+      const wasPop = popping;
+      popping = false;
+      syncCurrent(false, wasPop);
+    },
+  );
+
+  // Sync host when SDK becomes ready — pushes that happened before the
+  // bridge was ready never informed the host.
+  watch(
+    () => isReady,
+    (ready) => {
+      if (!ready || !sdk) return;
+      if (!isRootPath(route.path)) {
+        emitRouteChanged(previousPath.value, route.path);
+        void sdk.navigation.router?.push?.(true);
+      }
+    },
+  );
+
+  let offBackRequested: (() => void) | undefined;
+  onMounted(() => {
+    if (!sdk || !isReady) return;
+    const off = sdk.on(NAVIGATION_EVENTS.BACK_REQUESTED, () => {
+      void goBack();
+    });
+    if (typeof off === "function") offBackRequested = off;
+  });
+
+  onUnmounted(() => {
+    offBackRequested?.();
+  });
+
+  return { goBack };
+}
+
+```
 
 - vue-router exposes no navigation-type API, so PUSH vs POP is approximated: navigations triggered by the composable's own `goBack()` count as POPs, everything else as PUSHes. The flag is consumed and cleared by the route watcher (deterministic, no timers).
 - It runs inside the renderless `HostRouterSync.vue` child of the provider, so back-button sync is always active once the SDK is ready.
@@ -219,7 +349,179 @@ Loads the `en` / `si` / `ta` JSON dictionaries, selects by `locale.language`, fa
 
 ---
 
-## 6. Vite Build
+## 6. Extra codes you need (NOTE:You can manage these code as per your needs)
+
+```typescript
+//src/utils/errorDetails.ts
+
+export interface ErrorDetails {
+  message: string;
+  functionName?: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  stack?: string;
+}
+
+export function parseErrorDetails(error: Error): ErrorDetails {
+  const frame = parseFirstStackFrame(error.stack);
+  return {
+    message: error.message || "Something went wrong while rendering.",
+    functionName: frame?.functionName,
+    file: frame?.file,
+    line: frame?.line,
+    column: frame?.column,
+    stack: error.stack,
+  };
+}
+
+function parseFirstStackFrame(stack?: string) {
+  if (!stack) return undefined;
+
+  const frameRe = /^\s+at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?$/;
+  for (const line of stack.split("\n")) {
+    const match = line.match(frameRe);
+    if (match) {
+      return {
+        functionName: match[1]?.replace(/^Object\./, ""),
+        file: match[2],
+        line: Number(match[3]),
+        column: Number(match[4]),
+      };
+    }
+  }
+  return undefined;
+}
+
+//src/components/ErrorBoundary.vue
+
+<script setup lang="ts">
+import { onErrorCaptured, ref } from "vue";
+import type { ErrorDetails } from "../utils/errorDetails";
+import { parseErrorDetails } from "../utils/errorDetails";
+import LoadError from "./LoadError.vue";
+
+const details = ref<ErrorDetails | null>(null);
+
+onErrorCaptured((error) => {
+  console.error(
+    "ErrorBoundary caught an error:",
+    error,
+  );
+  details.value = parseErrorDetails(
+    error instanceof Error ? error : new Error(String(error)),
+  );
+  // Stop propagation: this boundary renders the fallback itself.
+  return false;
+});
+</script>
+
+<template>
+  <LoadError v-if="details" :details="details" />
+  <slot v-else />
+</template>
+
+//src/components/LoadError.vue
+<script setup lang="ts">
+import { ref } from "vue";
+import type { ErrorDetails } from "../utils/errorDetails";
+
+const props = withDefaults(
+  defineProps<{
+    message?: string;
+    details?: ErrorDetails;
+  }>(),
+  {
+    message: "Failed to load the application.",
+    details: undefined,
+  },
+);
+
+const showDetails = ref(false);
+
+function handleShowDetails() {
+  showDetails.value = !showDetails.value;
+}
+
+function reloadWindow() {
+  window.location.reload();
+}
+</script>
+
+<template>
+  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-6 py-8">
+    <div
+      class="max-w-lg rounded-xl border border-gray-200 bg-white p-8 text-center shadow-lg"
+    >
+      <div class="mb-4 text-5xl">⚠️</div>
+
+      <h1 class="mb-2 text-2xl font-semibold text-gray-900">Failed to Load</h1>
+
+      <p class="mb-6 text-sm text-gray-600">
+        {{ props.details?.message ?? props.message }}
+      </p>
+
+      <div v-if="props.details" class="mb-6 text-left">
+        <button
+          class="mb-3 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+          type="button"
+          @click="handleShowDetails"
+        >
+          {{ showDetails ? "Hide details" : "Show details" }} ▾
+        </button>
+
+        <div
+          v-if="showDetails"
+          class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-left text-xs text-gray-700"
+        >
+          <dl class="mb-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+            <template v-if="props.details.functionName">
+              <dt class="font-medium text-gray-500">Function</dt>
+              <dd class="break-all font-mono">
+                {{ props.details.functionName }}
+              </dd>
+            </template>
+            <template v-if="props.details.file">
+              <dt class="font-medium text-gray-500">File</dt>
+              <dd class="break-all font-mono">{{ props.details.file }}</dd>
+            </template>
+            <template v-if="props.details.line != null">
+              <dt class="font-medium text-gray-500">Location</dt>
+              <dd class="font-mono">
+                line {{ props.details.line
+                }}{{
+                  props.details.column != null
+                    ? `:${props.details.column}`
+                    : ""
+                }}
+              </dd>
+            </template>
+          </dl>
+
+          <pre
+            v-if="props.details.stack"
+            class="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-white p-3 font-mono text-[10px] leading-relaxed text-gray-600"
+            >{{ props.details.stack }}</pre
+          >
+        </div>
+      </div>
+
+      <button
+        class="rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700"
+        type="button"
+        @click="reloadWindow"
+      >
+        Retry
+      </button>
+    </div>
+  </div>
+</template>
+
+
+
+```
+
+## 7. Vite Build
 
 Same library contract as React - Vue plugin instead of the React plugin, `VueMiniApp` as the lib name, and `framework: "vue"` in the emitted manifest:
 

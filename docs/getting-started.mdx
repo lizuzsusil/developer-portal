@@ -40,17 +40,147 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
   return { unmount() { /* teardown your framework tree */ } };
 }
 ```
-
 The host owns the SDK instance and destroys it. your app only cleans up its own render tree.
 
-## 3. Build as a Library
+## 3. Build Manifest Skeleton(createManifest)
+```typescript
+import fs from "node:fs";
+import path from "node:path";
+import type { Plugin } from "vite";
+
+const pkgPath = path.resolve(process.cwd(), "package.json");
+const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+
+export function createManifest(): Plugin {
+  return {
+    name: "custom-manifest",
+    async writeBundle(options) {
+      const outDir = options.dir || "dist";
+
+      const possibleManifestPaths = [
+        path.resolve(outDir, "manifest.json"),
+        path.resolve(outDir, ".vite/manifest.json"),
+      ];
+
+      const originalManifestPath = possibleManifestPaths.find((p) =>
+        fs.existsSync(p),
+      );
+
+      if (!originalManifestPath) return;
+
+      const viteManifest = JSON.parse(
+        fs.readFileSync(originalManifestPath, "utf-8"),
+      );
+
+      const entryKey = Object.keys(viteManifest).find(
+        (key) => viteManifest[key].isEntry,
+      );
+
+      const entryItem = entryKey ? viteManifest[entryKey] : null;
+
+      const entryFile = entryItem?.file || "";
+      const styles = entryItem?.css || [];
+
+      const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []) => {
+        const files = fs.readdirSync(dirPath);
+
+        files.forEach((file) => {
+          const fullPath = path.join(dirPath, file);
+          if (fs.statSync(fullPath).isDirectory()) {
+            arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
+          } else {
+            // Get path relative to outDir
+            const relativePath = path
+              .relative(outDir, fullPath)
+              .replace(/\\/g, "/"); // Normalize Windows path slashes
+
+            // Exclude manifest file itself from files array
+            if (!relativePath.endsWith("manifest.json")) {
+              arrayOfFiles.push(relativePath);
+            }
+          }
+        });
+
+        return arrayOfFiles;
+      };
+
+      const allFiles = getAllFiles(outDir);
+
+      const customManifest = {
+        schemaVersion: "1",
+        framework: "react",
+        application: {
+          id: pkg.name || "mini-revenue-app",
+          name: pkg.name || "revenue-app",
+          version: pkg.version || "1.2.3",
+          type: "mini-app",
+        },
+        platform: {
+          runtime: "^1.0.0",
+          sdk: "^1.0.9",
+        },
+        bundle: {
+          entry: entryFile,
+          styles: styles,
+          files: allFiles,
+        },
+      };
+
+      const finalManifestPath = path.resolve(outDir, "manifest.json");
+
+      if (
+        originalManifestPath.includes(".vite") &&
+        fs.existsSync(originalManifestPath)
+      ) {
+        fs.unlinkSync(originalManifestPath);
+      }
+
+      fs.writeFileSync(
+        finalManifestPath,
+        JSON.stringify(customManifest, null, 2),
+      );
+    },
+  };
+}
+
+```
+Each mini app build manifest should be similar. So the createManifest function give a general manifest.json after build.
+
+## 4. Retry function used in every framework to talk with host through sdk with certain number of maxAttempts and other details
+
+```typescript
+//src/utils/retry.ts
+
+export async function retry<T>(
+  fn: () => T | Promise<T>,
+  options: { maxAttempts: number; delayMs: number; signal?: AbortSignal },
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < options.maxAttempts; attempt++) {
+    if (options.signal?.aborted)
+      throw new DOMException("Aborted", "AbortError");
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < options.maxAttempts - 1) {
+        await new Promise((r) => setTimeout(r, options.delayMs));
+      }
+    }
+  }
+  throw lastError;
+}
+
+```
+
+## 5. Build as a Library
 
 Build an ES library and emit the `manifest.json` the host uses for discovery. The `platform` constraints inside the manifest are host-side version metadata, not a bundle dependency.
 
 See your framework guide for the complete `vite.config.ts` + `createManifest` setup:
 [React](/docs/integration/react#6-vite-build) · [Vue](/docs/integration/vue#6-vite-build) · [Svelte](/docs/integration/svelte#6-vite-build) - same contract, different framework plugins.
 
-## 4. Verify
+## 6. Verify
 
 Build your application with your framework's build step and confirm `dist/manifest.json` contains `bundle.entry` and `bundle.files` pointing to the emitted assets. Then load the bundle in the [Host Playground](/docs/host-playground) to ensure it mounts and `sdk.*` calls resolve.
 
