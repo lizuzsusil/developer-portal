@@ -6,23 +6,29 @@ import TabItem from "@theme/TabItem";
 
 const FALLBACK = "@lizuz/mini-app-types";
 
-export function useTypesPackage(): string {
+interface InstallCommandTabsProps {
+  pkgName?: string;
+}
+
+export function useTypesPackage(overridePkg?: string): string {
+  if (overridePkg && overridePkg.trim()) {
+    return overridePkg.trim();
+  }
   const { siteConfig } = useDocusaurusContext();
   const fromConfig = siteConfig.customFields?.typesPackage as string | undefined;
-  // handle "N/A" or empty from older builds
   if (fromConfig && fromConfig.trim() && fromConfig !== "N/A") {
     return fromConfig.trim();
   }
   return FALLBACK;
 }
 
-export function TypesPackageName(): React.ReactNode {
-  const pkg = useTypesPackage();
+export function TypesPackageName({pkgName}:{pkgName?:string}): React.ReactNode {
+  const pkg = useTypesPackage(pkgName);
   return <>{pkg}</>;
 }
 
-export function InstallCommandBlock({ prefix = "pnpm add -D " }: { prefix?: string }) {
-  const pkg = useTypesPackage();
+export function InstallCommandBlock({ prefix = "pnpm add -D ", pkgName }: { prefix?: string ; pkgName?:string }) {
+  const pkg = useTypesPackage(pkgName);
   return <CodeBlock language="bash">{`${prefix}${pkg}`}</CodeBlock>;
 }
 
@@ -32,13 +38,19 @@ const PKG_MANAGERS: [string, string][] = [
   ["yarn", "yarn add --dev "],
   ["bun", "bun add -d "],
 ];
+const PACKAGE_MANAGERS: [string, string][] = [
+  ["pnpm", "pnpm add "],
+  ["npm", "npm install "],
+  ["yarn", "yarn add "],
+  ["bun", "bun add "],
+];
 
 /**
  * Renders switchable install commands (one tab per package manager) using the
  * Docusaurus theme's <Tabs>/<TabItem> + <CodeBlock>.
  */
-export function InstallCommandTabs() {
-  const pkg = useTypesPackage();
+export function InstallCommandTabs({pkgName}:InstallCommandTabsProps) {
+  const pkg = useTypesPackage(pkgName);
   return (
     <Tabs
       groupId="pkg-install"
@@ -54,6 +66,21 @@ export function InstallCommandTabs() {
           </TabItem>
         );
       })}
+    </Tabs>
+  );
+}
+export function InstallProdCommandTabs({ pkgName }: InstallCommandTabsProps) {
+  const pkg = useTypesPackage(pkgName);
+
+  return (
+    <Tabs groupId="pkg-install" queryString>
+      {PACKAGE_MANAGERS.map(([label, prefix]) => (
+        <TabItem key={label} value={label} label={label}>
+          <CodeBlock language="bash">
+            {`${prefix}${pkg}`}
+          </CodeBlock>
+        </TabItem>
+      ))}
     </Tabs>
   );
 }
@@ -128,6 +155,11 @@ export function UseAppearanceBlock() {
     <CodeBlock language="typescript">
       {`// src/hooks/useAppearance.ts
 import type { AppearanceState, LocaleState, ThemeState } from "${pkg}";
+
+const DEFAULT_STATE: AppearanceState = {
+  locale: { locale: "en-LK", language: "en", direction: "ltr" },
+  theme: { preference: "system", mode: "light" },
+};
 
 export function useAppearance(): { locale: LocaleState; theme: ThemeState } {
   const { sdk, isReady } = usePlatformSDK();

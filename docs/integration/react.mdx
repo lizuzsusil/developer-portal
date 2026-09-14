@@ -6,6 +6,7 @@ sidebar_label: React Integration
 
 import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
 import { TypesPackageName, InstallCommandTabs, ReactGovSdkImportBlock, PackageJsonBlock, UseAppearanceBlock } from "@site/src/components/TypesPackage";
+import { ScaffoldTabs } from "@site/src/components/FrameworkTabs";
 
 # React Integration Guide
 
@@ -23,17 +24,13 @@ React is the production-ready framework for Sewa mini apps. This single guide co
 
 Start from any react-vite project. From scratch:
 
-```bash
-pnpm create vite my-mini-app --template react-ts
-cd my-mini-app
-pnpm install
-```
+
+<ScaffoldTabs framework = "react" />
 
 Enable automatic JSX runtime and Tailwind, then add the types package (pick your package manager):
 
-```bash
-pnpm add -D @vitejs/plugin-react @tailwindcss/vite tailwindcss
-```
+
+<InstallCommandTabs pkgName= "@vitejs/plugin-react @tailwindcss/vite tailwindcss"/>
 
 <InstallCommandTabs />
 
@@ -82,6 +79,7 @@ export function mount(
 }
 ```
 
+
 ### `App.tsx` - HashRouter + SDK provider
 
 ```typescript
@@ -97,7 +95,7 @@ export default function App() {
     <ErrorBoundary>
       <HashRouter>
         <PlatformSDKProvider>
-          <TestMiniApp />
+          <TestMiniApp /> // YOUR MINI APP MAIN COMPONENT
         </PlatformSDKProvider>
       </HashRouter>
     </ErrorBoundary>
@@ -132,6 +130,199 @@ Resolution order in `applyInitialHash` reflects this priority:
 
 ---
 
+
+## 4. Additional Code you need
+
+You will need some addional code such as  ErrorBoundary, retry code etc.
+
+```typescript
+//src/utils/retry.ts
+export async function retry<T>(
+  fn: () => T | Promise<T>,
+  options: { maxAttempts: number; delayMs: number; signal?: AbortSignal },
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < options.maxAttempts; attempt++) {
+    if (options.signal?.aborted)
+      throw new DOMException("Aborted", "AbortError");
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < options.maxAttempts - 1) {
+        await new Promise((r) => setTimeout(r, options.delayMs));
+      }
+    }
+  }
+  throw lastError;
+}
+
+//src/components/ErrorBoundary
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+export interface ErrorDetails {
+  message: string;
+  functionName?: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  stack?: string;
+}
+
+interface ErrorBoundaryState {
+  details: ErrorDetails | null;
+}
+
+function parseErrorDetails(error: Error): ErrorDetails {
+  const frame = parseFirstStackFrame(error.stack);
+  return {
+    message: error.message || "Something went wrong while rendering.",
+    functionName: frame?.functionName,
+    file: frame?.file,
+    line: frame?.line,
+    column: frame?.column,
+    stack: error.stack,
+  };
+}
+
+function parseFirstStackFrame(stack?: string) {
+  if (!stack) return undefined;
+
+  const frameRe = /^\s+at\s+(?:(.+?)\s+\()?(.+?):(\d+):(\d+)\)?$/;
+  for (const line of stack.split("\n")) {
+    const match = line.match(frameRe);
+    if (match) {
+      return {
+        functionName: match[1]?.replace(/^Object\./, ""),
+        file: match[2],
+        line: Number(match[3]),
+        column: Number(match[4]),
+      };
+    }
+  }
+  return undefined;
+}
+
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = {
+    details: null,
+  };
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { details: parseErrorDetails(error) };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.details) {
+      return <LoadError details={this.state.details} />;
+    }
+
+    return this.props.children;
+  }
+}
+
+
+//src/components/LoadError
+export function LoadError({
+  message = "Failed to load the application.",
+  details,
+}: {
+  message?: string;
+  details?: ErrorDetails;
+}) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  const handleShowDetails = useCallback(
+    () => setShowDetails((prev) => !prev),
+    [],
+  );
+
+  const reloadWindow = useCallback(() => window.location.reload(), []);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6 py-8">
+      <div className="max-w-lg rounded-xl border border-gray-200 bg-white p-8 text-center shadow-lg">
+        <div className="mb-4 text-5xl">⚠️</div>
+
+        <h1 className="mb-2 text-2xl font-semibold text-gray-900">
+          Failed to Load
+        </h1>
+
+        <p className="mb-6 text-sm text-gray-600">
+          {details?.message ?? message}
+        </p>
+
+        {!!details && (
+          <div className="mb-6 text-left">
+            <button
+              className="mb-3 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+              onClick={handleShowDetails}
+              type="button"
+            >
+              {showDetails ? "Hide details" : "Show details"} ▾
+            </button>
+
+            {showDetails ? (
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-left text-xs text-gray-700">
+                <dl className="mb-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                  {!!details.functionName && (
+                    <>
+                      <dt className="font-medium text-gray-500">Function</dt>
+                      <dd className="break-all font-mono">
+                        {details.functionName}
+                      </dd>
+                    </>
+                  )}
+                  {!!details.file && (
+                    <>
+                      <dt className="font-medium text-gray-500">File</dt>
+                      <dd className="break-all font-mono">{details.file}</dd>
+                    </>
+                  )}
+                  {!!details.line != null && (
+                    <>
+                      <dt className="font-medium text-gray-500">Location</dt>
+                      <dd className="font-mono">
+                        line {details.line}
+                        {details.column != null ? `:${details.column}` : ""}
+                      </dd>
+                    </>
+                  )}
+                </dl>
+
+                {!!details.stack && (
+                  <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded bg-white p-3 font-mono text-[10px] leading-relaxed text-gray-600">
+                    {details.stack}
+                  </pre>
+                )}
+              </div>
+            ) : null}
+          </div>
+        )}
+
+        <button
+          className="rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700"
+          onClick={reloadWindow}
+          type="button"
+        >
+          Retry
+        </button>
+      </div>
+    </div>
+  );
+}
+
+```
+
 ## 4. SDK Context & Provider
 
 The provider reads the host-injected SDK from `window.__GSA_SDK__` with retry, an `AbortController` for clean unmount, and a reducer-based state machine (`loading → ready | error`). A full standalone mock is included so the app also runs outside the host during development.
@@ -151,10 +342,32 @@ export const SDKContext = createContext<SDKContextValue>({
 });
 
  // src/providers/PlatformSDKProvider.tsx
+ type State =
+  | { phase: "loading" }
+  | { phase: "ready"; sdk: MiniAppSdk; user: SdkPlatformUser | null }
+  | { phase: "error"; error: Error };
+
+type Action =
+  | { type: "ready"; sdk: MiniAppSdk; user: SdkPlatformUser | null }
+  | { type: "error"; error: Error };
+
+function reducer(_state: State, action: Action): State {
+  switch (action.type) {
+    case "ready":
+      return { phase: "ready", sdk: action.sdk, user: action.user };
+    case "error":
+      return { phase: "error", error: action.error };
+  }
+}
 function getSDK(): MiniAppSdk {
   const instance = window.__GSA_SDK__ ?? null;
   if (!instance) throw new Error("SDK not available");
   return instance;
+}
+
+function PlatformSDKRuntime({ children }: { children: ReactNode }) {
+  useHostRouter();
+  return <>{children}</>;
 }
 
 export function PlatformSDKProvider({ children }: { children: ReactNode }) {

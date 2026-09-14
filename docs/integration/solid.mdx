@@ -5,7 +5,8 @@ sidebar_label: Solid Integration
 ---
 
 import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
-import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
+import { ReactGovSdkImportBlock, InstallProdCommandTabs, InstallCommandTabs } from "@site/src/components/TypesPackage";
+import { ScaffoldTabs } from "@site/src/components/FrameworkTabs";
 
 # Solid Integration Guide
 
@@ -21,18 +22,14 @@ Solid is a supported framework for Sewa mini apps. The pattern mirrors React one
 
 Start from any Solid + Vite project. From scratch:
 
-```bash
-pnpm create vite my-mini-app -- --template solid-ts
-cd my-mini-app
-pnpm install
-```
+<ScaffoldTabs framework = "solid" />
 
 Add routing, icons, Tailwind, and the types package (`vite-plugin-solid` already ships with the template):
 
-```bash
-pnpm add @solidjs/router lucide-solid
-pnpm add -D tailwindcss @tailwindcss/vite "@lizuz/mini-app-types" @types/node
-```
+<InstallProdCommandTabs pkgName ="@solidjs/router lucide-solid" />
+
+<InstallCommandTabs pkgName= "tailwindcss @tailwindcss/vite @lizuz/mini-app-types @types/node" />
+
 
 Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3010` (`vite --port 3010 --host`).
 
@@ -202,6 +199,93 @@ export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
 1. **loading** - polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
 2. **ready** - provides state, mounts the renderless `PlatformSDKRuntime` component (which runs `useHostRouter()`), and renders children.
 3. **error** - renders `LoadError` with the failure message.
+```typescript
+//src/PlatformSDKProvider.tsx
+import { createSignal, onCleanup, onMount, Show, type JSX } from "solid-js";
+import { LoadError } from "./components/LoadError";
+import { usePlatformSDKContext } from "./hooks/usePlatformSDK";
+import { useHostRouter } from "./hooks/useHostRouter";
+import type { ProviderState } from "./store";
+import { retry } from "./utils/retry";
+
+function getSDK() {
+  const instance = window.__GSA_SDK__ ?? null;
+  if (!instance) throw new Error("SDK not available");
+  return instance;
+}
+
+function PlatformSDKRuntime(props: { children: JSX.Element }) {
+  useHostRouter();
+  return <>{props.children}</>;
+}
+
+export function PlatformSDKProvider(props: { children: JSX.Element }) {
+  const [state, setState] = createSignal<ProviderState>({ phase: "loading" });
+
+  onMount(() => {
+    const controller = new AbortController();
+    onCleanup(() => controller.abort());
+
+    const init = async () => {
+      try {
+        const instance = await retry(() => getSDK(), {
+          maxAttempts: 30,
+          delayMs: 500,
+          signal: controller.signal,
+        });
+        await new Promise<void>((res) => {
+          if (window.__GSA_SDK__) return res();
+          window.addEventListener("__GSA_SDK_READY__", () => res(), { once: true });
+        });
+        const user = await instance.auth.getUser();
+        if (!controller.signal.aborted) {
+          setState({ phase: "ready", sdk: instance, user: user ?? null });
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setState({
+            phase: "error",
+            error: error instanceof Error ? error : new Error("SDK initialization failed"),
+          });
+        }
+      }
+    };
+    void init();
+  });
+
+  return (
+    <>
+      <Show when={state().phase === "error"}>
+        {(() => {
+          const s = state() as Extract<ProviderState, { phase: "error" }>;
+          return (
+            <usePlatformSDKContext.Provider value={{ sdk: null, user: null, isReady: false, error: s.error }}>
+              <LoadError message={s.error.message} />
+            </usePlatformSDKContext.Provider>
+          );
+        })()}
+      </Show>
+      <Show when={state().phase === "loading"}>
+        <usePlatformSDKContext.Provider value={{ sdk: null, user: null, isReady: false, error: null }}>
+          <div>Connecting to platform...</div>
+        </usePlatformSDKContext.Provider>
+      </Show>
+      <Show when={state().phase === "ready"}>
+        {(() => {
+          const s = state() as Extract<ProviderState, { phase: "ready" }>;
+          return (
+            <usePlatformSDKContext.Provider value={{ sdk: s.sdk, user: s.user, isReady: true, error: null }}>
+              <PlatformSDKRuntime>{props.children}</PlatformSDKRuntime>
+            </usePlatformSDKContext.Provider>
+          );
+        })()}
+      </Show>
+    </>
+  );
+}
+
+```
+
 
 ---
 
@@ -248,6 +332,100 @@ Same responsibilities as the React hook - emit `navigation.route.changed` with `
 - Reactivity comes from `createEffect` tracking `location.pathname` (not a `location.key` dependency) - the effect re-runs on every path change, with a `lastPath`/`previousPath` pair for first-navigation dedupe.
 - `@solidjs/router` exposes no navigation-type API, so unlike React there is no PUSH-vs-POP distinction: every non-root change informs the host via `sdk.navigation.router?.push?.(true)`.
 - It runs inside the renderless `PlatformSDKRuntime` child of the provider, so back-button sync is always active once the SDK is ready.
+
+```typescript
+//src/hooks/useHostRouter.ts
+import { useLocation, useNavigate } from "@solidjs/router";
+import { createEffect, onCleanup } from "solid-js";
+import { usePlatformSDK } from "./usePlatformSDK";
+
+export const NAVIGATION_EVENTS = {
+  BACK_REQUESTED: "navigation.back.requested",
+  ROUTE_CHANGED: "navigation.route.changed",
+} as const;
+
+export function useHostRouter() {
+  const { sdk, isReady } = usePlatformSDK();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  let previousPath = location.pathname;
+  let lastPath: string | null = null;
+
+  const goBack = async () => {
+    const isRoot = location.pathname === "/" || location.pathname === "";
+    const consumed = !isRoot;
+    await sdk?.navigation.router?.back?.(consumed);
+    if (consumed) {
+      navigate(-1 as never);
+    }
+  };
+
+  createEffect(() => {
+    const current = location.pathname;
+    // First navigation tracking – dedupe via lastPath
+    if (lastPath === null) {
+      lastPath = current;
+      previousPath = current;
+      const isRoot = current === "/" || current === "";
+      if (!isRoot && sdk) {
+        sdk.emit(NAVIGATION_EVENTS.ROUTE_CHANGED, {
+          previous: previousPath,
+          current,
+          canGoBack: true,
+        });
+        void sdk.navigation.router?.push?.(true);
+      }
+      return;
+    }
+
+    if (lastPath === current) return;
+    if (!sdk) {
+      lastPath = current;
+      previousPath = current;
+      return;
+    }
+
+    const isRoot = current === "/" || current === "";
+    const canGoBack = !isRoot;
+
+    sdk.emit(NAVIGATION_EVENTS.ROUTE_CHANGED, {
+      previous: previousPath,
+      current,
+      canGoBack,
+    });
+
+    previousPath = current;
+    lastPath = current;
+
+    if (!isRoot) {
+      void sdk.navigation.router?.push?.(true);
+    }
+  });
+
+  createEffect(() => {
+    if (!sdk || !isReady) return;
+    const isRoot = location.pathname === "/" || location.pathname === "";
+    if (!isRoot) {
+      sdk.emit(NAVIGATION_EVENTS.ROUTE_CHANGED, {
+        previous: previousPath,
+        current: location.pathname,
+        canGoBack: true,
+      });
+      void sdk.navigation.router?.push?.(true);
+    }
+  });
+
+  createEffect(() => {
+    if (!sdk || !isReady) return;
+    const cleanup = sdk.on(NAVIGATION_EVENTS.BACK_REQUESTED, () => {
+      void goBack();
+    });
+    onCleanup(cleanup);
+  });
+}
+
+```
 
 ### Sidebar routing - `<A>` intercepts natively
 
@@ -342,7 +520,86 @@ Only the types package carries SDK typings - the runtime SDK (`MiniAppSdk`) come
 
 ---
 
-## 8. Essential folder structure
+## 8 . Additional Code you need
+
+You will need some addional code such as  ErrorBoundary, retry code etc.
+
+```typescript
+//src/utils/retry.ts
+export async function retry<T>(
+  fn: () => T | Promise<T>,
+  options: { maxAttempts: number; delayMs: number; signal?: AbortSignal },
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < options.maxAttempts; attempt++) {
+    if (options.signal?.aborted)
+      throw new DOMException("Aborted", "AbortError");
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < options.maxAttempts - 1) {
+        await new Promise((r) => setTimeout(r, options.delayMs));
+      }
+    }
+  }
+  throw lastError;
+}
+
+//src/components/ErrorBoundary.tsx
+import { ErrorBoundary as SolidErrorBoundary } from "solid-js";
+import type { JSX } from "solid-js";
+import { LoadError } from "./LoadError";
+
+export function ErrorBoundary(props: {
+    children: JSX.Element;
+}) {
+    return (
+        <SolidErrorBoundary
+            fallback={(error: Error) => (
+                <LoadError message={error.message} />
+            )}
+        >
+            {props.children}
+        </SolidErrorBoundary>
+    );
+}
+
+//src/components/LoadError.tsx
+export function LoadError(props: {
+    message?: string;
+}) {
+    const message = props.message ?? "Failed to load the application.";
+
+    return (
+        <div class="flex min-h-screen items-center justify-center bg-gray-50 px-6 py-8">
+            <div class="max-w-lg rounded-xl border border-gray-200 bg-white p-8 text-center shadow-lg">
+                <div class="mb-4 text-5xl">⚠️</div>
+
+                <h1 class="mb-2 text-2xl font-semibold text-gray-900">
+                    Failed to Load
+                </h1>
+
+                <p class="mb-6 text-sm text-gray-600">{message}</p>
+
+                <button
+                    class="rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700"
+                    onClick={() => window.location.reload()}
+                    type="button"
+                >
+                    Retry
+                </button>
+            </div>
+        </div>
+    );
+}
+
+
+```
+
+---
+
+## 9. Essential folder structure
 
 The canonical Solid layout for a mini app - entry contract, SDK state, signals, and build manifest. Only the load-bearing files are shown; feature tabs live under `components/`:
 
