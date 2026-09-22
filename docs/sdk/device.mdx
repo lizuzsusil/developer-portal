@@ -4,187 +4,194 @@ title: Device Capabilities Module (sdk.device)
 sidebar_label: sdk.device
 ---
 
-# Device Capabilities Module (`sdk.device`)
+import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
 
-The `sdk.device` module grants mini apps access to native hardware sensors, camera, GPS location, gallery, contacts, file system, network info, and biometric authentication via host bridge guards.
+<LanguageProvider>
 
----
+# Device (`sdk.device`)
 
-## Device Permission Statuses
+Bridges native hardware and OS services - location, camera, gallery, files, downloads, contacts, biometrics, notifications, network, device info, share, clipboard, haptics. Every privileged call returns a `{status, data?, error?}` envelope; branch on `status`, never assume success. Gate calls with `isSupported(action)` (action + `device` capability must both hold).
 
-Every device call returns a result with a `status` field. The mini app must branch on it rather than assuming success:
+## Response envelope
+
+| Field | Type | Description |
+|---|---|---|
+| `status` | `"granted" \| "denied" \| "permanentlyDenied" \| "restricted"` | Outcome - see statuses below. |
+| `data` | `T?` | Populated **only** on `granted`. |
+| `error` | `string?` | Human-readable reason on non-granted outcomes. |
 
 | Status | Meaning | Required action |
-| --- | --- | --- |
-| `granted` | Permission granted; `data` is populated (e.g. `location`, `file`) | Use `res.data`. |
-| `denied` | User denied permission | Show a retry affordance or a settings hint. |
-| `permanentlyDenied` | Permission permanently denied / revoked | Direct user to device settings to re-enable it. |
-| `restricted` | OS-level restriction (e.g. parental controls, MDM) | Inform the user that the device is restricted. |
+|---|---|---|
+| `granted` | Permission granted; `data` is populated | Use `res.data`. |
+| `denied` | User denied permission | Show a retry affordance or settings hint. |
+| `permanentlyDenied` | Permanently denied / revoked | Direct user to device settings. |
+| `restricted` | OS-level restriction (parental controls, MDM) | Inform the user the device is restricted. |
 
-`data` exists only on `granted`. Every tab (location, camera, gallery, files, download, contact, biometric) switches on `res.status` and maps each case to a distinct UI error message. A typical handler:
-
-```typescript
-const res = await sdk.device.location({ reason: "To view your current location" });
+<CodeTabs
+  typescript={`const res = await sdk.device.location({ reason: "To view your current location" });
 switch (res.status) {
-  case "granted":
-    setLocation(res.data ?? null);
-    break;
-  case "denied":
-    setError("Location permission denied.");
-    break;
-  case "permanentlyDenied":
-    setError("Please enable location permission from device settings.");
-    break;
-  case "restricted":
-    setError("Location access is restricted on this device.");
-    break;
-}
-```
+  case "granted": setLocation(res.data ?? null); break;
+  case "denied": setError("Location permission denied."); break;
+  case "permanentlyDenied": setError("Enable location in device settings."); break;
+  case "restricted": setError("Location access is restricted on this device."); break;
+}`}
+  javascript={`const res = await sdk.device.location({ reason: "To view your current location" });
+switch (res.status) {
+  case "granted": setLocation(res.data ?? null); break;
+  case "denied": setError("Location permission denied."); break;
+  case "permanentlyDenied": setError("Enable location in device settings."); break;
+  case "restricted": setError("Location access is restricted on this device."); break;
+}`}
+/>
 
-> **Is a runtime needed to initialize the mini app?** No. Device capabilities are bridged by the host via `window.__GSA_SDK__`; the mini app bundle imports no runtime module. The `platform.runtime` constraint in the manifest is a host-side version check.
+> Device capabilities are bridged by the host via `window.__GSA_SDK__`; the mini app bundle imports no runtime module.
 
 ---
 
-## Feature Detection
+## Public Methods
 
 ### `isSupported(action)`
 
-Checks if a specific device action (e.g., `"location"`, `"biometric"`) is supported by the host shell.
+Whether a device action is available: the action must be known **and** the host must have negotiated the `device` capability.
 
-```typescript
-if (sdk.device.isSupported("biometric")) {
+**Signature:** `isSupported(action: DeviceAction): boolean`
+
+| Parameter | Type | Required | Available values | Description |
+|---|---|---|---|---|
+| `action` | `DeviceAction` | Yes | `"location" \| "camera" \| "gallery" \| "files" \| "download" \| "contact" \| "biometric" \| "notifications" \| "network" \| "info" \| "share" \| "clipboard" \| "haptics" \| "review"` | Capability to probe. |
+
+<CodeTabs
+  typescript={`if (sdk.device.isSupported("biometric")) {
   // Offer fingerprint authentication
-}
-```
+}`}
+  javascript={`if (sdk.device.isSupported("biometric")) {
+  // Offer fingerprint authentication
+}`}
+/>
 
----
+### `location(options?)` / `camera(options?)` / `contact(options?)`
 
-## Device Methods
+One-shot sensor reads. All take the same options and return a permission envelope.
 
-### `location(options?)`
-
-Requests device location coordinates. Options carry only `reason` - see the `status`-switch
-pattern at the top of this page (never branch on a boolean):
-
-```typescript
-const loc = await sdk.device.location({ reason: "To view your current location" });
-if (loc.status === "granted") {
-  console.log("Latitude:", loc.data.latitude, "Longitude:", loc.data.longitude);
-}
-```
-
-### `camera(options?)`
-
-Triggers native camera capture.
+**Signatures:**
 
 ```typescript
-const result = await sdk.device.camera({ reason: "To capture a photo for verification" });
-if (result.status === "granted") {
-  const photoUrl = result.data.url;
-}
+location(options?: DeviceExtraOptions): Promise<DevicePermissionBaseResponse<DeviceLocationResult>>;
+camera(options?: DeviceExtraOptions): Promise<DevicePermissionBaseResponse<DeviceCameraResult>>;
+contact(options?: DeviceExtraOptions): Promise<DevicePermissionBaseResponse<DeviceContactResult>>;
 ```
 
-### `gallery(options?)`
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `options.reason` | `string` | No | - | User-facing reason shown in the OS permission prompt. |
 
-Opens system image picker.
+**Result payloads (`data` on `granted`):**
+
+| Method | `data` fields |
+|---|---|
+| `location` | `{ latitude: number; longitude: number; accuracy?: number; timestamp?: Date \| string }` |
+| `camera` | `{ url: string; fileName?: string; mimeType?: string; ... }` (see `DeviceCameraResult`) |
+| `contact` | `{ contactName?: string; number?: string }` |
+
+### `gallery(options?)` / `files(options?)`
+
+Pick media/files from the device library.
+
+**Signatures:**
 
 ```typescript
-const photo = await sdk.device.gallery();
+gallery(options?: DeviceFileOptions): Promise<DevicePermissionBaseResponse<DeviceGalleryResult>>;
+files(options?: DeviceFileOptions): Promise<DevicePermissionBaseResponse<DeviceFileResult>>;
 ```
 
-### `files(options?)`
-
-Opens document picker.
-
-```typescript
-const file = await sdk.device.files();
-```
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `options.reason` | `string` | No | - | User-facing reason for the prompt. |
+| `options.multiple` | `boolean` | No | `false` | Allow selecting more than one item. |
+| `options.accept` | `string[]` | No | - | MIME/extension allowlist, e.g. `["image/*", ".pdf"]`. |
 
 ### `download(options?)`
 
-Downloads file to device filesystem.
+Downloads a file to the device via the host.
 
-```typescript
-const res = await sdk.device.download({
-  url: "https://sewa.gov.np/receipt.pdf",
-  fileName: "tax_receipt.pdf",
-});
-```
+**Signature:** `download(options?: DeviceDownloadOptions): Promise<DevicePermissionBaseResponse<DeviceDownloadResult>>`
 
-### `contact(options?)`
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `options.url` | `string` | Yes | - | Source URL of the file. |
+| `options.fileName` | `string` | Yes | - | Filename to save as. |
+| `options.mimeType` | `string` | No | - | MIME hint, e.g. `"application/pdf"`. |
+| `options.reason` | `string` | No | - | User-facing reason for the prompt. |
 
-Opens system contact selector.
-
-```typescript
-const contact = await sdk.device.contact();
-```
+**Returns** `data.file: { url, fileName?, mimeType?, extension?, byteSize?, previewUrl? }` on `granted`.
 
 ### `biometric(options?)`
 
-Triggers native TouchID / FaceID / Fingerprint prompt.
+System biometric prompt (fingerprint / face).
 
-```typescript
-const bio = await sdk.device.biometric({ reason: "Authorize payment" });
-if (bio.status === "granted" && bio.data?.success) {
-  // Proceed with authorized operation
-}
-```
+**Signature:** `biometric(options?: DeviceBiometricOptions): Promise<DevicePermissionBaseResponse<DeviceBiometricResult>>`
 
-### `network()`
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `options.reason` | `string` | No | - | Message shown in the biometric prompt. |
+| `options[key]` | `unknown` | No | - | Extra host-specific knobs are passed through. |
 
-Queries active network connection state.
-
-```typescript
-const net = await sdk.device.network();
-console.log("Online:", net.online, "Type:", net.type);
-```
-
-### `info()`
-
-Returns hardware, OS, and screen dimensions.
-
-```typescript
-const info = await sdk.device.info();
-console.log(info.deviceModel, info.osVersion, info.screenWidth);
-```
-
-### `share(options)`
-
-Opens the native share sheet.
-
-```typescript
-await sdk.device.share({ title: "Tax receipt", text: "Paid Rs. 1,500", url: "https://sewa.gov.np/receipt/123" });
-```
-
-### `clipboardWrite(text)` / `clipboardRead()`
-
-```typescript
-await sdk.device.clipboardWrite("Copied text");
-const text = await sdk.device.clipboardRead();
-```
-
-### `haptics(style)`
-
-Triggers haptic feedback. `style`: `light` | `medium` | `heavy` | `selection`.
-
-```typescript
-await sdk.device.haptics("light");
-```
+**Returns** `data: { success: boolean; error?: string }` on `granted`.
 
 ### `notifications(options?)`
 
-Requests push-notification permission / token (device-scoped). For app-level push, use [`sdk.notifications`](/docs/sdk/notifications) instead.
+Device-level notification permission (distinct from push registration in `sdk.notifications`).
 
-### `review()` - reserved, not yet implemented
+**Signature:** `notifications(options?: DeviceNotificationsOptions): Promise<DeviceNotificationResult>`
 
-`review` is a reserved action name (app-store review dialog) but the SDK module exposes no
-`review()` method yet - calling `sdk.device.review()` will fail. Guard with a `typeof` check and
-treat it as upcoming:
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `options.requestPermission` | `boolean` | No | - | Whether to prompt the user. Extra keys pass through. |
+
+**Returns:** `{ enabled: boolean; token?: string }` (no permission envelope).
+
+### `network()` / `info()`
+
+Capability-free reads - no prompt, no envelope.
+
+**Signatures:**
 
 ```typescript
-const maybeReview = (sdk.device as { review?: () => Promise<void> }).review;
-if (typeof maybeReview === "function") {
-  await maybeReview();
-}
+network(): Promise<DeviceNetworkResult>;
+info(): Promise<DeviceInfoResult>;
 ```
 
+| Method | Returns |
+|---|---|
+| `network` | `{ online: boolean; type?: "wifi" \| "cellular" \| "none"; effectiveType?: string }` |
+| `info` | `{ platform: "web" \| "flutter"; osVersion: string; appVersion: string; deviceModel?: string; screenWidth?: number; screenHeight?: number }` |
+
+### `share(data)` / `clipboardWrite(text)` / `clipboardRead()` / `haptics(style?)`
+
+Web-bridged utilities. All optional on the type (`share?`, …) - guard with `isSupported()` where the host may lack them.
+
+**Signatures:**
+
+```typescript
+share?(data: { title?: string; text?: string; url?: string }): Promise<{ completed: boolean }>;
+clipboardWrite?(text: string): Promise<void>;
+clipboardRead?(): Promise<string>;
+haptics?(style?: "light" | "medium" | "heavy" | "selection"): Promise<void>;
+```
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `share().title` / `.text` / `.url` | `string` | No | - | At least one should be set. Resolves `{ completed }` (`false` on dismiss). |
+| `clipboardWrite()` `text` | `string` | Yes | - | Text to place on the clipboard. |
+| `haptics()` `style` | `"light" \| "medium" \| "heavy" \| "selection"` | No | `"light"` | Haptic intensity. |
+
+<CodeTabs
+  typescript={`if (sdk.device.isSupported("share")) {
+  await sdk.device.share?.({ title: "Tax receipt", url: receiptUrl });
+}`}
+  javascript={`if (sdk.device.isSupported("share")) {
+  await sdk.device.share({ title: "Tax receipt", url: receiptUrl });
+}`}
+/>
+
+</LanguageProvider>

@@ -4,13 +4,10 @@ title: Svelte Integration Guide
 sidebar_label: Svelte Integration
 ---
 
-import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
 import { ReactGovSdkImportBlock, InstallProdCommandTabs, InstallCommandTabs } from "@site/src/components/TypesPackage";
 import { SvelteScaffoldBlock } from "@site/src/components/FrameworkTabs";
 
 # Svelte Integration Guide
-
-<FrameworkBadge framework="svelte" status="active" />
 
 > **Package:** no framework runtime package - Svelte 5 + `svelte-spa-router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Svelte integration pattern for Sewa mini apps, verified against `mini-apps/svelte-mini-app`.
 
@@ -197,7 +194,7 @@ export async function initSdk(signal?: AbortSignal): Promise<void> {
 
 export function getSdkOrThrow(): MiniAppSdk {
   const sdk = get(sdkInstance);
-  if (!sdk) throw new Error("SDK not ready — use within initialized app");
+  if (!sdk) throw new Error("SDK not ready - use within initialized app");
   return sdk;
 }
 
@@ -435,7 +432,7 @@ let wired = false;
  * Exact port of test-mini-app's `useHostRouter` semantics:
  * - emit ROUTE_CHANGED { previous, current, canGoBack } on every change;
  * - call the optional `navigation.router.push` bridge ONLY on forward (PUSH)
- *   navigations — never on POP, so the host stack can't desync;
+ *   navigations - never on POP, so the host stack can't desync;
  * - re-sync when the SDK becomes ready (pushes before the bridge existed);
  * - answer BACK_REQUESTED by popping exactly one in-app route.
  */
@@ -467,7 +464,7 @@ export function startHostSync(): () => void {
       }
       pushLog(`route.changed ${previous || "/"} -> ${current}`);
     } catch {
-      // Mobile hosts may not implement the router bridge — never crash.
+      // Mobile hosts may not implement the router bridge - never crash.
     }
     previous = current;
   };
@@ -497,7 +494,7 @@ export function startHostSync(): () => void {
         });
         void sdk.navigation.router?.push?.(true);
       } catch {
-        // optional bridge — ignore
+        // optional bridge - ignore
       }
       previous = current;
     }
@@ -533,7 +530,7 @@ export async function handleBackPress(): Promise<void> {
   try {
     await sdk?.navigation.router?.back?.(consumed);
   } catch {
-    // optional bridge — ignore
+    // optional bridge - ignore
   }
   if (consumed) await stepBack();
 }

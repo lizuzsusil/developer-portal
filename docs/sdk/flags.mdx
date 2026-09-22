@@ -1,0 +1,100 @@
+---
+id: flags
+title: Feature Flags Module (sdk.flags)
+sidebar_label: sdk.flags
+---
+
+import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
+
+<LanguageProvider>
+
+# Feature Flags (`sdk.flags`)
+
+Reads host-provided feature flags. Flags are resolved lazily by the host on each call, so late-arriving flag updates are picked up without re-initializing.
+
+---
+
+## Public Methods
+
+### `isEnabled(flag)`
+
+Checks if a single feature flag is enabled.
+
+**Signature:** `isEnabled(flag: string): Promise<boolean>`
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `flag` | `string` | Yes | Feature flag name to check |
+
+<CodeTabs
+  typescript={`if (await sdk.flags.isEnabled("new-tax-form")) {
+  showNewTaxForm();
+} else {
+  showLegacyTaxForm();
+}`}
+  javascript={`if (await sdk.flags.isEnabled("new-tax-form")) {
+  showNewTaxForm();
+} else {
+  showLegacyTaxForm();
+}`}
+/>
+
+### `getAll()`
+
+Returns all feature flags as a key-value map.
+
+**Signature:** `getAll(): Promise<Record<string, boolean>>`
+
+**Returns:** `Record<string, boolean>` - object with flag names as keys and boolean values
+
+<CodeTabs
+  typescript={`const flags = await sdk.flags.getAll();
+console.log(flags); // { "new-tax-form": true, "dark-mode": false, ... }
+
+// Check multiple flags
+if (flags["new-tax-form"] && flags["dark-mode"]) {
+  // Both features enabled
+}`}
+  javascript={`const flags = await sdk.flags.getAll();
+console.log(flags); // { "new-tax-form": true, "dark-mode": false, ... }
+
+// Check multiple flags
+if (flags["new-tax-form"] && flags["dark-mode"]) {
+  // Both features enabled
+}`}
+/>
+
+### Usage Patterns
+
+**Gate UI rendering:**
+
+<CodeTabs
+  typescript={`const isFeatureEnabled = await sdk.flags.isEnabled("feature-name");
+return isFeatureEnabled ? <NewFeature /> : <LegacyFeature />;`}
+  javascript={`const isFeatureEnabled = await sdk.flags.isEnabled("feature-name");
+return isFeatureEnabled ? <NewFeature /> : <LegacyFeature />;`}
+/>
+
+**Fetch all flags once:**
+
+<CodeTabs
+  typescript={`const flags = await sdk.flags.getAll();
+// Use flags throughout your app without additional RPC calls`}
+  javascript={`const flags = await sdk.flags.getAll();
+// Use flags throughout your app without additional RPC calls`}
+/>
+
+**Combine with config:**
+
+<CodeTabs
+  typescript={`const [flags, config] = await Promise.all([
+  sdk.flags.getAll(),
+  sdk.config.getAll(),
+]);`}
+  javascript={`const [flags, config] = await Promise.all([
+  sdk.flags.getAll(),
+  sdk.config.getAll(),
+]);`}
+/>
+
+</LanguageProvider>

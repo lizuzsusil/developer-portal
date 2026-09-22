@@ -1,0 +1,133 @@
+/**
+ * Custom header theme switcher.
+ * The navbar masthead is always dark (see --color-surface-masthead), so the
+ * track/thumb are tuned for dark chrome in both color modes. Brand accent is
+ * the gold thumb in dark mode; white thumb in light mode.
+ */
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.switch {
+  position: relative;
+  width: 100px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--neutral-300);
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition:
+    background var(--duration-normal) var(--easing-standard),
+    border-color var(--duration-normal) var(--easing-standard);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 2px;
+}
+
+.switchDark {
+  border: 1px solid var(--neutral-900);
+}
+
+.switchDisabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Static sun/moon glyphs at each end of the track */
+.iconStart,
+.iconEnd {
+  display: inline-flex;
+    padding: 4px;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.75);
+  transition:
+    color var(--duration-normal) var(--easing-standard),
+    opacity var(--duration-normal) var(--easing-standard);
+}
+
+.switchDark .iconStart {
+  opacity: 0.45;
+}
+
+.switch:not(.switchDark) .iconEnd {
+  opacity: 0.45;
+}
+
+.switchDark .iconEnd {
+  color: var(--gold-300);
+  opacity: 1;
+}
+
+.switch:not(.switchDark) .iconStart {
+  color: #fff;
+  opacity: 1;
+}
+
+/* Sliding thumb */
+.thumb {
+  position: absolute;
+  top: 4px;
+  left: 10px;
+  width: 32px;
+  height: 32px;
+    padding: 4px;
+  border-radius: 50%;
+  background: var(--neutral-100);
+  color: var(--neutral-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  transition:
+    transform var(--duration-normal) var(--easing-standard),
+    background var(--duration-normal) var(--easing-standard),
+    color var(--duration-normal) var(--easing-standard);
+}
+
+.switchDark .thumb {
+  transform: translateX(46px);
+  background: var(--neutral-820);
+  color: var(--neutral-900);
+}
+
+.thumbIcon {
+  position: absolute;
+  display: inline-flex;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.thumbSun {
+  opacity: 1;
+}
+
+.thumbMoon {
+  opacity: 0;
+}
+
+.switchDark .thumbSun {
+  opacity: 0;
+}
+
+.switchDark .thumbMoon {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch,
+  .thumb,
+  .thumbIcon,
+  .iconStart,
+  .iconEnd {
+    transition: none;
+  }
+}

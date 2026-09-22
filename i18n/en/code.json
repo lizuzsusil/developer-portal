@@ -331,7 +331,7 @@
     "description": "Hero kicker"
   },
   "homepage.hero.title.line1": {
-    "message": "Build mini apps",
+    "message": "Build mini app",
     "description": "Hero title line 1"
   },
   "homepage.hero.title.line2": {
@@ -339,15 +339,15 @@
     "description": "Hero title line 2"
   },
   "homepage.hero.subtitle": {
-    "message": "Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime - you just declare types and export",
+    "message": "ES modules execute within the Sewa Citizen shell, with the SDK supplied by the host at runtime. Modules remain lightweight by declaring only their types and exports",
     "description": "Hero subtitle"
   },
   "homepage.hero.cta.getStarted": {
-    "message": "Get started",
+    "message": "Get Started",
     "description": "Hero CTA"
   },
   "homepage.hero.cta.apiReference": {
-    "message": "API reference",
+    "message": "API Reference",
     "description": "Hero CTA"
   },
   "homepage.hero.badge1": {
@@ -431,7 +431,7 @@
     "description": "Integrations kicker"
   },
   "homepage.integrations.title": {
-    "message": "Framework guides & tools",
+    "message": "Framework Guides & Tools",
     "description": "Integrations title"
   },
   "homepage.integrations.playground": {

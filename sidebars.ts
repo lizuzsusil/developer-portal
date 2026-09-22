@@ -33,16 +33,14 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         "sdk/auth",
-        "sdk/permissions", // @deprecated - retained for backward compatibility, will be removed in future major
+        "sdk/flags",
         "sdk/config",
         "sdk/navigation",
         "sdk/storage",
         "sdk/platform",
         "sdk/device",
         "sdk/api",
-        "sdk/http",
         "sdk/ai-chat",
-        "sdk/gic-chat",
         "sdk/appearance",
         "sdk/notifications",
         "sdk/links",

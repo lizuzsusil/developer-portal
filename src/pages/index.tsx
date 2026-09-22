@@ -6,14 +6,8 @@ export default function Home(): ReactNode {
   return (
     <Layout title="Sewa Developer Portal" description="Build mini apps for the Sewa government platform.">
       <main>
-          <div className="border-b border-border-decorative bg-surface-sunken">
-              <HeroFrameworks />
-          </div>
-        <HowItWorks />
-        <CapabilityTeaser />
+          <HeroFrameworks />
         <IntegrationGrid />
-        <PlaygroundGrid />
-        <FinalCTA />
       </main>
     </Layout>
   );

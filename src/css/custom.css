@@ -102,10 +102,12 @@
   --ifm-color-content-inverse: var(--color-text-inverse);
   --ifm-link-color: var(--color-text-link);
   --ifm-navbar-background-color: var(--color-surface-masthead);
-  --ifm-navbar-link-color: var(--neutral-0);
+  --ifm-navbar-link-color: var(--color-text-primary);
   --ifm-footer-background-color: var(--color-surface-footer);
-  --ifm-footer-color: var(--neutral-400);
-  --ifm-footer-link-color: var(--neutral-400);
+  --ifm-footer-color: var(--color-text-secondary);
+  --ifm-footer-link-color: var(--color-text-secondary);
+  --ifm-footer-link-hover-color: var(--gold-700);
+  --ifm-footer-title-color: var(--color-text-primary);
   --ifm-menu-color: var(--color-text-primary);
   --ifm-menu-color-active: var(--blue-500);
   --ifm-sidebar-bg-color: var(--color-surface-card);
@@ -149,6 +151,8 @@
   --ifm-footer-background-color: var(--color-surface-footer);
   --ifm-footer-color: var(--neutral-400);
   --ifm-footer-link-color: var(--neutral-400);
+  --ifm-footer-link-hover-color: var(--gold-300);
+  --ifm-footer-title-color: var(--neutral-0);
   --ifm-menu-color: var(--color-text-primary);
   --ifm-menu-color-active: var(--blue-300);
   --ifm-sidebar-bg-color: var(--color-surface-card);
@@ -216,17 +220,18 @@ html.plugin-pages .container {
 /* Navbar - compact typography */
 .navbar {
   border-bottom: 1px solid var(--color-border-decorative) !important;
-  height: 56px;
+  height: 82px;
 }
 
 .navbar__title {
-  font-weight: 700 !important;
-  font-size: 1rem !important;
-  letter-spacing: -0.01em;
+  font-weight: 500 !important;
+  font-size: 20px !important;
+  letter-spacing: -0.1px;
 }
 
 .navbar__brand {
   margin-right: 16px;
+    gap: 11px;
 }
 
 .navbar__item {
@@ -241,7 +246,7 @@ html.plugin-pages .container {
 }
 
 .navbar__logo {
-  height: 28px !important;
+  height: 40px !important;
 }
 
 /* Footer follows same rule: contained on landing, fluid elsewhere */
@@ -250,27 +255,13 @@ html.plugin-pages .footer .container {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Theme toggle - always visible on dark masthead                      */
+/*  Theme switcher - custom switch (see src/theme/ColorModeToggle).     */
+/*  Masthead is always dark, the switch module CSS owns its colors;    */
+/*  keep it vertically centered next to the locale dropdown.           */
 /* ------------------------------------------------------------------ */
-.navbar .colorModeToggle_JNgW,
-.navbar [class*="colorModeToggle"],
-.navbar [class*="toggle"] button {
-  color: var(--ifm-navbar-link-color) !important;
-}
-
-/* Docusaurus toggle uses currentColor for icons */
-.navbar button[class*="toggleButton"] {
-  color: var(--neutral-0) !important;
-  border-radius: var(--radius-md);
-}
-
-.navbar button[class*="toggleButton"]:hover {
-  background: rgba(255, 255, 255, 0.08) !important;
-}
-
-.navbar button[class*="toggleButton"] svg {
-  width: 18px;
-  height: 18px;
+.navbar .navbar__items--right {
+  align-items: center;
+    gap: 1rem;
 }
 
 /* Sidebar */
@@ -451,10 +442,10 @@ pre[class*="language-"] {
   border-top: 1px solid var(--color-border-decorative) !important;
 }
 
-.footer__title {
-  color: var(--neutral-0) !important;
-  font-weight: 700 !important;
-}
+/*.footer__title {*/
+/*  color: var(--color-text-primary) !important;*/
+/*  font-weight: 500 !important;*/
+/*}*/
 
 /* ------------------------------------------------------------------ */
 /*  Status badges                                                      */

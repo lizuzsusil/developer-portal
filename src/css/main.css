@@ -1,13 +1,20 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Tailwind's default `dark:` variant follows the OS (prefers-color-scheme),
+   but this site's theme is driven by Docusaurus, which toggles
+   `data-theme="dark"` on <html> via the header switcher. Redefine `dark:`
+   to follow that attribute so `dark:` utilities stay in sync with the toggle
+   instead of the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Host Playground embed: scoped preflight + widget layout. Imported here, and
    after the two lines above, so the `theme` and `utilities` cascade layers are
    always registered in that order regardless of chunk emission order. */
 @import "../../packages/host-playground/src/embed.css";
 
 :root {
-  --font-family-base: "Open Sans", sans-serif;
+  --font-family-base: "Google Sans", sans-serif;
   --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --ifm-font-family-base: var(--font-family-base);
   --ifm-font-family-monospace: var(--font-family-monospace);
@@ -150,8 +157,8 @@
   --color-surface-hover: var(--neutral-100);
   --color-surface-sunken: var(--neutral-100);
   --color-surface-section-alt: var(--neutral-100);
-  --color-surface-masthead: var(--neutral-900);
-  --color-surface-footer: var(--neutral-900);
+  --color-surface-masthead: var(--neutral-0);
+  --color-surface-footer: var(--neutral-0);
   --color-surface-brand: var(--gold-500);
   --color-surface-inverse: var(--neutral-900);
 
@@ -275,7 +282,7 @@
   --color-surface-hover: var(--neutral-800);
   --color-surface-sunken: var(--neutral-820);
   --color-surface-section-alt: var(--neutral-800);
-  --color-surface-masthead: var(--neutral-900);
+  --color-surface-masthead: var(--neutral-800);
   --color-surface-footer: var(--neutral-950);
   --color-surface-brand: var(--gold-500);
   --color-surface-inverse: var(--neutral-0);

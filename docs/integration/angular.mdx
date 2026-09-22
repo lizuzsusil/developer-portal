@@ -4,16 +4,11 @@ title: Angular Integration Guide
 sidebar_label: Angular Integration
 ---
 
-import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
 import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
 
 # Angular Integration Guide
 
-<FrameworkBadge framework="angular" status="active" />
-
-> **Package:** no framework runtime package - Angular + Router from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Angular integration pattern for Sewa mini apps.
-
-Angular is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting the `mount` lifecycle, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling - expressed with Angular idioms (standalone components, signals, `providedIn: "root"` services, hash-location router). State lives in feature services rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
+Angular is a supported framework for Sewa mini apps. A Vite ES-library build exporting the `mount` lifecycle, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling. State lives in feature services rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
 
 ---
 

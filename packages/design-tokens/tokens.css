@@ -3,7 +3,7 @@
 @import "tailwindcss/utilities.css" layer(utilities);
 
 :root {
-  --font-family-base: "Open Sans", sans-serif;
+  --font-family-base: "Google Sans", sans-serif;
   --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   /* Primitive - Gold */
   --gold-50: #fffef2;
@@ -460,7 +460,7 @@ body {
 }
 
 :root {
-  --font-family-base: "Open Sans", sans-serif;
+  --font-family-base: "Google Sans", sans-serif;
   --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --ifm-font-family-base: var(--font-family-base);
   --ifm-font-family-monospace: var(--font-family-monospace);

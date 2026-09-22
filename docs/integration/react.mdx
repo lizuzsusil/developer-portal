@@ -4,13 +4,10 @@ title: React Integration Guide
 sidebar_label: React Integration
 ---
 
-import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
 import { TypesPackageName, InstallCommandTabs, ReactGovSdkImportBlock, PackageJsonBlock, UseAppearanceBlock } from "@site/src/components/TypesPackage";
 import { ScaffoldTabs } from "@site/src/components/FrameworkTabs";
 
 # React Integration Guide
-
-<FrameworkBadge framework="react" status="active" />
 
 > **Package:** no framework runtime package - React + react-router from npm, types from the shared types package, and the host-injected SDK at runtime. (`@sewa/framework-react` in `packages/framework-react` is an internal workspace package used by the portal itself - mini apps must not install it.) This guide documents the production-ready React integration pattern for Sewa mini apps.
 

@@ -4,53 +4,85 @@ title: Appearance Module (sdk.appearance)
 sidebar_label: sdk.appearance
 ---
 
-# Appearance Module (`sdk.appearance`)
+import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
 
-The `sdk.appearance` module tracks platform theme preferences (`light` | `dark`) and active locale state (`language`, `region`, `direction`), enabling automatic dark-mode and localization sync across shells.
+<LanguageProvider>
+
+# Appearance (`sdk.appearance`)
+
+Reads host-driven locale and theme. The host owns appearance - the mini app observes it and renders accordingly. Values hydrate during `sdk.initialize()` (from the `platform.getType` hint when the host sends one), then stay live via events.
 
 ---
 
 ## Public Methods
 
-### `getTheme()`
-
-Fetches the active theme state.
-
-- **Signature**: `getTheme(): Promise<ThemeState>`
-
-```typescript
-const themeState = await sdk.appearance.getTheme();
-console.log("Preference:", themeState.preference); // "system" | "light" | "dark"
-console.log("Active Mode:", themeState.mode);       // "light" | "dark"
-```
-
 ### `getLocale()`
 
-Fetches the active locale state.
+Reads the host's active locale.
 
-- **Signature**: `getLocale(): Promise<LocaleState>`
+**Signature:** `getLocale(): Promise<LocaleState>`
 
-```typescript
-const localeState = await sdk.appearance.getLocale();
-console.log("Locale Tag:", localeState.locale);   // e.g. "ne-NP"
-console.log("Language:", localeState.language);     // e.g. "ne"
-console.log("Direction:", localeState.direction);   // "ltr" | "rtl"
-```
+**Returns:** `LocaleState`
+
+| Field | Type | Description |
+|---|---|---|
+| `locale` | `string` | Full tag, e.g. `"en-LK"`, `"si-LK"`, `"ta-LK"`. |
+| `language` | `string` | Primary subtag, e.g. `"en"`, `"si"`, `"ta"`. |
+| `region` | `string?` | Region subtag, e.g. `"LK"`. |
+| `direction` | `"ltr" \| "rtl"` | Resolved text direction for the locale. |
+
+### `getTheme()`
+
+Reads the host's active theme (preference + resolved mode).
+
+**Signature:** `getTheme(): Promise<ThemeState>`
+
+**Returns:** `ThemeState`
+
+| Field | Type | Available values | Description |
+|---|---|---|---|
+| `preference` | `"light" \| "dark" \| "system"` | - | User-selected preference. |
+| `mode` | `"light" \| "dark"` | - | Mode actually applied (`system` is resolved via media query). |
 
 ### `state()`
 
-Returns a synchronous snapshot of the appearance store.
+Synchronous snapshot of the current locale + theme. Never blocks - use it in render paths.
 
-- **Signature**: `state(): AppearanceState`
+**Signature:** `state(): AppearanceState` (`{ locale: LocaleState; theme: ThemeState }`)
 
 ### `subscribe(listener)`
 
-Subscribes to host appearance state updates.
+Subscribes to `appearance.locale.changed` / `appearance.theme.changed`. Returns an unsubscribe function.
 
-- **Signature**: `subscribe(listener: (next: AppearanceState) => void): () => void`
+**Signature:** `subscribe(listener: (state: AppearanceState) => void): () => void`
 
-```typescript
-const unsubscribe = sdk.appearance.subscribe((nextState) => {
-  document.documentElement.classList.toggle("dark", nextState.theme.mode === "dark");
-});
-```
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `listener` | `(state: AppearanceState) => void` | Yes | Callback invoked on locale/theme changes |
+
+**Returns:** `() => void` - unsubscribe function
+
+<CodeTabs
+  typescript={`const applyTheme = (state: AppearanceState) => {
+  document.body.dataset.theme = state.theme.mode;
+  document.body.dir = state.locale.direction;
+};
+
+applyTheme(sdk.appearance.state());
+const unsubscribe = sdk.appearance.subscribe(applyTheme);
+
+// Later, to stop listening:
+unsubscribe();`}
+  javascript={`const applyTheme = (state) => {
+  document.body.dataset.theme = state.theme.mode;
+  document.body.dir = state.locale.direction;
+};
+
+applyTheme(sdk.appearance.state());
+const unsubscribe = sdk.appearance.subscribe(applyTheme);
+
+// Later, to stop listening:
+unsubscribe();`}
+/>
+
+</LanguageProvider>

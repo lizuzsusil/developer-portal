@@ -1,79 +1,98 @@
 ---
 id: ai-chat
-title: Chat Modules Overview
-sidebar_label: Chat Overview
+title: Chat Patterns
+sidebar_label: Chat Patterns
 ---
 
-# Chat Modules Overview
+# Chat Patterns
 
-:::info Migration Notice
-The previous `sdk.ai` namespace has been removed. Chat functionality is now split into two dedicated modules:
-
-| Module | Purpose | Namespace |
-|---|---|---|
-| `sdk.http` | Generic LLM chat streaming | `HTTP.CHAT_STREAM` |
-| `sdk.gicChat` | GIC-specific agent chat (tool calls, SSE events) | `GIC_CHAT.STREAM` |
-
-Both modules are gated by the **`http`** capability during handshake.
-:::
+All chat goes through generic [`sdk.api.request`](/docs/sdk/api) with `stream: true`. There are no chat-specific SDK modules - each mini app owns its backend's session shape, routes, and event parsing, while the SDK and host only move bytes. Both patterns below are gated by the **`api`** capability.
 
 ---
 
-## Generic Chat (`sdk.http.stream`)
+## Generic chat
 
-Streams a generic LLM completion through the host network proxy. Use this for general-purpose AI chat that does not require GIC-specific tool calling or SSE event types.
+Streams a model completion for general-purpose conversation. The body carries the message history; the host streams back text chunks with a terminal empty chunk.
+
+**Request:**
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `body.messages` | `{ role: "user" \| "system"; content: string }[]` | Yes | - | Conversation history, oldest first. Must be non-empty. |
+| `body.options` | `ModelCompletionOptions` | No | - | `{ model?, temperature?, maxTokens?, ... }` passthrough. |
+| `stream` | `true` | Yes | - | Opens the live stream. |
 
 ```typescript
-const stream = sdk.http.stream({
-  messages: [
-    { role: "system", content: "You are a helpful government tax assistant." },
-    { role: "user", content: "How do I renew my vehicle tax?" },
-  ],
+const builder = await sdk.api.request("POST", {
+  body: {
+    messages: [
+      { role: "system", content: "You are a helpful government tax assistant." },
+      { role: "user", content: "How do I renew my vehicle tax?" },
+    ],
+  },
+  stream: true,
 });
 
-for await (const chunk of stream.iterate()) {
+for await (const chunk of builder.iterate()) {
   appendToUI(chunk);
 }
+await builder.waitUntilDone();
 ```
-
-See the full [HTTP Module reference](/docs/sdk/http) for more details.
 
 ---
 
-## GIC Chat (`sdk.gicChat`)
+## Backend agent chat
 
-Streams responses from the GIC Chat Agent, which supports tool calls (knowledge-base lookups), structured SSE events, and session management. Use this when you need the GIC-specific agent features.
+Streams from a session-based backend emitting structured SSE events (tool calls, tokens, metadata, audio). Session handling and event parsing live in the mini app.
+
+**Init (unary):**
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `endpoint` | `string` | Yes | - | Session route, e.g. `"/citizen/v1/chat-session/start"`. Relative path; the host joins it onto its backend base URL. |
+| `headers` | `Record<string, string>` | Varies | - | Backend auth/tenant headers, e.g. `x-mini-app-id`. Forwarded verbatim. |
 
 ```typescript
-// 1. Start a session
-const session = await sdk.gicChat.startSession();
-
-// 2. Stream a response
-const { invocation_id } = await sdk.gicChat.stream(
-  {
-    user_id: session.user_id,
-    session_id: session.session_id,
-    message: "How do I apply for a National Identity Card?",
-  },
-  {
-    onEvent: (event) => {
-      switch (event.type) {
-        case "tool_call":
-          showSearching();
-          break;
-        case "token":
-          appendText(event.text);
-          break;
-        case "done":
-          finalize();
-          break;
-        case "error":
-          showError(event.detail);
-          break;
-      }
-    },
-  }
-);
+const res = await sdk.api.request("POST", {
+  endpoint: "/citizen/v1/chat-session/start",
+  headers: { "x-mini-app-id": "my-mini-app" },
+});
+const { user_id, session_id } = res.data; // shape is backend-defined
 ```
 
-See the full [GIC Chat Module reference](/docs/sdk/gic-chat) for SSE event details and the `streamText` convenience method.
+**Stream:**
+
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `endpoint` | `string` | Yes | - | Stream route, e.g. `"/citizen/v1/chat-session/stream"`. |
+| `headers` | `Record<string, string>` | Varies | - | Same headers as init. |
+| `body` | backend-defined | Yes | - | e.g. `{ user_id, session_id, message }`. Opaque to SDK/Host. |
+| `stream` | `true` | Yes | - | Opens the live SSE stream. |
+| `signal` | `AbortSignal` | No | - | Cancels the turn. |
+
+```typescript
+const builder = await sdk.api.request("POST", {
+  endpoint: "/citizen/v1/chat-session/stream",
+  headers: { "x-mini-app-id": "my-mini-app" },
+  body: { user_id, session_id, message },
+  stream: true,
+  signal: controller.signal,
+});
+
+for await (const chunk of builder.iterate()) {
+  const event = JSON.parse(typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk));
+  switch (event.type) {
+    case "tool_call": showSearching(); break;
+    case "token": appendText(event.text); break;
+    case "meta": recordInvocation(event.invocation_id); break;
+    case "audio": playAudio(event.url); break;
+    case "done": finalize(); break;
+    case "error": showError(event.detail); break;
+  }
+}
+await builder.waitUntilDone();
+```
+
+:::warning Session Expiry
+Sessions expire after a period of inactivity. On a "session not found"-style failure, repeat the init call for fresh identifiers and retry the turn.
+:::

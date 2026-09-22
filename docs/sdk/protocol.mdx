@@ -53,7 +53,7 @@ interface HandshakePayload {
   sdkVersion: string;
   protocolVersion: string;          // "1.0.0"
   protocolVersionRange?: string;    // "^1.0.0"
-  capabilities: readonly string[];  // 14 domain namespaces
+  capabilities: readonly string[];  // 12 domain namespaces
 }
 
 interface HandshakeAckPayload {
@@ -73,9 +73,7 @@ interface HandshakeAckPayload {
 
 ```typescript
 // SDK_CAPABILITIES = auth, permissions (deprecated), config, navigation, storage,
-//                    platform, device, api, http, gic-chat, appearance, notifications, links
+//                    platform, device, api, appearance, notifications, links
 sdk.capabilities        // string[] granted by host
 sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)
 ```
-
-`gicChat` is gated by `http` - the host must grant `http` for `sdk.gicChat` to be available.

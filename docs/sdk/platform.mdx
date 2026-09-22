@@ -4,44 +4,92 @@ title: Platform Module (sdk.platform)
 sidebar_label: sdk.platform
 ---
 
-# Platform Module (`sdk.platform`)
+import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
 
-The `sdk.platform` module allows mini apps to inspect the host container runtime (Web browser iframe vs Flutter mobile native container).
+<LanguageProvider>
+
+# Platform (`sdk.platform`)
+
+Reports which shell hosts the mini app. The `type` resolves during `sdk.initialize()` from the host's `platform.getType` reply (bare `"web"`/`"flutter"` string or a `{ type, appearance }` object that also hydrates locale/theme).
 
 ---
 
-## Public Properties & Methods
+## Public Members
 
 ### `type`
 
-Read-only getter returning `"web"` or `"flutter"`.
+The resolved host type. One of `"web"` or `"flutter"`.
 
-- **Type**: `"web" | "flutter"`
+**Signature:** `type: PlatformTypeLiteral`
+
+### `isWeb()` / `isFlutter()` / `isMobile()`
+
+Feature predicates derived from `type`. Note `isMobile()` is currently equivalent to `isFlutter()`.
+
+**Signatures:**
 
 ```typescript
-console.log("Current platform container:", sdk.platform.type);
+isWeb(): boolean;      // type === "web"
+isFlutter(): boolean;  // type === "flutter"
+isMobile(): boolean;   // type === "flutter"
 ```
 
-### `isWeb()`
+<CodeTabs
+  typescript={`if (sdk.platform.isFlutter()) {
+  // native shell: prefer device.* bridges over web APIs
+} else {
+  // web shell
+}`}
+  javascript={`if (sdk.platform.isFlutter()) {
+  // native shell: prefer device.* bridges over web APIs
+} else {
+  // web shell
+}`}
+/>
 
-Returns `true` if running inside a Web host container.
+### Usage Patterns
 
-- **Signature**: `isWeb(): boolean`
+**Conditional device access:**
 
-### `isFlutter()`
-
-Returns `true` if running inside a Flutter mobile host container.
-
-- **Signature**: `isFlutter(): boolean`
-
-### `isMobile()`
-
-Alias for `isFlutter()`.
-
-- **Signature**: `isMobile(): boolean`
-
-```typescript
+<CodeTabs
+  typescript={`// On Flutter, use native device APIs
 if (sdk.platform.isFlutter()) {
-  // Mobile container specific UI styling or behavior
-}
-```
+  const location = await sdk.device.location();
+} else {
+  // Web: use browser geolocation API
+  navigator.geolocation.getCurrentPosition(success, error);
+}`}
+  javascript={`// On Flutter, use native device APIs
+if (sdk.platform.isFlutter()) {
+  const location = await sdk.device.location();
+} else {
+  // Web: use browser geolocation API
+  navigator.geolocation.getCurrentPosition(success, error);
+}`}
+/>
+
+**Platform-specific styling:**
+
+<CodeTabs
+  typescript={`if (sdk.platform.isMobile()) {
+  document.body.classList.add("mobile-layout");
+} else {
+  document.body.classList.add("desktop-layout");
+}`}
+  javascript={`if (sdk.platform.isMobile()) {
+  document.body.classList.add("mobile-layout");
+} else {
+  document.body.classList.add("desktop-layout");
+}`}
+/>
+
+**Check platform type:**
+
+<CodeTabs
+  typescript={`const platformType: PlatformTypeLiteral = sdk.platform.type; // "web" | "flutter"
+console.log(\`Running on: \${platformType}\`);`}
+  javascript={`const platformType = sdk.platform.type; // "web" | "flutter"
+console.log(\`Running on: \${platformType}\`);`}
+/>
+
+</LanguageProvider>

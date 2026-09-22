@@ -6,7 +6,7 @@ sidebar_label: Errors
 
 # Errors
 
-All SDK failures are `SdkError` subclasses with a `code` and optional `retryable` flag.
+All SDK failures are `SdkError` subclasses carrying a machine-readable `code` and, usually, a `retryable` flag. Branch on the shape - mini apps never import the error classes.
 
 ## Hierarchy
 
@@ -18,19 +18,28 @@ SdkError
 ├── TimeoutError          - per-request timeout (retryable)
 ├── RequestCancelledError - AbortSignal aborted
 ├── StreamCancelledError  - StreamBuilder.cancel()
-├── HttpClientError       - 4xx (not retryable)
-└── HttpServerError       - 5xx (retryable)
+├── HttpClientError       - mapped 4xx from proxied HTTP (not retryable)
+└── HttpServerError       - mapped 5xx from proxied HTTP (retryable)
 ```
 
 ## Codes
 
-Common `SdkError.code` values: `HANDSHAKE_FAILED`, `CAPABILITY_NOT_SUPPORTED`, `SDK_NOT_INITIALIZED`, `SDK_ALREADY_DESTROYED`, `CIRCUIT_OPEN`, `REQUEST_CANCELLED`, `STREAM_CANCELLED`.
+| Code | Meaning | Retryable | Typical source |
+|---|---|---|---|
+| `HANDSHAKE_FAILED` | Host rejected or never answered the handshake | No | `sdk.initialize()` |
+| `CAPABILITY_NOT_SUPPORTED` | Namespace the host did not grant - gate with `isSupported()` / `sdk.capabilities` first | No | Any namespaced call |
+| `SDK_NOT_INITIALIZED` | Call before `initialize()` resolved | No | Any call |
+| `SDK_ALREADY_DESTROYED` | Call after `destroy()` | No | `initialize()` |
+| `INVALID_PARAMS` | Bad call shape (e.g. removed object form, non-relative endpoint) | No | `sdk.request`, host validation |
+| `TIMEOUT` | Per-request timeout elapsed | Yes | Any call |
+| `REQUEST_CANCELLED` | `AbortSignal` aborted | No | Unmount / user cancel paths |
+| `STREAM_CANCELLED` | `StreamBuilder.cancel()` | No | Stream teardown |
+| `CIRCUIT_OPEN` | Circuit breaker open under load | After backoff | Any call |
+| `HTTP_CLIENT_ERROR` | Mapped 4xx from a proxied HTTP response | No | `api.request` |
+| `HTTP_SERVER_ERROR` | Mapped 5xx from a proxied HTTP response | Yes | `api.request` |
+| `AUTH_FAILED` / `AUTH_REQUIRED` / `UNAUTHENTICATED` / `FORBIDDEN` | Auth-family failures | No | `sdk.auth`, guarded endpoints |
 
 ## Guards
-
-Error classes and guard helpers (`isTimeout`, `isRetryable`, …) live in the SDK runtime, which
-mini apps never import. Branch on the error shape instead - every SDK failure carries a `code`
-and usually a `retryable` flag:
 
 ```typescript
 try {
@@ -44,4 +53,4 @@ try {
 }
 ```
 
-`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake - gate such calls with `sdk.device.isSupported()` (or the deprecated `sdk.permissions`, see [Permissions](/docs/sdk/permissions) - deprecated) first. Auth-family codes (`AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`) arrive the same way, on `err.code`.
+`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake - gate such calls with the module's `isSupported()` (or `sdk.capabilities`) first.

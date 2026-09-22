@@ -4,9 +4,13 @@ title: Push Notifications Module (sdk.notifications)
 sidebar_label: sdk.notifications
 ---
 
-# Push Notifications Module (`sdk.notifications`)
+import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
 
-The `sdk.notifications` module handles push notification token registration and click events.
+<LanguageProvider>
+
+# Push Notifications (`sdk.notifications`)
+
+Registers for push delivery and observes token/open events. Gated on the **`notifications`** capability - check `isSupported()` (or `sdk.capabilities`) before `register()`; event subscriptions are safe regardless (a host that never emits simply never fires).
 
 ---
 
@@ -14,39 +18,69 @@ The `sdk.notifications` module handles push notification token registration and 
 
 ### `isSupported()`
 
-Checks if push notifications are supported by the host.
+Whether the host negotiated the `notifications` namespace during the handshake.
 
-- **Signature**: `isSupported(): boolean`
+**Signature:** `isSupported(): boolean`
 
 ### `register(options?)`
 
-Requests push token registration.
+Requests notification access and the device push token from the host. The host may prompt the user.
 
-- **Signature**: `register(options?: NotificationsRegisterOptions): Promise<NotificationsRegisterResult>`
+**Signature:** `register(options?: NotificationsRegisterOptions): Promise<NotificationsRegisterResult>`
 
-```typescript
-if (sdk.notifications.isSupported()) {
-  const res = await sdk.notifications.register();
-  if (res.token) {
-    console.log("Registered Push Token:", res.token);
-  }
-}
-```
+| Parameter | Type | Required | Default | Description |
+|---|---|---|---|---|
+| `options.requestPermission` | `boolean` | No | `true` | Whether the host should prompt the user for permission. |
+
+**Returns:** `NotificationsRegisterResult`
+
+| Field | Type | Description |
+|---|---|---|
+| `enabled` | `boolean` | Whether notifications are enabled for this mini app. |
+| `token` | `string?` | Device push token, when the host has one to hand over. |
+
+<CodeTabs
+  typescript={`if (sdk.notifications.isSupported()) {
+  const { enabled, token } = await sdk.notifications.register();
+  if (enabled && token) await saveToken(token);
+}`}
+  javascript={`if (sdk.notifications.isSupported()) {
+  const { enabled, token } = await sdk.notifications.register();
+  if (enabled && token) await saveToken(token);
+}`}
+/>
 
 ### `onToken(handler)`
 
-Subscribes to token rotation events.
+Subscribes to push-token delivery (initial issue + refreshes). Returns an unsubscribe function.
 
-- **Signature**: `onToken(handler: (token: string) => void): () => void`
+**Signature:** `onToken(handler: (token: string) => void): () => void`
+
+<CodeTabs
+  typescript={`const off = sdk.notifications.onToken((token) => saveToken(token));`}
+  javascript={`const off = sdk.notifications.onToken((token) => saveToken(token));`}
+/>
 
 ### `onOpen(handler)`
 
-Subscribes to inbound notification tap/click events.
+Subscribes to notification taps the host resolves into this mini app. Returns an unsubscribe function.
 
-- **Signature**: `onOpen(handler: (event: NotificationOpenEvent) => void): () => void`
+**Signature:** `onOpen(handler: (event: NotificationOpenEvent) => void): () => void`
 
-```typescript
-sdk.notifications.onOpen((event) => {
-  console.log("User tapped notification with payload:", event.data);
-});
-```
+**Event payload (`NotificationOpenEvent`):**
+
+| Field | Type | Description |
+|---|---|---|
+| `url` | `string?` | URL the notification deep-links to, when the host resolved one. |
+| `data` | `Record<string, unknown>?` | Arbitrary payload the notification carried. |
+
+<CodeTabs
+  typescript={`sdk.notifications.onOpen(({ url, data }) => {
+  if (url) router.navigate(url);
+});`}
+  javascript={`sdk.notifications.onOpen(({ url, data }) => {
+  if (url) router.navigate(url);
+});`}
+/>
+
+</LanguageProvider>

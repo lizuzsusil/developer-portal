@@ -24,7 +24,7 @@ await sdk.batch([{ namespace, action, payload }]); // batch via host or parallel
 | Option | Default | Effect |
 |---|---|---|
 | `signal` | - | `AbortSignal` → `RequestCancelledError` |
-| `mapPayload` | - | Transform success payload; used by `http` to map `HttpResult` → `HttpClientError` / `HttpServerError` |
+| `mapPayload` | - | Transform success payload inside the retry loop (e.g. map error statuses to typed errors) |
 | `dedupe` | `false` | 50 ms window coalesces identical reads |
 
 **Dedup allowlist** (9 idempotent reads): `auth.getUser`, `permissions.has` (deprecated), `config.get`, `navigation.getCurrent`, `storage.get`, `platform.getType`, `appearance.*`.
@@ -40,7 +40,7 @@ await sdk.batch([{ namespace, action, payload }]); // batch via host or parallel
 }
 ```
 
-Retryable = `TimeoutError` or `SdkError` with `retryable: true` (5xx via `HttpServerError`). 4xx (`HttpClientError`) fast-fails. Backoff is exponential with jitter (`utils/backoff.ts`).
+Retryable = `TimeoutError` or `SdkError` with `retryable: true` (e.g. mapped 5xx). 4xx-style failures fast-fail. Backoff is exponential with jitter (`utils/backoff.ts`). Streams never retry - re-issue the request.
 
 ## Middleware
 

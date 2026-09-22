@@ -54,7 +54,7 @@ const config: Config = {
 
   stylesheets: [
     {
-      href: "https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap",
+      href: "https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap",
       type: "text/css",
     },
   ],
@@ -101,12 +101,6 @@ const config: Config = {
       },
       items: [
         {
-          type: "docSidebar",
-          sidebarId: "tutorialSidebar",
-          position: "left",
-          label: "Docs",
-        },
-        {
           href: "https://github.com/anomalyco/sewa-platform",
           label: "GitHub",
           position: "right",
@@ -118,7 +112,7 @@ const config: Config = {
       ],
     },
     footer: {
-      style: "dark",
+      style: "light",
       links: [
         {
           title: "Documentation",
@@ -176,7 +170,6 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Sewa - Government of Sri Lanka.`,
     },
     prism: {
       theme: prismThemes.github,

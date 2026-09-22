@@ -52,9 +52,9 @@ await sdk.emit("myapp.ready", { version: "1.2.0" });
 | `navigation.route.changed` | `{ previous, current, canGoBack }` - emitted by mini app via `sdk.emit` |
 | `connection.lost` | `{ timestamp }` |
 | `connection.established` | `{ timestamp }` |
-| `http.uploadProgress` | `HttpProgress` - forwarded to `http.post` `onProgress` |
+| `api.uploadProgress` | `ApiUploadProgress` - forwarded to `api.request` `onProgress` |
 | `notifications.token` | `string` - push token from host |
 | `notifications.opened` | `NotificationOpenEvent` |
 | `links.opened` | `LinksOpenedEvent` |
 
-See also `APPEARANCE_EVENTS`, `NAVIGATION_EVENTS`, `CONNECTION_EVENTS`, `HTTP_EVENTS` in `constants/`.
+See also `APPEARANCE_EVENTS`, `NAVIGATION_EVENTS`, `CONNECTION_EVENTS` in `constants/`.

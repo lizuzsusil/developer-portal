@@ -4,9 +4,13 @@ title: Authentication Module (sdk.auth)
 sidebar_label: sdk.auth
 ---
 
-# Authentication Module (`sdk.auth`)
+import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
 
-The `sdk.auth` module allows mini apps to access citizen identity information, verify authentication state, and request session logout via the host platform.
+<LanguageProvider>
+
+# Authentication (`sdk.auth`)
+
+Exposes the host's authenticated user to the mini app. Read-only - login itself happens in the host; this module only reports who is signed in and ends the session on request.
 
 ---
 
@@ -14,41 +18,64 @@ The `sdk.auth` module allows mini apps to access citizen identity information, v
 
 ### `getUser()`
 
-Fetches the profile of the authenticated citizen.
+Returns the currently authenticated user, or `null` when nobody is signed in.
 
-- **Signature**: `getUser(): Promise<PlatformUser | null>`
-- **Returns**: `PlatformUser` object or `null` if user is unauthenticated.
+**Signature:** `getUser(): Promise<PlatformUser | null>`
 
-```typescript
-const user = await sdk.auth.getUser();
+**Returns:** `PlatformUser | null`
 
-if (user) {
-  console.log("Citizen Name:", user.name);
-  console.log("Email:", user.email);
-  console.log("Roles:", user.roles);
-  console.log("Permissions:", user.permissions);
-}
-```
+| Field | Type | Description |
+|---|---|---|
+| `id` | `string` | Stable user identifier. |
+| `name` | `string` | Display name. |
+| `email` | `string` | Email address. |
+| `fullName` | `string?` | Full legal name, when the host provides it. |
+| `nationalId` | `string?` | National ID, when the host provides it. |
+| `roles` | `string[]` | Role codes granted to the user. |
+| `permissions` | `string[]` | Fine-grained permission codes. |
+| `avatar` | `string?` | Avatar image URL, when available. |
+
+<CodeTabs
+  typescript={`const user = await sdk.auth.getUser();
+if (!user) {
+  showSignInPrompt();
+} else {
+  greet(user.name);
+}`}
+  javascript={`const user = await sdk.auth.getUser();
+if (!user) {
+  showSignInPrompt();
+} else {
+  greet(user.name);
+}`}
+/>
 
 ### `isAuthenticated()`
 
-Checks if there is an active authenticated user session.
+Whether a user is currently signed in. Prefer this for gating UI; use `getUser()` when you need the profile.
 
-- **Signature**: `isAuthenticated(): Promise<boolean>`
+**Signature:** `isAuthenticated(): Promise<boolean>`
 
-```typescript
-const isAuth = await sdk.auth.isAuthenticated();
-if (!isAuth) {
-  // Prompt user to log in via host
-}
-```
+<CodeTabs
+  typescript={`if (await sdk.auth.isAuthenticated()) {
+  enableTaxFiling();
+}`}
+  javascript={`if (await sdk.auth.isAuthenticated()) {
+  enableTaxFiling();
+}`}
+/>
 
 ### `logout()`
 
-Triggers host session logout.
+Ends the host session. The host also emits an auth event so other mini apps can reconcile.
 
-- **Signature**: `logout(): Promise<void>`
+**Signature:** `logout(): Promise<void>`
 
-```typescript
-await sdk.auth.logout();
-```
+<CodeTabs
+  typescript={`await sdk.auth.logout();
+redirectToWelcome();`}
+  javascript={`await sdk.auth.logout();
+redirectToWelcome();`}
+/>
+
+</LanguageProvider>
