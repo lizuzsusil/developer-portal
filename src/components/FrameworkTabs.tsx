@@ -2,7 +2,6 @@ import React from "react";
 import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
-import { useTypesPackage } from "./TypesPackage";
 
 type Framework = "react" | "vue" | "angular" | "svelte" | "solid";
 
@@ -17,11 +16,8 @@ type PackageManager = typeof PKG_MANAGERS[number];
 
 export function ScaffoldTabs({
   framework = "react",
-  pkgName,
   projectName = "my-mini-app",
 }: ScaffoldTabsProps) {
-  const pkg = useTypesPackage(pkgName);
-
   const getCommand = (pm: PackageManager): string => {
     switch (framework) {
       case "react":
@@ -40,16 +36,16 @@ export function ScaffoldTabs({
 
       case "angular":
         if (pm === "pnpm") {
-          return `mkdir ${projectName} && cd ${projectName}\npnpm init\npnpm add @analogjs/vite-plugin-angular @angular/common @angular/compiler @angular/core @angular/platform-browser @angular/router lucide-angular tailwindcss @tailwindcss/vite zone.js\npnpm add -D @angular/build @angular/compiler-cli "${pkg}" @types/node typescript@^5 vite`;
+          return `npx -y @angular/cli@21 new ${projectName} --routing --style=css --ssr=false --skip-tests --skip-git --package-manager=pnpm\ncd ${projectName}`;
         }
         if (pm === "npm") {
-          return `mkdir ${projectName} && cd ${projectName}\nnpm init -y\nnpm install @analogjs/vite-plugin-angular @angular/common @angular/compiler @angular/core @angular/platform-browser @angular/router lucide-angular tailwindcss @tailwindcss/vite zone.js\nnpm install -D @angular/build @angular/compiler-cli "${pkg}" @types/node typescript@^5 vite`;
+          return `npx -y @angular/cli@21 new ${projectName} --routing --style=css --ssr=false --skip-tests --skip-git\ncd ${projectName}`;
         }
         if (pm === "yarn") {
-          return `mkdir ${projectName} && cd ${projectName}\nyarn init -y\nyarn add @analogjs/vite-plugin-angular @angular/common @angular/compiler @angular/core @angular/platform-browser @angular/router lucide-angular tailwindcss @tailwindcss/vite zone.js\nyarn add -D @angular/build @angular/compiler-cli "${pkg}" @types/node typescript@^5 vite`;
+          return `npx -y @angular/cli@21 new ${projectName} --routing --style=css --ssr=false --skip-tests --skip-git --package-manager=yarn\ncd ${projectName}`;
         }
         if (pm === "bun") {
-          return `mkdir ${projectName} && cd ${projectName}\nbun init -y\nbun add @analogjs/vite-plugin-angular @angular/common @angular/compiler @angular/core @angular/platform-browser @angular/router lucide-angular tailwindcss @tailwindcss/vite zone.js\nbun add -d @angular/build @angular/compiler-cli "${pkg}" @types/node typescript@^5 vite`;
+          return `npx -y @angular/cli@21 new ${projectName} --routing --style=css --ssr=false --skip-tests --skip-git --package-manager=bun\ncd ${projectName}`;
         }
         break;
 
