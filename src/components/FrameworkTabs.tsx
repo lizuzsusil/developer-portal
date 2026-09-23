@@ -1,7 +1,18 @@
-import React from "react";
+import React, { useId } from "react";
 import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
+
+/**
+ * Resolves the tab sync group: an explicit groupId keeps shared selection
+ * (plus URL query-string persistence); otherwise each block gets its own
+ * unique group so a selection never leaks into other blocks.
+ */
+function useTabGroup(groupId: string | undefined): { groupId: string; queryString: boolean } {
+  const autoId = useId();
+  if (groupId) return { groupId, queryString: true };
+  return { groupId: `auto-${autoId}`, queryString: false };
+}
 
 type Framework = "react" | "vue" | "angular" | "svelte" | "solid";
 
@@ -9,7 +20,7 @@ interface ScaffoldTabsProps {
   framework?: Framework;
   pkgName?: string;
   projectName?: string;
-  /** Tab sync group - defaults to "pkg-scaffold" (synced page-wide). */
+  /** Optional sync group - omit for an independent block. */
   groupId?: string;
 }
 
@@ -19,8 +30,9 @@ type PackageManager = typeof PKG_MANAGERS[number];
 export function ScaffoldTabs({
   framework = "react",
   projectName = "my-mini-app",
-  groupId = "pkg-scaffold",
+  groupId: groupIdProp,
 }: ScaffoldTabsProps) {
+  const { groupId, queryString } = useTabGroup(groupIdProp);
   const getCommand = (pm: PackageManager): string => {
     switch (framework) {
       case "react":
@@ -70,7 +82,7 @@ export function ScaffoldTabs({
   };
 
   return (
-    <Tabs groupId={groupId} queryString>
+    <Tabs groupId={groupId} queryString={queryString} defaultValue="pnpm">
       {PKG_MANAGERS.map((pm) => (
         <TabItem key={pm} value={pm} label={pm}>
           <CodeBlock language="bash">{getCommand(pm)}</CodeBlock>
@@ -85,22 +97,23 @@ export interface RunCommandTabsProps {
   pnpm: string;
   yarn: string;
   bun: string;
-  /** Tab sync group - defaults to "pkg-install" (follows install tabs). */
+  /** Optional sync group - omit for an independent block. */
   groupId?: string;
 }
 
 /**
  * Package-manager tabs for run/dev/build commands (one command per manager).
- * Shares groupId="pkg-install" by default so the selection follows the
- * install-command tabs on the page; pass a unique groupId for independence.
+ * Each block is independent by default; pass a shared groupId to sync
+ * several blocks.
  *
  * Usage in MDX:
  * <RunCommandTabs npm="npm run build" pnpm="pnpm build" yarn="yarn build" bun="bun run build" />
  */
-export function RunCommandTabs({ npm, pnpm, yarn, bun, groupId = "pkg-install" }: RunCommandTabsProps) {
+export function RunCommandTabs({ npm, pnpm, yarn, bun, groupId: groupIdProp }: RunCommandTabsProps) {
   const commands: Record<PackageManager, string> = { npm, pnpm, yarn, bun };
+  const { groupId, queryString } = useTabGroup(groupIdProp);
   return (
-    <Tabs groupId={groupId} queryString>
+    <Tabs groupId={groupId} queryString={queryString} defaultValue="pnpm">
       {PKG_MANAGERS.map((pm) => (
         <TabItem key={pm} value={pm} label={pm}>
           <CodeBlock language="bash">{commands[pm]}</CodeBlock>

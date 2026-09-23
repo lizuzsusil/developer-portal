@@ -11,7 +11,7 @@ import {CodeTabs} from '@site/src/components/CodeTabs';
 
 The SDK is **injected by the host shell** before your app mounts. You do **not** install the SDK runtime. Your app depends only on the shared types package for type-checking (if using `Typescript`); the host provides the live instance at runtime.
 
-> Choose your language once - every code sample on this page follows it. Tabs below are synced page-wide (and across the framework guides).
+> Choose your language per sample - each TypeScript / JavaScript block below is independent, so picking JavaScript in one place never flips the others.
 >
 > - **TypeScript** (recommended): full type-checking via the types package.
 > - **JavaScript**: skip the types package or keep it for editor hints via JSDoc - the runtime contract is identical.
@@ -24,11 +24,9 @@ The SDK is **injected by the host shell** before your app mounts. You do **not**
 
 <InstallCommandTabs />
 
-That gives you `MiniAppSdkInterface`, `PlatformMessage`, `SdkEventMap`, and all namespace result types with no runtime cost.
+**JavaScript:** the types package is optional. Install it anyway for editor autocompletion via JSDoc, or skip it entirely - SDK works the same at runtime either way.
 
-**JavaScript:** the types package is optional. Install it anyway for editor autocompletion via JSDoc, or skip it entirely - `window.__GSA_SDK__` works the same at runtime either way.
-
-## 1. Declare the Injected SDK (`global.d.ts` / JSDoc)
+## 1. Declare the Injected SDK (`global.d.ts`)
 
 So your editor knows about the host-injected global:
 
@@ -41,17 +39,13 @@ No runtime import - types are erased at build (TypeScript) or live only in comme
 The host loads your bundle as an ES module and calls `mount`. Honor the optional `runtime.initialPath` when present (deep links) and return an `unmount` handle:
 
 <CodeTabs
-  typescript={`// src/main.ts - shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
+  typescript={`// src/main.ts
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
-  // render your app into \`container\` - e.g. createRoot(container).render(<App />)
-  // if \`runtime?.initialPath\` is set, route there on first render
-  return { unmount() { /* teardown your framework tree */ } };
+  return { unmount() };
 }`}
-  javascript={`// src/main.js - shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
+  javascript={`// src/main.js
 export function mount(container, runtime) {
-  // render your app into \`container\` - e.g. createRoot(container).render(<App />)
-  // if \`runtime?.initialPath\` is set, route there on first render
-  return { unmount() { /* teardown your framework tree */ } };
+  return { unmount() };
 }`}
 />
 The host owns the SDK instance and destroys it. your app only cleans up its own render tree.
@@ -105,12 +99,10 @@ export function createManifest(): Plugin {
           if (fs.statSync(fullPath).isDirectory()) {
             arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
           } else {
-            // Get path relative to outDir
             const relativePath = path
               .relative(outDir, fullPath)
-              .replace(/\\/g, "/"); // Normalize Windows path slashes
+              .replace(/\\/g, "/");
 
-            // Exclude manifest file itself from files array
             if (!relativePath.endsWith("manifest.json")) {
               arrayOfFiles.push(relativePath);
             }
@@ -201,12 +193,10 @@ export function createManifest() {
           if (fs.statSync(fullPath).isDirectory()) {
             arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
           } else {
-            // Get path relative to outDir
             const relativePath = path
               .relative(outDir, fullPath)
-              .replace(/\\/g, "/"); // Normalize Windows path slashes
+              .replace(/\\/g, "/");
 
-            // Exclude manifest file itself from files array
             if (!relativePath.endsWith("manifest.json")) {
               arrayOfFiles.push(relativePath);
             }

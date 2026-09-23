@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
@@ -6,9 +6,20 @@ import TabItem from "@theme/TabItem";
 
 const FALLBACK = "@lizuz/mini-app-types";
 
+/**
+ * Resolves the tab sync group: an explicit groupId keeps shared selection
+ * (plus URL query-string persistence); otherwise each block gets its own
+ * unique group so a selection never leaks into other blocks.
+ */
+function useTabGroup(groupId: string | undefined): { groupId: string; queryString: boolean } {
+  const autoId = useId();
+  if (groupId) return { groupId, queryString: true };
+  return { groupId: `auto-${autoId}`, queryString: false };
+}
+
 interface InstallCommandTabsProps {
   pkgName?: string;
-  /** Tab sync group - defaults to "pkg-install" (synced page-wide). */
+  /** Optional sync group - omit for an independent block. */
   groupId?: string;
 }
 
@@ -51,12 +62,14 @@ const PACKAGE_MANAGERS: [string, string][] = [
  * Renders switchable install commands (one tab per package manager) using the
  * Docusaurus theme's <Tabs>/<TabItem> + <CodeBlock>.
  */
-export function InstallCommandTabs({pkgName, groupId = "pkg-install"}:InstallCommandTabsProps) {
+export function InstallCommandTabs({pkgName, groupId: groupIdProp}:InstallCommandTabsProps) {
   const pkg = useTypesPackage(pkgName);
+  const { groupId, queryString } = useTabGroup(groupIdProp);
   return (
     <Tabs
       groupId={groupId}
-      queryString
+      queryString={queryString}
+      defaultValue="pnpm"
     >
       {PKG_MANAGERS.map((mgr) => {
         const [label, prefix] = mgr;
@@ -71,11 +84,12 @@ export function InstallCommandTabs({pkgName, groupId = "pkg-install"}:InstallCom
     </Tabs>
   );
 }
-export function InstallProdCommandTabs({ pkgName, groupId = "pkg-install" }: InstallCommandTabsProps) {
+export function InstallProdCommandTabs({ pkgName, groupId: groupIdProp }: InstallCommandTabsProps) {
   const pkg = useTypesPackage(pkgName);
+  const { groupId, queryString } = useTabGroup(groupIdProp);
 
   return (
-    <Tabs groupId={groupId} queryString>
+    <Tabs groupId={groupId} queryString={queryString} defaultValue="pnpm">
       {PACKAGE_MANAGERS.map(([label, prefix]) => (
         <TabItem key={label} value={label} label={label}>
           <CodeBlock language="bash">
@@ -111,10 +125,11 @@ declare global {
   );
 }
 
-export function ImportCodeTabs({ groupId = "code-language" }: { groupId?: string }) {
+export function ImportCodeTabs({ groupId: groupIdProp }: { groupId?: string }) {
   const pkg = useTypesPackage();
+  const { groupId, queryString } = useTabGroup(groupIdProp);
   return (
-    <Tabs groupId={groupId} queryString>
+    <Tabs groupId={groupId} queryString={queryString}>
       <TabItem value="typescript" label="TypeScript">
         <CodeBlock language="typescript">
           {`// src/global.d.ts
