@@ -22,31 +22,20 @@ Returns the currently authenticated user, or `null` when nobody is signed in.
 
 **Signature:** `getUser(): Promise<PlatformUser | null>`
 
-**Returns:** `PlatformUser | null`
-
-| Field | Type | Description |
-|---|---|---|
-| `id` | `string` | Stable user identifier. |
-| `name` | `string` | Display name. |
-| `email` | `string` | Email address. |
-| `fullName` | `string?` | Full legal name, when the host provides it. |
-| `nationalId` | `string?` | National ID, when the host provides it. |
-| `roles` | `string[]` | Role codes granted to the user. |
-| `permissions` | `string[]` | Fine-grained permission codes. |
-| `avatar` | `string?` | Avatar image URL, when available. |
+**Returns:** `Record<string, unknown> | null`. The user object is host-defined - its keys vary between shells, so don't code against a fixed field list. Read what you need defensively (`user?.name ?? "there"`) and narrow at runtime.
 
 <CodeTabs
   typescript={`const user = await sdk.auth.getUser();
 if (!user) {
   showSignInPrompt();
 } else {
-  greet(user.name);
+  greet((user.name as string | undefined) ?? "Welcome, User");
 }`}
   javascript={`const user = await sdk.auth.getUser();
 if (!user) {
   showSignInPrompt();
 } else {
-  greet(user.name);
+  greet(user?.name ?? "there");
 }`}
 />
 
@@ -58,10 +47,10 @@ Whether a user is currently signed in. Prefer this for gating UI; use `getUser()
 
 <CodeTabs
   typescript={`if (await sdk.auth.isAuthenticated()) {
-  enableTaxFiling();
+        {**Do Something**}
 }`}
   javascript={`if (await sdk.auth.isAuthenticated()) {
-  enableTaxFiling();
+        {**Do Something**}
 }`}
 />
 
@@ -73,9 +62,9 @@ Ends the host session. The host also emits an auth event so other mini apps can 
 
 <CodeTabs
   typescript={`await sdk.auth.logout();
-redirectToWelcome();`}
+{**your next action**}`}
   javascript={`await sdk.auth.logout();
-redirectToWelcome();`}
+{**your next action**}`}
 />
 
 </LanguageProvider>

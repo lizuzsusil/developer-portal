@@ -36,9 +36,9 @@ remove(key: string): Promise<void>;
 
 <CodeTabs
   typescript={`await sdk.storage.set("draft:-return-2026", "in-progress", { ttlMs: 86_400_000 });
-const draft = await sdk.storage.get("draft:return-2026"); // string | null`}
+const draft = await sdk.storage.get("draft:return-2026");`}
   javascript={`await sdk.storage.set("draft:-return-2026", "in-progress", { ttlMs: 86_400_000 });
-const draft = await sdk.storage.get("draft:return-2026"); // string | null`}
+const draft = await sdk.storage.get("draft:return-2026");`}
 />
 
 ### `getJson(key)` / `setJson(key, value, options?)`
@@ -73,9 +73,9 @@ Returns a sub-module with every key prefixed (`prefix:key`). Nestable (`a.scoped
 
 <CodeTabs
   typescript={`const prefs = sdk.storage.scoped("prefs");
-await prefs.set("theme", "dark"); // stored as "prefs:theme"`}
+await prefs.set("theme", "dark");"`}
   javascript={`const prefs = sdk.storage.scoped("prefs");
-await prefs.set("theme", "dark"); // stored as "prefs:theme"`}
+await prefs.set("theme", "dark");"`}
 />
 
 ### `getMany(keys)` / `getManyJson(keys)`

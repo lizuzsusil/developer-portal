@@ -54,17 +54,11 @@ isMobile(): boolean;   // type === "flutter"
 <CodeTabs
   typescript={`// On Flutter, use native device APIs
 if (sdk.platform.isFlutter()) {
-  const location = await sdk.device.location();
-} else {
-  // Web: use browser geolocation API
-  navigator.geolocation.getCurrentPosition(success, error);
+    const location = await sdk.device.location();
 }`}
   javascript={`// On Flutter, use native device APIs
 if (sdk.platform.isFlutter()) {
-  const location = await sdk.device.location();
-} else {
-  // Web: use browser geolocation API
-  navigator.geolocation.getCurrentPosition(success, error);
+    const location = await sdk.device.location();
 }`}
 />
 
@@ -86,9 +80,9 @@ if (sdk.platform.isFlutter()) {
 **Check platform type:**
 
 <CodeTabs
-  typescript={`const platformType: PlatformTypeLiteral = sdk.platform.type; // "web" | "flutter"
+  typescript={`const platformType: PlatformTypeLiteral = sdk.platform.type;
 console.log(\`Running on: \${platformType}\`);`}
-  javascript={`const platformType = sdk.platform.type; // "web" | "flutter"
+  javascript={`const platformType = sdk.platform.type;
 console.log(\`Running on: \${platformType}\`);`}
 />
 
