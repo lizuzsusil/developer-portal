@@ -4,7 +4,11 @@ title: Angular Integration Guide
 sidebar_label: Angular Integration
 ---
 
-import { ReactGovSdkImportBlock } from "@site/src/components/TypesPackage";
+import { ReactGovSdkImportBlock, InstallProdCommandTabs, InstallCommandTabs } from "@site/src/components/TypesPackage";
+import { ScaffoldTabs, RunCommandTabs } from "@site/src/components/FrameworkTabs";
+import { CodeTabs, LanguageProvider } from "@site/src/components/CodeTabs";
+
+<LanguageProvider>
 
 # Angular Integration Guide
 
@@ -22,6 +26,12 @@ router sync, per-screen feature folders) are covered under
 > `zone.js`). Icons use `@lucide/angular 1.47.0` — the legacy `lucide-angular` package is
 > deprecated, and the new package peers on `@angular/core >= 17` with no upper bound.
 
+> **Reading this guide:** shell commands offer a package-manager selector (npm / pnpm / yarn /
+> bun) and code samples offer a TypeScript / JavaScript selector. Each selector acts on its
+> own block only — changing one never flips the others on the page. The scaffold itself is
+> TypeScript — Angular requires TS for decorators and AOT compilation — the JavaScript tabs
+> show the equivalent untyped logic for comparison.
+
 > **No runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK
 > runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your
 > app only needs the shared types package as a dev dependency for compile-time safety.
@@ -38,13 +48,10 @@ router sync, per-screen feature folders) are covered under
 
 ## Step 1 — Create the stock project with `ng new`
 
-Answer the prompts as shown (or pass the equivalent flags). Routing **Yes**, stylesheet
-**CSS**, SSR **No**:
+Answer the prompts as shown (routing **Yes**, stylesheet **CSS**, SSR **No**).
+Pick your package manager in the selector:
 
-```bash
-npx -y @angular/cli@21 new my-mini-app
-cd my-mini-app
-```
+<ScaffoldTabs framework="angular" projectName="my-mini-app" groupId="angular-pm-scaffold" />
 
 ```bash
 # Interactive prompts — answer like this:
@@ -53,7 +60,7 @@ cd my-mini-app
 # ? Do you want to configure Server-Side Rendering (SSR)? › No
 ```
 
-Non-interactive equivalent:
+Non-interactive equivalent (npm shown; the flags are identical for every manager):
 
 ```bash
 npx -y @angular/cli@21 new my-mini-app --routing --style=css --ssr=false --skip-tests --skip-git
@@ -61,10 +68,7 @@ npx -y @angular/cli@21 new my-mini-app --routing --style=css --ssr=false --skip-
 
 Sanity-check the stock app first — this must serve the default Angular welcome page:
 
-```bash
-npm start
-# → http://localhost:4200
-```
+<RunCommandTabs npm="npm start" pnpm="pnpm start" yarn="yarn start" bun="bun run start" groupId="angular-pm-sanity" />
 
 What you got (2025 file-name style): `src/main.ts` bootstrapping `App` from `src/app/app.ts`,
 providers in `src/app/app.config.ts` (zoned change detection + router), an empty route table
@@ -80,10 +84,9 @@ On top of the stock install, add the Vite/Angular bridge, styling, icons, and th
 packages. (`zone.js`, TypeScript, and `@angular/build` + `@angular/compiler-cli` are already
 there from `ng new` — don't reinstall them.)
 
-```bash
-npm install @analogjs/vite-plugin-angular @lucide/angular tailwindcss @tailwindcss/vite
-npm install -D @lizuz/mini-app-types @types/node vite
-```
+<InstallProdCommandTabs pkgName="@analogjs/vite-plugin-angular @lucide/angular tailwindcss @tailwindcss/vite" groupId="angular-pm-deps" />
+
+<InstallCommandTabs pkgName="@lizuz/mini-app-types @types/node vite" groupId="angular-pm-devdeps" />
 
 What each addition is for:
 
@@ -154,8 +157,8 @@ without it, and the emit breaks without this line:
 `ng build` can't produce the host contract, so production goes through `vite.lib.config.ts`
 plus a small `createManifest` plugin. Both are new files; `angular.json` stays untouched.
 
-```typescript
-// src/app/utils/createManifest.ts — writes the host-discovery manifest.json
+<CodeTabs groupId="angular-code-manifest"
+  typescript={`// src/app/utils/createManifest.ts — writes the host-discovery manifest.json
 import fs from "node:fs";
 import path from "node:path";
 import type { Plugin } from "vite";
@@ -169,8 +172,8 @@ export function createManifest(): Plugin {
     async writeBundle(options) {
       const outDir = options.dir || "dist";
 
-      // Vite writes its manifest to .vite/ by default, but `manifest:
-      // "manifest.json"` in the lib config below puts it at the output root.
+      // Vite writes its manifest to .vite/ by default, but \`manifest:
+      // "manifest.json"\` in the lib config below puts it at the output root.
       const possibleManifestPaths = [
         path.resolve(outDir, "manifest.json"),
         path.resolve(outDir, ".vite/manifest.json"),
@@ -188,7 +191,7 @@ export function createManifest(): Plugin {
           if (fs.statSync(full).isDirectory()) {
             collectFiles(full, acc);
           } else {
-            const rel = path.relative(outDir, full).replace(/\\/g, "/");
+            const rel = path.relative(outDir, full).replace(/\\\\/g, "/");
             if (!rel.endsWith("manifest.json")) acc.push(rel);
           }
         }
@@ -227,8 +230,80 @@ export function createManifest(): Plugin {
       );
     },
   };
-}
-```
+}`}
+  javascript={`// src/app/utils/createManifest.js — writes the host-discovery manifest.json
+import fs from "node:fs";
+import path from "node:path";
+
+const pkgPath = path.resolve(process.cwd(), "package.json");
+const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+
+export function createManifest() {
+  return {
+    name: "custom-manifest",
+    async writeBundle(options) {
+      const outDir = options.dir || "dist";
+
+      // Vite writes its manifest to .vite/ by default, but \`manifest:
+      // "manifest.json"\` in the lib config below puts it at the output root.
+      const possibleManifestPaths = [
+        path.resolve(outDir, "manifest.json"),
+        path.resolve(outDir, ".vite/manifest.json"),
+      ];
+      const originalManifestPath = possibleManifestPaths.find((p) => fs.existsSync(p));
+      if (!originalManifestPath) return;
+
+      const viteManifest = JSON.parse(fs.readFileSync(originalManifestPath, "utf-8"));
+      const entryKey = Object.keys(viteManifest).find((key) => viteManifest[key].isEntry);
+      const entryItem = entryKey ? viteManifest[entryKey] : null;
+
+      const collectFiles = (dir, acc = []) => {
+        for (const file of fs.readdirSync(dir)) {
+          const full = path.join(dir, file);
+          if (fs.statSync(full).isDirectory()) {
+            collectFiles(full, acc);
+          } else {
+            const rel = path.relative(outDir, full).replace(/\\\\/g, "/");
+            if (!rel.endsWith("manifest.json")) acc.push(rel);
+          }
+        }
+        return acc;
+      };
+
+      const customManifest = {
+        schemaVersion: "1",
+        framework: "angular",
+        application: {
+          id: pkg.name || "my-mini-app",
+          name: pkg.name || "my-mini-app",
+          version: pkg.version || "0.0.0",
+          type: "mini-app",
+        },
+        platform: {
+          runtime: "^1.0.0",
+          sdk: "^1.0.9",
+        },
+        bundle: {
+          entry: entryItem?.file || "",
+          styles: entryItem?.css || [],
+          files: collectFiles(outDir),
+        },
+      };
+
+      if (
+        originalManifestPath.includes(".vite") &&
+        fs.existsSync(originalManifestPath)
+      ) {
+        fs.unlinkSync(originalManifestPath);
+      }
+      fs.writeFileSync(
+        path.resolve(outDir, "manifest.json"),
+        JSON.stringify(customManifest, null, 2),
+      );
+    },
+  };
+}`}
+/>
 
 ```typescript
 // vite.lib.config.ts — new file at the project root
@@ -290,8 +365,8 @@ This is the heart of the conversion. Four edits to stock files plus one new serv
 the host serves the bundle with no server-side routes — add `withHashLocation()`. Everything
 else in the stock config stays:
 
-```typescript
-// src/app/app.config.ts — one-line change
+<CodeTabs groupId="angular-code-config"
+  typescript={`// src/app/app.config.ts — one-line change
 import { provideRouter, withHashLocation } from '@angular/router';
 
 export const appConfig: ApplicationConfig = {
@@ -301,14 +376,25 @@ export const appConfig: ApplicationConfig = {
     // Hash location: the host serves the bundle without server-side routes.
     provideRouter(routes, withHashLocation())
   ]
-};
-```
+};`}
+  javascript={`// src/app/app.config.js — one-line change
+import { provideRouter, withHashLocation } from '@angular/router';
+
+export const appConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    // Hash location: the host serves the bundle without server-side routes.
+    provideRouter(routes, withHashLocation())
+  ]
+};`}
+/>
 
 **2. New SDK service at `src/app/core/sdk.service.ts`.** Polls for the host-injected SDK and
 publishes a `phase` signal (`loading | ready | error`):
 
-```typescript
-// src/app/core/sdk.service.ts — new file
+<CodeTabs groupId="angular-code-sdk"
+  typescript={`// src/app/core/sdk.service.ts — new file
 import { Injectable, signal } from "@angular/core";
 
 export type SdkPhase = "loading" | "ready" | "error";
@@ -334,8 +420,33 @@ export class SdkService {
     }
     this.phase.set("error");
   }
-}
-```
+}`}
+  javascript={`// src/app/core/sdk.service.js — new file
+import { Injectable, signal } from "@angular/core";
+
+@Injectable({ providedIn: "root" })
+export class SdkService {
+  phase = signal("loading");
+  sdk = null;
+
+  constructor() {
+    void this.waitForSdk();
+  }
+
+  async waitForSdk() {
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const sdk = window.__GSA_SDK__;
+      if (sdk) {
+        this.sdk = sdk;
+        this.phase.set("ready");
+        return;
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    this.phase.set("error");
+  }
+}`}
+/>
 
 **3. Phase gating in the stock root component.** Keep the `App` class and its files — just
 gate the template on the SDK phase. Replace `src/app/app.html` with:
@@ -353,8 +464,8 @@ gate the template on the SDK phase. Replace `src/app/app.html` with:
 
 and inject the service in `src/app/app.ts`:
 
-```typescript
-// src/app/app.ts — keep the stock component, add the SDK gate
+<CodeTabs groupId="angular-code-app"
+  typescript={`// src/app/app.ts — keep the stock component, add the SDK gate
 import { Component, inject } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { SdkService } from "./core/sdk.service";
@@ -367,15 +478,29 @@ import { SdkService } from "./core/sdk.service";
 })
 export class App {
   protected readonly sdk = inject(SdkService);
-}
-```
+}`}
+  javascript={`// src/app/app.js — keep the stock component, add the SDK gate
+import { Component, inject } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+import { SdkService } from "./core/sdk.service";
+
+@Component({
+  selector: "app-root",
+  imports: [RouterOutlet],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
+})
+export class App {
+  sdk = inject(SdkService);
+}`}
+/>
 
 **4. Replace `src/main.ts`.** The stock `bootstrapApplication(App, appConfig)` becomes the
 host-called `mount`/`unmount` pair — reusing the stock `appConfig` as-is via
 `createApplication(appConfig)`:
 
-```typescript
-// src/main.ts — replace the stock bootstrap
+<CodeTabs groupId="angular-code-main"
+  typescript={`// src/main.ts — replace the stock bootstrap
 import "zone.js";
 import type { ApplicationRef } from "@angular/core";
 import { createApplication } from "@angular/platform-browser";
@@ -387,9 +512,9 @@ const mounted = new WeakMap<HTMLElement, { appRef: ApplicationRef; host: HTMLEle
 /** Sets the initial hash so the router starts at the host-provided path. */
 function applyInitialHash(initialPath?: string) {
   if (!initialPath) return;
-  const normalized = initialPath.startsWith("/") ? initialPath : `/${initialPath}`;
+  const normalized = initialPath.startsWith("/") ? initialPath : \`/\${initialPath}\`;
   if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
-    window.location.replace(`#${normalized}`);
+    window.location.replace(\`#\${normalized}\`);
   }
   // If the host already set the hash (e.g. deep link), leave it alone.
 }
@@ -418,8 +543,51 @@ export function unmount(container: HTMLElement): void {
 // Local dev only (ng serve): the host is absent, so mount into the page.
 if (import.meta.env.DEV) {
   void mount(document.body);
+}`}
+  javascript={`// src/main.js — replace the stock bootstrap
+import "zone.js";
+import { createApplication } from "@angular/platform-browser";
+import { appConfig } from "./app/app.config";
+import { App } from "./app/app";
+
+const mounted = new WeakMap();
+
+/** Sets the initial hash so the router starts at the host-provided path. */
+function applyInitialHash(initialPath) {
+  if (!initialPath) return;
+  const normalized = initialPath.startsWith("/") ? initialPath : \`/\${initialPath}\`;
+  if (!window.location.hash || window.location.hash === "#" || !window.location.hash.startsWith("#/")) {
+    window.location.replace(\`#\${normalized}\`);
+  }
+  // If the host already set the hash (e.g. deep link), leave it alone.
 }
-```
+
+export async function mount(container, runtime) {
+  // Seed the hash BEFORE bootstrap: the router reads the start location
+  // during initialization.
+  applyInitialHash(runtime?.initialPath);
+
+  const appRef = await createApplication(appConfig);
+  const host = document.createElement("app-root");
+  container.appendChild(host);
+  appRef.bootstrap(App, host);
+  mounted.set(container, { appRef, host });
+}
+
+/** Host-called teardown. The host loader calls this directly. */
+export function unmount(container) {
+  const entry = mounted.get(container);
+  if (!entry) return;
+  entry.appRef.destroy();
+  entry.host.remove();
+  mounted.delete(container);
+}
+
+// Local dev only (ng serve): the host is absent, so mount into the page.
+if (import.meta.env.DEV) {
+  void mount(document.body);
+}`}
+/>
 
 Three details differ from React/Vue and all three matter:
 
@@ -433,17 +601,13 @@ Three details differ from React/Vue and all three matter:
 
 Verify the conversion typechecks (template errors fail the production build, so catch them now):
 
-```bash
-npm run typecheck
-```
+<RunCommandTabs npm="npm run typecheck" pnpm="pnpm typecheck" yarn="yarn typecheck" bun="bun run typecheck" groupId="angular-pm-typecheck" />
 
 ---
 
 ## Step 7 — Run the dev server
 
-```bash
-npm start
-```
+<RunCommandTabs npm="npm start" pnpm="pnpm start" yarn="yarn start" bun="bun run start" groupId="angular-pm-start" />
 
 `ng serve` compiles the converted project as-is — the `import.meta.env.DEV` block at the
 bottom of `main.ts` mounts the app locally, so no extra dev bootstrap is needed. You will see
@@ -455,8 +619,9 @@ components compile and render; the real SDK arrives in Step 9.
 
 ## Step 8 — Build the mini-app bundle and check the manifest
 
+<RunCommandTabs npm="npm run build:miniapp" pnpm="pnpm build:miniapp" yarn="yarn build:miniapp" bun="bun run build:miniapp" groupId="angular-pm-build" />
+
 ```bash
-npm run build:miniapp
 cat dist/manifest.json
 ```
 
@@ -469,9 +634,8 @@ in `dist/`, and `framework` is `"angular"`. (Remember: the stock `build` script 
 ## Step 9 — Load it in the Host Playground
 
 1. Serve `dist/` **with CORS enabled** so the docs site (a different origin) can fetch it:
-   ```bash
-   npx http-server dist -p 8080 --cors
-   ```
+
+   <RunCommandTabs npm="npx http-server dist -p 8080 --cors" pnpm="pnpm dlx http-server dist -p 8080 --cors" yarn="yarn dlx http-server dist -p 8080 --cors" bun="bunx http-server dist -p 8080 --cors" groupId="angular-pm-serve" />
    (For a deployed preview, any static host works — see the
    [CORS notes](/docs/host-playground#preparing-your-mini-app).)
 2. Open the [Host Playground](/docs/host-playground), click **Load app**, and enter the
@@ -516,37 +680,61 @@ while each feature stays independently testable. Presentational cards take data 
 (icons as standalone component references, e.g. `LucideCpu` from `@lucide/angular`) and emit
 via `@Output`:
 
-```typescript
-// src/app/features/location/location.component.ts (shape)
+<CodeTabs groupId="angular-code-feature"
+  typescript={`// src/app/features/location/location.component.ts (shape)
 import { LucideCpu } from "@lucide/angular";
 
 @Component({
   selector: "app-location",
   imports: [LocationCardComponent, LucideCpu],
-  template: `
+  template: \`
     <app-location-card title="WITH SDK" color="emerald"
       [icon]="CpuIcon" [location]="svc.location()" ... />
-  `,
+  \`,
 })
 export class LocationComponent {
   protected readonly svc = inject(LocationService);
   protected readonly CpuIcon = LucideCpu;
-}
-```
+}`}
+  javascript={`// src/app/features/location/location.component.js (shape)
+import { LucideCpu } from "@lucide/angular";
+
+@Component({
+  selector: "app-location",
+  imports: [LocationCardComponent, LucideCpu],
+  template: \`
+    <app-location-card title="WITH SDK" color="emerald"
+      [icon]="CpuIcon" [location]="svc.location()" ... />
+  \`,
+})
+export class LocationComponent {
+  svc = inject(LocationService);
+  CpuIcon = LucideCpu;
+}`}
+/>
 
 Add screens as routes in the stock `src/app/app.routes.ts` (the hash location from Step 6
 already applies). Sidebar links use `routerLink` + `routerLinkActive` — Angular intercepts
 these natively, so the hash-desync trap that bites raw anchors cannot occur:
 
-```typescript
+<CodeTabs groupId="angular-code-routes"
+  typescript={`import { Routes } from "@angular/router";
+
 export const appRoutes: Routes = [
   { path: "", component: HomeComponent },
   { path: "test-api", component: TestApiComponent },
   { path: "chat", component: ChatComponent },
   // ... one path per feature
   { path: "**", redirectTo: "" },
-];
-```
+];`}
+  javascript={`export const appRoutes = [
+  { path: "", component: HomeComponent },
+  { path: "test-api", component: TestApiComponent },
+  { path: "chat", component: ChatComponent },
+  // ... one path per feature
+  { path: "**", redirectTo: "" },
+];`}
+/>
 
 ### Full reference layout
 
@@ -594,3 +782,5 @@ Follow along and tick off each step:
 - [ ] **Step 8:** `npm run build:miniapp` passes; `dist/manifest.json` lists entry + files, `framework: "angular"`
 - [ ] **Step 9:** served with CORS and mounted in the Host Playground (`phase() === "ready"`)
 - [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+
+</LanguageProvider>

@@ -9,6 +9,8 @@ interface ScaffoldTabsProps {
   framework?: Framework;
   pkgName?: string;
   projectName?: string;
+  /** Tab sync group — defaults to "pkg-scaffold" (synced page-wide). */
+  groupId?: string;
 }
 
 const PKG_MANAGERS = ["pnpm", "npm", "yarn", "bun"] as const;
@@ -17,6 +19,7 @@ type PackageManager = typeof PKG_MANAGERS[number];
 export function ScaffoldTabs({
   framework = "react",
   projectName = "my-mini-app",
+  groupId = "pkg-scaffold",
 }: ScaffoldTabsProps) {
   const getCommand = (pm: PackageManager): string => {
     switch (framework) {
@@ -67,10 +70,40 @@ export function ScaffoldTabs({
   };
 
   return (
-    <Tabs groupId="pkg-scaffold" queryString>
+    <Tabs groupId={groupId} queryString>
       {PKG_MANAGERS.map((pm) => (
         <TabItem key={pm} value={pm} label={pm}>
           <CodeBlock language="bash">{getCommand(pm)}</CodeBlock>
+        </TabItem>
+      ))}
+    </Tabs>
+  );
+}
+
+export interface RunCommandTabsProps {
+  npm: string;
+  pnpm: string;
+  yarn: string;
+  bun: string;
+  /** Tab sync group — defaults to "pkg-install" (follows install tabs). */
+  groupId?: string;
+}
+
+/**
+ * Package-manager tabs for run/dev/build commands (one command per manager).
+ * Shares groupId="pkg-install" by default so the selection follows the
+ * install-command tabs on the page; pass a unique groupId for independence.
+ *
+ * Usage in MDX:
+ * <RunCommandTabs npm="npm run build" pnpm="pnpm build" yarn="yarn build" bun="bun run build" />
+ */
+export function RunCommandTabs({ npm, pnpm, yarn, bun, groupId = "pkg-install" }: RunCommandTabsProps) {
+  const commands: Record<PackageManager, string> = { npm, pnpm, yarn, bun };
+  return (
+    <Tabs groupId={groupId} queryString>
+      {PKG_MANAGERS.map((pm) => (
+        <TabItem key={pm} value={pm} label={pm}>
+          <CodeBlock language="bash">{commands[pm]}</CodeBlock>
         </TabItem>
       ))}
     </Tabs>

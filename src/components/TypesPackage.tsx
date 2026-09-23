@@ -8,6 +8,8 @@ const FALLBACK = "@lizuz/mini-app-types";
 
 interface InstallCommandTabsProps {
   pkgName?: string;
+  /** Tab sync group — defaults to "pkg-install" (synced page-wide). */
+  groupId?: string;
 }
 
 export function useTypesPackage(overridePkg?: string): string {
@@ -49,11 +51,11 @@ const PACKAGE_MANAGERS: [string, string][] = [
  * Renders switchable install commands (one tab per package manager) using the
  * Docusaurus theme's <Tabs>/<TabItem> + <CodeBlock>.
  */
-export function InstallCommandTabs({pkgName}:InstallCommandTabsProps) {
+export function InstallCommandTabs({pkgName, groupId = "pkg-install"}:InstallCommandTabsProps) {
   const pkg = useTypesPackage(pkgName);
   return (
     <Tabs
-      groupId="pkg-install"
+      groupId={groupId}
       queryString
     >
       {PKG_MANAGERS.map((mgr) => {
@@ -69,11 +71,11 @@ export function InstallCommandTabs({pkgName}:InstallCommandTabsProps) {
     </Tabs>
   );
 }
-export function InstallProdCommandTabs({ pkgName }: InstallCommandTabsProps) {
+export function InstallProdCommandTabs({ pkgName, groupId = "pkg-install" }: InstallCommandTabsProps) {
   const pkg = useTypesPackage(pkgName);
 
   return (
-    <Tabs groupId="pkg-install" queryString>
+    <Tabs groupId={groupId} queryString>
       {PACKAGE_MANAGERS.map(([label, prefix]) => (
         <TabItem key={label} value={label} label={label}>
           <CodeBlock language="bash">

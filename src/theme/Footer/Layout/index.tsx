@@ -9,7 +9,7 @@ export default function FooterLayout({style, links}: Props): ReactNode {
     const logoSrc = useBaseUrl('/img/footerGlow.png');
   return (
     <footer
-      className={clsx(ThemeClassNames.layout.footer.container, 'pt-15 pb-30 relative', {
+      className={clsx(ThemeClassNames.layout.footer.container, 'lg:pt-15 lg:pb-30 py-8 relative', {
         'footer--dark': style === 'dark',
       })}>
       <div className="container container-fluid">{links}</div>
