@@ -101,7 +101,7 @@ const config: Config = {
       },
       items: [
         {
-          href: "https://github.com/anomalyco/sewa-platform",
+          href: "https://github.com/<repo>/sewa-platform",
           label: "GitHub",
           position: "right",
         },
@@ -165,7 +165,7 @@ const config: Config = {
           items: [
             {
               label: "Sewa Platform GitHub",
-              href: "https://github.com/anomalyco/sewa-platform",
+              href: "https://github.com/<repo>/sewa-platform",
             },
           ],
         },

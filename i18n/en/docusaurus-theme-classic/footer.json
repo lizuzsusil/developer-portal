@@ -37,7 +37,7 @@
   },
   "link.item.label.Sewa Platform GitHub": {
     "message": "Sewa Platform GitHub",
-    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/anomalyco/sewa-platform"
+    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/<repo>/sewa-platform"
   },
   "copyright": {
     "message": "Copyright © 2026 Sewa - Government of Sri Lanka.",

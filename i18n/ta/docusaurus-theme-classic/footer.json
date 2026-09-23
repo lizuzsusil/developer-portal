@@ -37,7 +37,7 @@
   },
   "link.item.label.Sewa Platform GitHub": {
     "message": "சேவா தளம் GitHub",
-    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/anomalyco/sewa-platform"
+    "description": "The label of footer link with label=Sewa Platform GitHub linking to https://github.com/<repo>/sewa-platform"
   },
   "copyright": {
     "message": "பதிப்புரிமை © 2026 சேவா - இலங்கை அரசு.",
