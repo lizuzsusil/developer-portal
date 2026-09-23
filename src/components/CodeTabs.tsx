@@ -46,7 +46,7 @@ export function CodeTabs({ typescript, javascript, title, groupId = "code-langua
 interface InlineCodeTabsProps {
   typescript: React.ReactNode;
   javascript: React.ReactNode;
-  /** See CodeTabs.groupId — defaults to "code-language" (synced). */
+  /** See CodeTabs.groupId - defaults to "code-language" (synced). */
   groupId?: string;
 }
 

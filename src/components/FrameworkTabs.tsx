@@ -9,7 +9,7 @@ interface ScaffoldTabsProps {
   framework?: Framework;
   pkgName?: string;
   projectName?: string;
-  /** Tab sync group — defaults to "pkg-scaffold" (synced page-wide). */
+  /** Tab sync group - defaults to "pkg-scaffold" (synced page-wide). */
   groupId?: string;
 }
 
@@ -85,7 +85,7 @@ export interface RunCommandTabsProps {
   pnpm: string;
   yarn: string;
   bun: string;
-  /** Tab sync group — defaults to "pkg-install" (follows install tabs). */
+  /** Tab sync group - defaults to "pkg-install" (follows install tabs). */
   groupId?: string;
 }
 

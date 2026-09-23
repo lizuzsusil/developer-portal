@@ -6,51 +6,80 @@ sidebar_label: Errors
 
 # Errors
 
-All SDK failures are `SdkError` subclasses carrying a machine-readable `code` and, usually, a `retryable` flag. Branch on the shape - mini apps never import the error classes.
+All SDK failures are `SdkError` subclasses carrying a machine-readable `code` and, usually, a `retryable` flag. Branch on the guards — prefer the exported helpers over string-matching `code` by hand.
+
+> Scope: this page covers only what a mini-app developer can observe through the host-injected instance (`window.__GSA_SDK__`). Construction- and lifecycle-time failures (`initialize()` / `destroy()` / bad options) belong to the host — see [Host-only errors](#host-only-errors) at the bottom.
 
 ## Hierarchy
 
 ```
-SdkError
-├── HandshakeError        - handshake rejected / timeout / version mismatch
-├── TransportError        - transport send/start failure
-├── ProtocolError         - malformed wire message
-├── TimeoutError          - per-request timeout (retryable)
-├── RequestCancelledError - AbortSignal aborted
+SdkError                              - root: { code, message, retryable, details?, cause? }, .toJSON()
+├── TransportError        - transport send failure (the pipe itself is broken)
+├── ProtocolError         - `reason: 'malformed-message'` (don't trust what arrived) vs `'host-rejected'` (host understood and said no; host `code` preserved as-is)
+├── TimeoutError          - per-request timeout (retryable; `details: { namespace, action, timeoutMs }`)
+├── RequestCancelledError - AbortSignal aborted (never retryable — caller's choice; has `namespace` / `action`)
 ├── StreamCancelledError  - StreamBuilder.cancel()
-├── HttpClientError       - mapped 4xx from proxied HTTP (not retryable)
-└── HttpServerError       - mapped 5xx from proxied HTTP (retryable)
+├── HttpClientError       - mapped 4xx from proxied HTTP (not retryable; has `.status`)
+└── HttpServerError       - mapped 5xx from proxied HTTP (retryable; has `.status`)
 ```
+
+`HandshakeError` is host-only (thrown from `initialize()`, which the host calls before injecting the instance) — listed under [Host-only errors](#host-only-errors).
 
 ## Codes
 
+What you can catch from the injected instance:
+
 | Code | Meaning | Retryable | Typical source |
 |---|---|---|---|
-| `HANDSHAKE_FAILED` | Host rejected or never answered the handshake | No | `sdk.initialize()` |
+| `TRANSPORT_SEND_FAILED` | Underlying transport failed to send | Per-case | Any call |
 | `CAPABILITY_NOT_SUPPORTED` | Namespace the host did not grant - gate with `isSupported()` / `sdk.capabilities` first | No | Any namespaced call |
-| `SDK_NOT_INITIALIZED` | Call before `initialize()` resolved | No | Any call |
-| `SDK_ALREADY_DESTROYED` | Call after `destroy()` | No | `initialize()` |
 | `INVALID_PARAMS` | Bad call shape (e.g. removed object form, non-relative endpoint) | No | `sdk.request`, host validation |
+| `INVALID_MESSAGE` | Incoming host message failed validation (`ProtocolError`, `reason: 'malformed-message'`) | No | Any call |
 | `TIMEOUT` | Per-request timeout elapsed | Yes | Any call |
 | `REQUEST_CANCELLED` | `AbortSignal` aborted | No | Unmount / user cancel paths |
 | `STREAM_CANCELLED` | `StreamBuilder.cancel()` | No | Stream teardown |
 | `CIRCUIT_OPEN` | Circuit breaker open under load | After backoff | Any call |
 | `HTTP_CLIENT_ERROR` | Mapped 4xx from a proxied HTTP response | No | `api.request` |
 | `HTTP_SERVER_ERROR` | Mapped 5xx from a proxied HTTP response | Yes | `api.request` |
-| `AUTH_FAILED` / `AUTH_REQUIRED` / `UNAUTHENTICATED` / `FORBIDDEN` | Auth-family failures | No | `sdk.auth`, guarded endpoints |
+| `AUTH_FAILED` / `AUTH_REQUIRED` / `UNAUTHENTICATED` / `FORBIDDEN` | Auth-family failures (host-defined; matched by `isAuthError()`) | No | `sdk.auth`, guarded endpoints |
+| `<host-defined>` | Any other host `code`, preserved as-is on `ProtocolError` (`reason: 'host-rejected'`) | From host | Any call |
 
 ## Guards
 
+The SDK exports pure, never-throwing helpers from its entrypoint — use them instead of casting to `{ code }` by hand:
+
 ```typescript
+import {
+  getErrorCode,
+  isAuthError,
+  isRetryable,
+  isSdkError,
+  isTimeout,
+  isTransportError,
+} from '@lizuz/sewa-sdk';
+
 try {
   await sdk.auth.getUser();
 } catch (err) {
-  const code = (err as { code?: string } | null)?.code;
-  const retryable = (err as { retryable?: boolean } | null)?.retryable === true;
-  if (code === "REQUEST_CANCELLED" || code === "STREAM_CANCELLED") return; // unmount path
-  if (code === "TIMEOUT" || retryable) { /* retry or show spinner */ }
-  console.log(code); // string | undefined
+  if (!isSdkError(err)) throw err; // not from the SDK
+  const code = getErrorCode(err); // string | undefined
+  if (code === 'REQUEST_CANCELLED' || code === 'STREAM_CANCELLED') return; // unmount path
+  if (isTimeout(err) || isRetryable(err)) { /* retry or show spinner */ }
+  if (isTransportError(err)) { /* pipe broken — check sdk.debug.diagnose() */ }
+  if (isAuthError(err)) { /* redirect to login */ }
 }
 ```
 
 `CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake - gate such calls with the module's `isSupported()` (or `sdk.capabilities`) first.
+
+## Host-only errors
+
+Thrown where the host constructs and owns the instance — never catchable from the injected `window.__GSA_SDK__`. Listed here so you can recognize them in host logs and `sdk.debug.diagnose()` output:
+
+| Code | Meaning | Thrown from |
+|---|---|---|
+| `HANDSHAKE_FAILED` / `HANDSHAKE_TIMEOUT` | Host rejected or never answered the handshake (`HandshakeError`, never retryable — fatal for the instance) | `sdk.initialize()` |
+| `TRANSPORT_NOT_STARTED` | Transport not started while SDK is initialized — surfaced via `sdk.debug.diagnose()` | `initialize()` / any call |
+| `SDK_NOT_INITIALIZED` | Call before `initialize()` resolved | Any call pre-init |
+| `SDK_ALREADY_DESTROYED` | Call after `destroy()` | Post-`destroy()` |
+| `INVALID_OPTIONS` | Bad `MiniAppSdkOptions` at construction | `new MiniAppSdk()` |

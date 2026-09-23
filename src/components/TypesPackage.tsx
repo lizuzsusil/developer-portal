@@ -8,7 +8,7 @@ const FALLBACK = "@lizuz/mini-app-types";
 
 interface InstallCommandTabsProps {
   pkgName?: string;
-  /** Tab sync group — defaults to "pkg-install" (synced page-wide). */
+  /** Tab sync group - defaults to "pkg-install" (synced page-wide). */
   groupId?: string;
 }
 

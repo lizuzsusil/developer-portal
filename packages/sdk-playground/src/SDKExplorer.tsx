@@ -12,7 +12,19 @@ export interface MethodSpec {
   returnType: string;
   snippet: string;
   mockResponse: unknown;
-  category: "core" | "data" | "device" | "network" | "ai";
+  category:
+    | "auth"
+    | "permissions"
+    | "flags"
+    | "config"
+    | "navigation"
+    | "storage"
+    | "platform"
+    | "device"
+    | "api"
+    | "notifications"
+    | "links"
+    | "appearance";
 }
 
 const METHODS: MethodSpec[] = [
@@ -33,7 +45,7 @@ console.log(user?.name, user?.email);`,
       email: "bikram.adhikari@sewa.gov.np",
       roles: ["citizen", "taxpayer"],
     },
-    category: "core",
+    category: "auth",
   },
   {
     id: "auth-isAuthenticated",
@@ -48,7 +60,7 @@ if (isAuth) {
   // User is logged in
 }`,
     mockResponse: true,
-    category: "core",
+    category: "auth",
   },
   {
     id: "auth-logout",
@@ -61,7 +73,7 @@ if (isAuth) {
     snippet: `await sdk.auth.logout();
 // Redirect to login screen`,
     mockResponse: { success: true },
-    category: "core",
+    category: "auth",
   },
   {
     id: "permissions-has",
@@ -77,7 +89,7 @@ if (canUseCamera) {
   const capture = await sdk.device.camera();
 }`,
     mockResponse: true,
-    category: "core",
+    category: "permissions",
   },
   {
     id: "permissions-list",
@@ -91,7 +103,7 @@ if (canUseCamera) {
 const permissions = await sdk.permissions.list();
 // ["camera", "location", "storage", "biometric"]`,
     mockResponse: ["camera", "location", "storage", "biometric"],
-    category: "core",
+    category: "permissions",
   },
   {
     id: "config-get",
@@ -104,14 +116,57 @@ const permissions = await sdk.permissions.list();
     snippet: `const apiHost = await sdk.config.get<string>("api_gateway_url");
 // "https://api.sewa.gov.np/v1"`,
     mockResponse: "https://api.sewa.gov.np/v1",
-    category: "core",
+    category: "config",
+  },
+  {
+    id: "config-getAll",
+    module: "config",
+    method: "getAll",
+    signature: "sdk.config.getAll(): Promise<Record<string, unknown>>",
+    description: "Returns the whole host-provided configuration map.",
+    paramsExample: "None",
+    returnType: "Promise<Record<string, unknown>>",
+    snippet: `const cfg = await sdk.config.getAll();
+console.log(cfg.api_gateway_url);`,
+    mockResponse: {
+      api_gateway_url: "https://api.sewa.gov.np/v1",
+      default_locale: "ne-NP",
+    },
+    category: "config",
+  },
+  {
+    id: "flags-isEnabled",
+    module: "flags",
+    method: "isEnabled",
+    signature: "sdk.flags.isEnabled(flag: string): Promise<boolean>",
+    description: "Checks a single host-provided feature flag.",
+    paramsExample: '"new_payment_flow"',
+    returnType: "Promise<boolean>",
+    snippet: `if (await sdk.flags.isEnabled("new_payment_flow")) {
+  renderNewFlow();
+}`,
+    mockResponse: true,
+    category: "flags",
+  },
+  {
+    id: "flags-getAll",
+    module: "flags",
+    method: "getAll",
+    signature: "sdk.flags.getAll(): Promise<Record<string, boolean>>",
+    description: "Returns all feature flags granted to this mini app.",
+    paramsExample: "None",
+    returnType: "Promise<Record<string, boolean>>",
+    snippet: `const flags = await sdk.flags.getAll();
+// { new_payment_flow: true, chat: false }`,
+    mockResponse: { new_payment_flow: true, chat: false },
+    category: "flags",
   },
   {
     id: "platform-type",
     module: "platform",
-    method: "type / isFlutter / isWeb",
-    signature: 'sdk.platform.type: "web" | "flutter"',
-    description: "Inspects the host platform container type.",
+    method: "type / isWeb / isFlutter / isMobile",
+    signature: 'sdk.platform.type: "web" | "flutter" (sync, no RPC)',
+    description: "Inspects the host platform container type. All checks are sync local state.",
     paramsExample: "None",
     returnType: '"web" | "flutter"',
     snippet: `if (sdk.platform.isFlutter()) {
@@ -120,24 +175,50 @@ const permissions = await sdk.permissions.list();
   console.log("Running in web WebView");
 }`,
     mockResponse: { type: "web", isWeb: true, isFlutter: false },
-    category: "core",
+    category: "platform",
   },
 
   // ── Data ──────────────────────────────────────────
+  {
+    id: "storage-set",
+    module: "storage",
+    method: "set",
+    signature:
+      "sdk.storage.set(key: string, value: string, options?: StorageSetOptions): Promise<void>",
+    description: "Stores a raw string value (supports `ttlMs`).",
+    paramsExample: '"theme", "dark"',
+    returnType: "Promise<void>",
+    snippet: `await sdk.storage.set("theme", "dark");`,
+    mockResponse: { success: true, storedKey: "theme" },
+    category: "storage",
+  },
+  {
+    id: "storage-get",
+    module: "storage",
+    method: "get",
+    signature: "sdk.storage.get(key: string): Promise<string | null>",
+    description: "Reads a raw string value from storage.",
+    paramsExample: '"theme"',
+    returnType: "Promise<string | null>",
+    snippet: `const theme = await sdk.storage.get("theme");
+if (theme) applyTheme(theme);`,
+    mockResponse: "dark",
+    category: "storage",
+  },
   {
     id: "storage-setJson",
     module: "storage",
     method: "setJson",
     signature:
-      "sdk.storage.setJson(key: string, value: T, options?: StorageOptions): Promise<void>",
-    description: "Stores a JSON-serializable value in platform secure storage.",
+      "sdk.storage.setJson(key: string, value: unknown, options?: StorageSetOptions): Promise<void>",
+    description: "JSON-encodes and stores a value in platform storage.",
     paramsExample: '"draft_form", { step: 2 }, { ttlMs: 86400000 }',
     returnType: "Promise<void>",
     snippet: `await sdk.storage.setJson("draft_form", { step: 2 }, {
   ttlMs: 86400000, // 24 hours
 });`,
     mockResponse: { success: true, storedKey: "draft_form" },
-    category: "data",
+    category: "storage",
   },
   {
     id: "storage-getJson",
@@ -152,7 +233,19 @@ if (draft) {
   resumeForm(draft.step);
 }`,
     mockResponse: { step: 2, taxId: "99120" },
-    category: "data",
+    category: "storage",
+  },
+  {
+    id: "storage-remove",
+    module: "storage",
+    method: "remove",
+    signature: "sdk.storage.remove(key: string): Promise<void>",
+    description: "Deletes a key from platform storage.",
+    paramsExample: '"draft_form"',
+    returnType: "Promise<void>",
+    snippet: `await sdk.storage.remove("draft_form");`,
+    mockResponse: { success: true, removedKey: "draft_form" },
+    category: "storage",
   },
   {
     id: "storage-scoped",
@@ -167,10 +260,25 @@ if (draft) {
 await userStore.set("theme", "dark");
 const theme = await userStore.get("theme");`,
     mockResponse: { scopedPrefix: "user_settings:", created: true },
-    category: "data",
+    category: "storage",
   },
 
   // ── Device ────────────────────────────────────────
+  {
+    id: "device-isSupported",
+    module: "device",
+    method: "isSupported",
+    signature: "sdk.device.isSupported(action: DeviceAction): boolean",
+    description:
+      "Sync capability guard — call before any device method the host may not grant.",
+    paramsExample: '"location"',
+    returnType: "boolean",
+    snippet: `if (sdk.device.isSupported("location")) {
+  const res = await sdk.device.location();
+}`,
+    mockResponse: true,
+    category: "device",
+  },
   {
     id: "device-location",
     module: "device",
@@ -231,60 +339,184 @@ if (auth.granted && auth.data.authenticated) {
     category: "device",
   },
 
-  // ── Network ───────────────────────────────────────
   {
-    id: "http-get",
-    module: "http",
-    method: "get",
-    signature: "sdk.http.get<T>(params: HttpGetParams): Promise<HttpResult<T>>",
+    id: "device-gallery",
+    module: "device",
+    method: "gallery",
+    signature:
+      "sdk.device.gallery(options?: DeviceFileOptions): Promise<DevicePermissionBaseResponse<DeviceGalleryResult>>",
+    description: "Lets the user pick images from the device gallery.",
+    paramsExample: "{ maxCount: 3 }",
+    returnType: "Promise<DevicePermissionBaseResponse<DeviceGalleryResult>>",
+    snippet: `const pick = await sdk.device.gallery({ maxCount: 3 });
+if (pick.granted) {
+  setImages(pick.data.uris);
+}`,
+    mockResponse: {
+      granted: true,
+      data: { uris: ["file:///gallery/img1.jpg", "file:///gallery/img2.jpg"] },
+    },
+    category: "device",
+  },
+  {
+    id: "device-files",
+    module: "device",
+    method: "files",
+    signature:
+      "sdk.device.files(options?: DeviceFileOptions): Promise<DevicePermissionBaseResponse<DeviceFileResult>>",
+    description: "Lets the user pick files from device storage.",
+    paramsExample: "{ mimeTypes: ['application/pdf'] }",
+    returnType: "Promise<DevicePermissionBaseResponse<DeviceFileResult>>",
+    snippet: `const pick = await sdk.device.files({ mimeTypes: ["application/pdf"] });
+if (pick.granted) {
+  upload(pick.data.uris[0]);
+}`,
+    mockResponse: {
+      granted: true,
+      data: { uris: ["file:///docs/form.pdf"] },
+    },
+    category: "device",
+  },
+  {
+    id: "device-info",
+    module: "device",
+    method: "info",
+    signature: "sdk.device.info(): Promise<DeviceInfoResult>",
     description:
-      "Performs an HTTP GET request routed safely through the host network proxy.",
-    paramsExample: '{ url: "https://api.sewa.gov.np/v1/taxes" }',
-    returnType: "Promise<HttpResult<T>>",
-    snippet: `const res = await sdk.http.get<{ taxDue: number }>({
-  url: "https://api.sewa.gov.np/v1/taxes"
+      "Returns device platform, OS, app, screen, locale and timezone info.",
+    paramsExample: "None",
+    returnType: "Promise<DeviceInfoResult>",
+    snippet: `const info = await sdk.device.info();
+console.log(info.os, info.locale);`,
+    mockResponse: {
+      platform: "android",
+      os: "Android 14",
+      locale: "ne-NP",
+      timezone: "Asia/Kathmandu",
+    },
+    category: "device",
+  },
+  {
+    id: "device-network",
+    module: "device",
+    method: "network",
+    signature: "sdk.device.network(): Promise<DeviceNetworkResult>",
+    description: "Returns current connectivity state and network type.",
+    paramsExample: "None",
+    returnType: "Promise<DeviceNetworkResult>",
+    snippet: `const net = await sdk.device.network();
+if (!net.online) showOfflineBanner();`,
+    mockResponse: { online: true, type: "wifi" },
+    category: "device",
+  },
+  // ── Network (`api`: GET / POST / PUT / PATCH / DELETE + stream) ──
+  {
+    id: "api-request-get",
+    module: "api",
+    method: "request (GET)",
+    signature:
+      "sdk.api.request<T>(method: 'GET', params: ApiRequestParams): Promise<ApiResult<T>>",
+    description:
+      "Proxied GET through the host. `path` is the required BFF inner route; `query` is folded into the envelope path.",
+    paramsExample: '\'GET\', { path: "/taxes/due", query: { pan: "99120" } }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request<{ taxDue: number }>("GET", {
+  path: "/taxes/due",
+  query: { pan: "99120" },
+});
+console.log(res.status, res.data.taxDue);`,
+    mockResponse: {
+      status: 200,
+      data: { taxDue: 1500, period: "2080/81", currency: "NPR" },
+    },
+    category: "api",
+  },
+  {
+    id: "api-request-post",
+    module: "api",
+    method: "request (POST)",
+    signature:
+      "sdk.api.request<T, B>(method?: string, params?: ApiRequestParams<B>): Promise<ApiResult<T>>",
+    description:
+      "Proxied POST (the default method when omitted). Carry `body`, `headers`, `query`; track uploads with `onProgress`.",
+    paramsExample: '\'POST\', { path: "/taxes/due", body: { pan: "99120" } }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request<{ taxDue: number }>("POST", {
+  path: "/taxes/due",
+  body: { pan: "99120" },
 });
 console.log(res.data.taxDue);`,
     mockResponse: {
       status: 200,
       data: { taxDue: 1500, period: "2080/81", currency: "NPR" },
     },
-    category: "network",
+    category: "api",
   },
   {
-    id: "http-post",
-    module: "http",
-    method: "post",
+    id: "api-request-put",
+    module: "api",
+    method: "request (PUT)",
     signature:
-      "sdk.http.post<T, B>(params: HttpPostParams<B>): Promise<HttpResult<T>>",
-    description:
-      "Performs an HTTP POST request with optional upload progress tracking.",
-    paramsExample:
-      '{ url: "https://api.sewa.gov.np/v1/upload", body: { ... } }',
-    returnType: "Promise<HttpResult<T>>",
-    snippet: `const res = await sdk.http.post<{ id: string }, FormData>(
-  { url: "https://api.sewa.gov.np/v1/upload", body: formData },
-  { onProgress: (p) => console.log(p.percent + "%") }
-);`,
-    mockResponse: {
-      status: 201,
-      data: { id: "doc_abc123", uploaded: true },
-    },
-    category: "network",
+      "sdk.api.request<T, B>(method: 'PUT', params: ApiRequestParams<B>): Promise<ApiResult<T>>",
+    description: "Proxied PUT — full-resource replace through the host.",
+    paramsExample: '\'PUT\', { path: "/profile", body: { name: "..." } }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request("PUT", {
+  path: "/profile",
+  body: { name: "Bikram Adhikari" },
+});
+console.log(res.status); // 200`,
+    mockResponse: { status: 200, data: { updated: true } },
+    category: "api",
   },
   {
-    id: "http-chatStream",
-    module: "http",
-    method: "stream",
+    id: "api-request-patch",
+    module: "api",
+    method: "request (PATCH)",
     signature:
-      "sdk.http.stream(params: { messages: ChatMessage[] }): StreamBuilder",
+      "sdk.api.request<T, B>(method: 'PATCH', params: ApiRequestParams<B>): Promise<ApiResult<T>>",
+    description: "Proxied PATCH — partial update through the host.",
+    paramsExample: '\'PATCH\', { path: "/profile", body: { locale: "ne-NP" } }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request("PATCH", {
+  path: "/profile",
+  body: { locale: "ne-NP" },
+});
+console.log(res.status); // 200`,
+    mockResponse: { status: 200, data: { updated: true } },
+    category: "api",
+  },
+  {
+    id: "api-request-delete",
+    module: "api",
+    method: "request (DELETE)",
+    signature:
+      "sdk.api.request<T>(method: 'DELETE', params: ApiRequestParams): Promise<ApiResult<T>>",
+    description: "Proxied DELETE through the host.",
+    paramsExample: '\'DELETE\', { path: "/drafts/99120" }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request("DELETE", {
+  path: "/drafts/99120",
+});
+console.log(res.status); // 200`,
+    mockResponse: { status: 200, data: { deleted: true } },
+    category: "api",
+  },
+  {
+    id: "api-request-stream",
+    module: "api",
+    method: "request (stream)",
+    signature:
+      "sdk.api.request(method: string, params: ApiRequestParams & { stream: true }): Promise<StreamBuilder>",
     description:
-      "Streams a generic LLM chat completion. Deprecated alias: sdk.http.getStream().",
+      "Streaming variant — returns a StreamBuilder of SSE chunks for chat/file streaming.",
     paramsExample:
-      '[{ role: "user", content: "How do I renew my license?" }]',
-    returnType: "StreamBuilder",
-    snippet: `const stream = sdk.http.stream({
-  messages: [{ role: "user", content: "How do I renew my license?" }]
+      '\'POST\', { path: "/chat", body: { message: "..." }, stream: true }',
+    returnType: "Promise<StreamBuilder>",
+    snippet: `const stream = await sdk.api.request("POST", {
+  path: "/chat",
+  body: { message: "How do I renew my license?" },
+  stream: true,
 });
 for await (const chunk of stream.iterate()) {
   appendText(chunk);
@@ -293,81 +525,79 @@ for await (const chunk of stream.iterate()) {
       streamStarted: true,
       chunks: ["To renew your ", "driver license, ", "visit the portal."],
     },
-    category: "network",
+    category: "api",
   },
 
-  // ── GIC Chat ──────────────────────────────────────
+  // ── Notifications ─────────────────────────────────
   {
-    id: "gicChat-startSession",
-    module: "gicChat",
-    method: "startSession",
-    signature: "sdk.gicChat.startSession(): Promise<GicChatSession>",
+    id: "notifications-register",
+    module: "notifications",
+    method: "register",
+    signature:
+      "sdk.notifications.register(options?: NotificationsRegisterOptions): Promise<NotificationsRegisterResult>",
     description:
-      "Initializes a new GIC chat session. Returns user_id and session_id for subsequent stream calls.",
+      "Requests notification permission and returns the push token. Gate with `isSupported()` first.",
     paramsExample: "None",
-    returnType: "Promise<{ user_id: string; session_id: string }>",
-    snippet: `const session = await sdk.gicChat.startSession();
-console.log(session.user_id, session.session_id);`,
-    mockResponse: {
-      status: "success",
-      user_id: "8a9f1653-4c7b-44f4-b6eb-9055da85ba24",
-      session_id: "9d58028d-af89-4dad-bd9b-5567981942e1",
-    },
-    category: "ai",
+    returnType: "Promise<NotificationsRegisterResult>",
+    snippet: `if (sdk.notifications.isSupported()) {
+  const reg = await sdk.notifications.register();
+  console.log(reg.token);
+}`,
+    mockResponse: { granted: true, token: "push_tok_abc123" },
+    category: "notifications",
   },
   {
-    id: "gicChat-stream",
-    module: "gicChat",
-    method: "stream",
+    id: "notifications-onOpen",
+    module: "notifications",
+    method: "onOpen",
     signature:
-      "sdk.gicChat.stream(request: GicChatStreamRequest, options?: GicChatStreamOptions): Promise<{ invocation_id?: string }>",
+      "sdk.notifications.onOpen(handler: (event: NotificationOpenEvent) => void): () => void",
     description:
-      "Streams a GIC chat response as typed SSE events (tool_call, token, meta, done, error).",
-    paramsExample:
-      '{ user_id: "...", session_id: "...", message: "How do I apply for a NIC?" }',
-    returnType: "Promise<{ invocation_id?: string }>",
-    snippet: `const session = await sdk.gicChat.startSession();
-const result = await sdk.gicChat.stream(
-  { user_id: session.user_id, session_id: session.session_id,
-    message: "How do I apply for a NIC?" },
-  { onEvent: (event) => {
-    if (event.type === "token") appendText(event.text);
-    if (event.type === "done") finalize();
-  }}
-);`,
-    mockResponse: {
-      invocation_id: "e-c6fee063-cf84-45e3-aa92-9fea96a50433",
-      events: [
-        { type: "tool_call" },
-        { type: "token", text: "To apply for a NIC, " },
-        { type: "token", text: "you need Form 1..." },
-        { type: "done" },
-      ],
-    },
-    category: "ai",
+      "Subscribes to notification-tap events. Returns an unsubscribe function.",
+    paramsExample: "(event) => console.log(event.notificationId)",
+    returnType: "() => void (unsubscribe)",
+    snippet: `useEffect(() => {
+  const unsub = sdk.notifications.onOpen((event) => {
+    navigate(event deeplink);
+  });
+  return () => unsub();
+}, []);`,
+    mockResponse: { notificationId: "ntf_123", deeplink: "/services/pay" },
+    category: "notifications",
+  },
+
+  // ── Links ─────────────────────────────────────────
+  {
+    id: "links-open",
+    module: "links",
+    method: "open",
+    signature:
+      "sdk.links.open(url: string, options?: LinksOpenOptions): Promise<void>",
+    description: "Opens a URL, optionally in-app (`{ inApp: true }`).",
+    paramsExample: '"https://sewa.gov.np/services", { inApp: true }',
+    returnType: "Promise<void>",
+    snippet: `await sdk.links.open("https://sewa.gov.np/services", { inApp: true });`,
+    mockResponse: { status: "opened", inApp: true },
+    category: "links",
   },
   {
-    id: "gicChat-streamText",
-    module: "gicChat",
-    method: "streamText",
+    id: "links-onOpen",
+    module: "links",
+    method: "onOpen",
     signature:
-      "sdk.gicChat.streamText(request, options?): Promise<{ text: string; invocation_id?: string }>",
+      "sdk.links.onOpen(handler: (event: LinksOpenedEvent) => void): () => void",
     description:
-      "Convenience wrapper: collects all token events and returns the full text response.",
-    paramsExample:
-      '{ user_id: "...", session_id: "...", message: "What are the office hours?" }',
-    returnType: "Promise<{ text: string; invocation_id?: string }>",
-    snippet: `const session = await sdk.gicChat.startSession();
-const { text, invocation_id } = await sdk.gicChat.streamText(
-  { user_id: session.user_id, session_id: session.session_id,
-    message: "What are the office hours?" }
-);
-console.log(text); // Full response text`,
-    mockResponse: {
-      text: "GIC office hours are 9 AM to 5 PM, Sunday through Thursday.",
-      invocation_id: "e-3fa2b8c1-9d4e-4a1b-8c2d-1a2b3c4d5e6f",
-    },
-    category: "ai",
+      "Subscribes to incoming deep links. Returns an unsubscribe function.",
+    paramsExample: "(event) => console.log(event.url)",
+    returnType: "() => void (unsubscribe)",
+    snippet: `useEffect(() => {
+  const unsub = sdk.links.onOpen((event) => {
+    router.push(event.url);
+  });
+  return () => unsub();
+}, []);`,
+    mockResponse: { url: "sewa://services/pay?serviceId=water_tax" },
+    category: "links",
   },
 
   // ── Navigation ────────────────────────────────────
@@ -385,25 +615,91 @@ console.log(text); // Full response text`,
   params: { serviceId: "water_tax" }
 });`,
     mockResponse: { status: "navigated", target: "/services/pay" },
-    category: "core",
+    category: "navigation",
+  },
+  {
+    id: "navigation-getCurrent",
+    module: "navigation",
+    method: "getCurrent",
+    signature: "sdk.navigation.getCurrent(): Promise<NavigationState>",
+    description: "Returns the current route and navigation history.",
+    paramsExample: "None",
+    returnType: "Promise<NavigationState>",
+    snippet: `const state = await sdk.navigation.getCurrent();
+console.log(state.route, state.history);`,
+    mockResponse: { route: "/services/pay", history: ["/", "/services"] },
+    category: "navigation",
   },
   {
     id: "navigation-router-back",
     module: "navigation",
     method: "router.back",
-    signature: "sdk.navigation.router.back(consumed: boolean): Promise<void>",
-    description: "Reports back-press handling state to the host shell.",
+    signature: "sdk.navigation.router.back(consumed?: boolean): Promise<NavigationRouterResult>",
+    description: "Reports back-press handling state to the host shell. Omit or pass `false` to hand the press back to the host.",
     paramsExample: "true // true = popped route; false = hand back to host",
-    returnType: "Promise<void>",
+    returnType: "Promise<NavigationRouterResult>",
     snippet: `sdk.on("navigation.back.requested", async () => {
   const hasHistory = window.history.length > 1;
   await sdk.navigation.router.back(hasHistory);
 });`,
     mockResponse: { consumed: true },
-    category: "core",
+    category: "navigation",
+  },
+  {
+    id: "navigation-router-push",
+    module: "navigation",
+    method: "router.push",
+    signature: "sdk.navigation.router.push(consumed?: boolean): Promise<NavigationRouterResult>",
+    description: "Reports internal forward-push handling state to the host shell.",
+    paramsExample: "true",
+    returnType: "Promise<NavigationRouterResult>",
+    snippet: `await sdk.navigation.router.push(true);`,
+    mockResponse: { consumed: true },
+    category: "navigation",
   },
 
   // ── Appearance ────────────────────────────────────
+  {
+    id: "appearance-getLocale",
+    module: "appearance",
+    method: "getLocale",
+    signature: "sdk.appearance.getLocale(): Promise<LocaleState>",
+    description: "Returns the active host locale.",
+    paramsExample: "None",
+    returnType: "Promise<LocaleState>",
+    snippet: `const locale = await sdk.appearance.getLocale();
+console.log(locale.language); // "ne"`,
+    mockResponse: { locale: "ne-NP", language: "ne", direction: "ltr" },
+    category: "appearance",
+  },
+  {
+    id: "appearance-getTheme",
+    module: "appearance",
+    method: "getTheme",
+    signature: "sdk.appearance.getTheme(): Promise<ThemeState>",
+    description: "Returns the theme preference and resolved mode.",
+    paramsExample: "None",
+    returnType: "Promise<ThemeState>",
+    snippet: `const theme = await sdk.appearance.getTheme();
+console.log(theme.mode); // "dark"`,
+    mockResponse: { preference: "system", mode: "dark" },
+    category: "appearance",
+  },
+  {
+    id: "appearance-state",
+    module: "appearance",
+    method: "state",
+    signature: "sdk.appearance.state(): AppearanceState",
+    description: "Sync snapshot of the current locale + theme (no RPC).",
+    paramsExample: "None",
+    returnType: "AppearanceState",
+    snippet: `const { locale, theme } = sdk.appearance.state();`,
+    mockResponse: {
+      locale: { locale: "ne-NP", language: "ne", direction: "ltr" },
+      theme: { preference: "system", mode: "dark" },
+    },
+    category: "appearance",
+  },
   {
     id: "appearance-subscribe",
     module: "appearance",
@@ -425,24 +721,38 @@ console.log(text); // Full response text`,
       locale: { locale: "ne-NP", language: "ne", direction: "ltr" },
       theme: { preference: "system", mode: "dark" },
     },
-    category: "core",
+    category: "appearance",
   },
 ];
 
 const CATEGORY_LABELS: Record<MethodSpec["category"], string> = {
-  core: "Core",
-  data: "Data & Storage",
+  auth: "Auth",
+  permissions: "Permissions (deprecated)",
+  flags: "Feature Flags",
+  config: "Config",
+  navigation: "Navigation",
+  storage: "Storage",
+  platform: "Platform",
   device: "Device",
-  network: "Network & HTTP",
-  ai: "AI & Chat",
+  api: "Network (api)",
+  notifications: "Notifications",
+  links: "Links",
+  appearance: "Appearance",
 };
 
 const CATEGORY_COLORS: Record<MethodSpec["category"], string> = {
-  core: "var(--gold-500)",
-  data: "var(--teal-500)",
+  auth: "var(--gold-500)",
+  permissions: "var(--neutral-500)",
+  flags: "var(--orange-500)",
+  config: "var(--teal-500)",
+  navigation: "var(--blue-500)",
+  storage: "var(--green-500)",
+  platform: "var(--neutral-600)",
   device: "var(--purple-500)",
-  network: "var(--blue-500)",
-  ai: "var(--green-500)",
+  api: "var(--red-500)",
+  notifications: "var(--orange-600)",
+  links: "var(--teal-600)",
+  appearance: "var(--gold-600)",
 };
 
 const darkTheme: PrismTheme = {

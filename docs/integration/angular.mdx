@@ -23,13 +23,13 @@ router sync, per-screen feature folders) are covered under
 [Going further](#going-further) once the scaffold runs.
 
 > **Version used here: Angular 21** (`@angular/* ^21.0.0`, TypeScript `~5.9`, zoned with
-> `zone.js`). Icons use `@lucide/angular 1.47.0` — the legacy `lucide-angular` package is
+> `zone.js`). Icons use `@lucide/angular 1.47.0` - the legacy `lucide-angular` package is
 > deprecated, and the new package peers on `@angular/core >= 17` with no upper bound.
 
 > **Reading this guide:** shell commands offer a package-manager selector (npm / pnpm / yarn /
 > bun) and code samples offer a TypeScript / JavaScript selector. Each selector acts on its
-> own block only — changing one never flips the others on the page. The scaffold itself is
-> TypeScript — Angular requires TS for decorators and AOT compilation — the JavaScript tabs
+> own block only - changing one never flips the others on the page. The scaffold itself is
+> TypeScript - Angular requires TS for decorators and AOT compilation - the JavaScript tabs
 > show the equivalent untyped logic for comparison.
 
 > **No runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK
@@ -42,11 +42,11 @@ router sync, per-screen feature folders) are covered under
 
 - **Node.js 20+** (check with `node -v`)
 - **npm** (commands below use npm; pnpm/yarn/bun work the same)
-- The Angular CLI is installed on demand via `npx` below — no global install required.
+- The Angular CLI is installed on demand via `npx` below - no global install required.
 
 ---
 
-## Step 1 — Create the stock project with `ng new`
+## Step 1 - Create the stock project with `ng new`
 
 Answer the prompts as shown (routing **Yes**, stylesheet **CSS**, SSR **No**).
 Pick your package manager in the selector:
@@ -54,7 +54,7 @@ Pick your package manager in the selector:
 <ScaffoldTabs framework="angular" projectName="my-mini-app" groupId="angular-pm-scaffold" />
 
 ```bash
-# Interactive prompts — answer like this:
+# Interactive prompts - answer like this:
 # ? Would you like to add routing? › Yes
 # ? Which stylesheet format would you like to use? › CSS
 # ? Do you want to configure Server-Side Rendering (SSR)? › No
@@ -66,23 +66,23 @@ Non-interactive equivalent (npm shown; the flags are identical for every manager
 npx -y @angular/cli@21 new my-mini-app --routing --style=css --ssr=false --skip-tests --skip-git
 ```
 
-Sanity-check the stock app first — this must serve the default Angular welcome page:
+Sanity-check the stock app first - this must serve the default Angular welcome page:
 
 <RunCommandTabs npm="npm start" pnpm="pnpm start" yarn="yarn start" bun="bun run start" groupId="angular-pm-sanity" />
 
 What you got (2025 file-name style): `src/main.ts` bootstrapping `App` from `src/app/app.ts`,
 providers in `src/app/app.config.ts` (zoned change detection + router), an empty route table
 in `src/app/app.routes.ts`, and strict templates already enabled. Leave `angular.json`,
-`index.html`, and `src/app/` exactly where the CLI put them — the conversion below only
+`index.html`, and `src/app/` exactly where the CLI put them - the conversion below only
 **edits** a few files and **adds** the mini-app wiring.
 
 ---
 
-## Step 2 — Install the mini-app dependencies
+## Step 2 - Install the mini-app dependencies
 
 On top of the stock install, add the Vite/Angular bridge, styling, icons, and the build-time
 packages. (`zone.js`, TypeScript, and `@angular/build` + `@angular/compiler-cli` are already
-there from `ng new` — don't reinstall them.)
+there from `ng new` - don't reinstall them.)
 
 <InstallProdCommandTabs pkgName="@analogjs/vite-plugin-angular @lucide/angular tailwindcss @tailwindcss/vite" groupId="angular-pm-deps" />
 
@@ -94,16 +94,16 @@ What each addition is for:
 |---|---|
 | `@analogjs/vite-plugin-angular` | Lets the production Vite build understand Angular components/templates |
 | `tailwindcss`, `@tailwindcss/vite` | Styling (wired into `styles.css` in Step 5) |
-| `@lucide/angular` | Icons (used once you add screens — [Going further](#going-further)) |
-| `@lizuz/mini-app-types` (dev) | Compile-time typings for the host-injected SDK — no runtime code |
+| `@lucide/angular` | Icons (used once you add screens - [Going further](#going-further)) |
+| `@lizuz/mini-app-types` (dev) | Compile-time typings for the host-injected SDK - no runtime code |
 | `@types/node` (dev) | Types for the manifest plugin's `node:fs` / `node:path` usage |
 | `vite` (dev) | Direct dependency for the dev/build commands below |
 
 ---
 
-## Step 3 — Add the scripts and the emit config
+## Step 3 - Add the scripts and the emit config
 
-Add two scripts to `package.json` (keep the stock `start` for daily dev — Step 7):
+Add two scripts to `package.json` (keep the stock `start` for daily dev - Step 7):
 
 ```json
 {
@@ -117,14 +117,14 @@ Add two scripts to `package.json` (keep the stock `start` for daily dev — Step
 - `typecheck` runs Angular's template + TypeScript checking (fails on errors).
 - `build:miniapp` typechecks, AOT-emits to `ngc-out/`, then bundles the ES library +
   `manifest.json`. (The stock `build` script runs `ng build`, which emits an
-  `index.html`-centric app bundle — **not** what the host loads. `build:miniapp` replaces it
+  `index.html`-centric app bundle - **not** what the host loads. `build:miniapp` replaces it
   for production; see Step 8.)
 
 The stock `tsconfig.app.json` works for typechecking as-is **except** its `"types": []`,
 which hides Node builtins from the manifest plugin. Change that one line:
 
 ```json
-// tsconfig.app.json — edit the stock file, one line:
+// tsconfig.app.json - edit the stock file, one line:
 {
   "compilerOptions": {
     "types": ["node"]
@@ -133,11 +133,11 @@ which hides Node builtins from the manifest plugin. Change that one line:
 ```
 
 Then add the emit overlay `ngc` uses to output compilable JavaScript for Vite to bundle.
-`moduleResolution: bundler` is required — the stock base config uses `module: preserve`
+`moduleResolution: bundler` is required - the stock base config uses `module: preserve`
 without it, and the emit breaks without this line:
 
 ```json
-// tsconfig.emit.json — new file at the project root
+// tsconfig.emit.json - new file at the project root
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
@@ -152,13 +152,13 @@ without it, and the emit breaks without this line:
 
 ---
 
-## Step 4 — Add the manifest plugin and the production Vite config
+## Step 4 - Add the manifest plugin and the production Vite config
 
 `ng build` can't produce the host contract, so production goes through `vite.lib.config.ts`
 plus a small `createManifest` plugin. Both are new files; `angular.json` stays untouched.
 
 <CodeTabs groupId="angular-code-manifest"
-  typescript={`// src/app/utils/createManifest.ts — writes the host-discovery manifest.json
+  typescript={`// src/app/utils/createManifest.ts - writes the host-discovery manifest.json
 import fs from "node:fs";
 import path from "node:path";
 import type { Plugin } from "vite";
@@ -231,7 +231,7 @@ export function createManifest(): Plugin {
     },
   };
 }`}
-  javascript={`// src/app/utils/createManifest.js — writes the host-discovery manifest.json
+  javascript={`// src/app/utils/createManifest.js - writes the host-discovery manifest.json
 import fs from "node:fs";
 import path from "node:path";
 
@@ -306,7 +306,7 @@ export function createManifest() {
 />
 
 ```typescript
-// vite.lib.config.ts — new file at the project root
+// vite.lib.config.ts - new file at the project root
 import angular from "@analogjs/vite-plugin-angular";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
@@ -331,42 +331,42 @@ export default defineConfig({
 ```
 
 `platform.runtime` / `platform.sdk` are host-side version constraints, not bundle
-dependencies — your bundle ships zero SDK code.
+dependencies - your bundle ships zero SDK code.
 
 ---
 
-## Step 5 — Add styles, Vite env types, and the SDK typings
+## Step 5 - Add styles, Vite env types, and the SDK typings
 
 Three small files. First, switch the stock `styles.css` to Tailwind v4:
 
 ```css
-/* src/styles.css — replace the stock content */
+/* src/styles.css - replace the stock content */
 @import "tailwindcss";
 ```
 
 ```typescript
-// src/vite-env.d.ts — new file; Vite client types for import.meta.env (dev auto-mount)
+// src/vite-env.d.ts - new file; Vite client types for import.meta.env (dev auto-mount)
 /// <reference types="vite/client" />
 ```
 
 <ReactGovSdkImportBlock />
 
-Only `@lizuz/mini-app-types` is a dev dependency — there is no `npm install` for the runtime
+Only `@lizuz/mini-app-types` is a dev dependency - there is no `npm install` for the runtime
 SDK. This `global.d.ts` declares the host-injected `window.__GSA_SDK__` so TypeScript knows
 about it; the types are erased at build.
 
 ---
 
-## Step 6 — Convert the bootstrap into `mount`/`unmount`
+## Step 6 - Convert the bootstrap into `mount`/`unmount`
 
 This is the heart of the conversion. Four edits to stock files plus one new service:
 
 **1. Hash routing in `src/app/app.config.ts`.** The CLI generates path-location routing, but
-the host serves the bundle with no server-side routes — add `withHashLocation()`. Everything
+the host serves the bundle with no server-side routes - add `withHashLocation()`. Everything
 else in the stock config stays:
 
 <CodeTabs groupId="angular-code-config"
-  typescript={`// src/app/app.config.ts — one-line change
+  typescript={`// src/app/app.config.ts - one-line change
 import { provideRouter, withHashLocation } from '@angular/router';
 
 export const appConfig: ApplicationConfig = {
@@ -377,7 +377,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withHashLocation())
   ]
 };`}
-  javascript={`// src/app/app.config.js — one-line change
+  javascript={`// src/app/app.config.js - one-line change
 import { provideRouter, withHashLocation } from '@angular/router';
 
 export const appConfig = {
@@ -394,7 +394,7 @@ export const appConfig = {
 publishes a `phase` signal (`loading | ready | error`):
 
 <CodeTabs groupId="angular-code-sdk"
-  typescript={`// src/app/core/sdk.service.ts — new file
+  typescript={`// src/app/core/sdk.service.ts - new file
 import { Injectable, signal } from "@angular/core";
 
 export type SdkPhase = "loading" | "ready" | "error";
@@ -421,7 +421,7 @@ export class SdkService {
     this.phase.set("error");
   }
 }`}
-  javascript={`// src/app/core/sdk.service.js — new file
+  javascript={`// src/app/core/sdk.service.js - new file
 import { Injectable, signal } from "@angular/core";
 
 @Injectable({ providedIn: "root" })
@@ -448,7 +448,7 @@ export class SdkService {
 }`}
 />
 
-**3. Phase gating in the stock root component.** Keep the `App` class and its files — just
+**3. Phase gating in the stock root component.** Keep the `App` class and its files - just
 gate the template on the SDK phase. Replace `src/app/app.html` with:
 
 ```html
@@ -465,7 +465,7 @@ gate the template on the SDK phase. Replace `src/app/app.html` with:
 and inject the service in `src/app/app.ts`:
 
 <CodeTabs groupId="angular-code-app"
-  typescript={`// src/app/app.ts — keep the stock component, add the SDK gate
+  typescript={`// src/app/app.ts - keep the stock component, add the SDK gate
 import { Component, inject } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { SdkService } from "./core/sdk.service";
@@ -479,7 +479,7 @@ import { SdkService } from "./core/sdk.service";
 export class App {
   protected readonly sdk = inject(SdkService);
 }`}
-  javascript={`// src/app/app.js — keep the stock component, add the SDK gate
+  javascript={`// src/app/app.js - keep the stock component, add the SDK gate
 import { Component, inject } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { SdkService } from "./core/sdk.service";
@@ -496,11 +496,11 @@ export class App {
 />
 
 **4. Replace `src/main.ts`.** The stock `bootstrapApplication(App, appConfig)` becomes the
-host-called `mount`/`unmount` pair — reusing the stock `appConfig` as-is via
+host-called `mount`/`unmount` pair - reusing the stock `appConfig` as-is via
 `createApplication(appConfig)`:
 
 <CodeTabs groupId="angular-code-main"
-  typescript={`// src/main.ts — replace the stock bootstrap
+  typescript={`// src/main.ts - replace the stock bootstrap
 import "zone.js";
 import type { ApplicationRef } from "@angular/core";
 import { createApplication } from "@angular/platform-browser";
@@ -544,7 +544,7 @@ export function unmount(container: HTMLElement): void {
 if (import.meta.env.DEV) {
   void mount(document.body);
 }`}
-  javascript={`// src/main.js — replace the stock bootstrap
+  javascript={`// src/main.js - replace the stock bootstrap
 import "zone.js";
 import { createApplication } from "@angular/platform-browser";
 import { appConfig } from "./app/app.config";
@@ -594,7 +594,7 @@ Three details differ from React/Vue and all three matter:
 - **`mount` is async** (`createApplication` returns a promise). The host ignores the return value
   and uses the module-level `unmount(container)` export instead.
 - **`unmount` is a real export**, tracked per container in a `WeakMap`.
-  `ApplicationRef.destroy()` plus host-node removal is the only leak-free teardown — unlike
+  `ApplicationRef.destroy()` plus host-node removal is the only leak-free teardown - unlike
   React/Vue, DOM removal alone is not enough.
 - **State lives in root-provided services** (`providedIn: "root"` singletons like
   `SdkService`), so it survives route changes once you add screens.
@@ -605,19 +605,19 @@ Verify the conversion typechecks (template errors fail the production build, so 
 
 ---
 
-## Step 7 — Run the dev server
+## Step 7 - Run the dev server
 
 <RunCommandTabs npm="npm start" pnpm="pnpm start" yarn="yarn start" bun="bun run start" groupId="angular-pm-start" />
 
-`ng serve` compiles the converted project as-is — the `import.meta.env.DEV` block at the
+`ng serve` compiles the converted project as-is - the `import.meta.env.DEV` block at the
 bottom of `main.ts` mounts the app locally, so no extra dev bootstrap is needed. You will see
-**"Connecting to platform..."** — that is expected: there is no host shell in local dev, so
+**"Connecting to platform..."** - that is expected: there is no host shell in local dev, so
 `window.__GSA_SDK__` never appears and the phase stays `loading`. The dev server proves your
 components compile and render; the real SDK arrives in Step 9.
 
 ---
 
-## Step 8 — Build the mini-app bundle and check the manifest
+## Step 8 - Build the mini-app bundle and check the manifest
 
 <RunCommandTabs npm="npm run build:miniapp" pnpm="pnpm build:miniapp" yarn="yarn build:miniapp" bun="bun run build:miniapp" groupId="angular-pm-build" />
 
@@ -627,21 +627,21 @@ cat dist/manifest.json
 
 Confirm `bundle.entry` points at the emitted hashed JS file, `bundle.files` lists every asset
 in `dist/`, and `framework` is `"angular"`. (Remember: the stock `build` script runs
-`ng build`, which emits an `index.html`-centric app — it is no longer used for production.)
+`ng build`, which emits an `index.html`-centric app - it is no longer used for production.)
 
 ---
 
-## Step 9 — Load it in the Host Playground
+## Step 9 - Load it in the Host Playground
 
 1. Serve `dist/` **with CORS enabled** so the docs site (a different origin) can fetch it:
 
    <RunCommandTabs npm="npx http-server dist -p 8080 --cors" pnpm="pnpm dlx http-server dist -p 8080 --cors" yarn="yarn dlx http-server dist -p 8080 --cors" bun="bunx http-server dist -p 8080 --cors" groupId="angular-pm-serve" />
-   (For a deployed preview, any static host works — see the
+   (For a deployed preview, any static host works - see the
    [CORS notes](/docs/host-playground#preparing-your-mini-app).)
 2. Open the [Host Playground](/docs/host-playground), click **Load app**, and enter the
    **Frontend URL** serving your `manifest.json` (e.g. `http://localhost:8080`).
 3. Hit **Test & load app**. The playground fetches the manifest, downloads the bundle,
-   injects the SDK, and calls your `mount()` export — your converted app should now render
+   injects the SDK, and calls your `mount()` export - your converted app should now render
    "Hello from your Angular mini app!" with `phase() === "ready"`.
 
 ---
@@ -652,28 +652,28 @@ Once the converted app loads, grow it with these patterns (all covered in the se
 
 ### Core services
 
-`src/app/core/` holds platform wiring only — no UI, no feature logic. All services are
+`src/app/core/` holds platform wiring only - no UI, no feature logic. All services are
 `providedIn: "root"` singletons. Beyond the `SdkService` from Step 6:
 
-- **AppearanceService** — holds `locale` / `theme` computed signals seeded from
+- **AppearanceService** - holds `locale` / `theme` computed signals seeded from
   `sdk.appearance.state()`. An `effect` starts the `sdk.appearance.subscribe()` subscription
-  the moment the SDK signal becomes ready — no lifecycle-ordering assumptions — and
+  the moment the SDK signal becomes ready - no lifecycle-ordering assumptions - and
   unsubscribes on destroy.
-- **I18nService** — loads the `en` / `si` / `ta` JSON dictionaries, selects by
+- **I18nService** - loads the `en` / `si` / `ta` JSON dictionaries, selects by
   `locale.language` with `en` fallback, and interpolates `{param}` placeholders. Components
   call `i18n.t('home.badge')` directly in templates.
-- **HostRouterService** — subscribes to `router.events`, emits
+- **HostRouterService** - subscribes to `router.events`, emits
   `navigation.route.changed` with `canGoBack` derived from "is the route root?", syncs
-  immediately on start when booting off-root (deep link — seeded by `applyInitialHash` in
+  immediately on start when booting off-root (deep link - seeded by `applyInitialHash` in
   `main.ts`), and answers `navigation.back.requested` via `Location.back()`. Every
   `sdk.navigation.router.*` call is guarded with `?.` because some mobile hosts don't
   implement the router bridge. Advantage over React/Vue: PUSH vs POP uses Angular's native
-  `NavigationStart.navigationTrigger` (`'imperative'` vs `'popstate'`) — no approximation
+  `NavigationStart.navigationTrigger` (`'imperative'` vs `'popstate'`) - no approximation
   needed.
 
 ### Feature segregation + routing
 
-Each screen is a folder with a stateful service plus thin components — the service owns
+Each screen is a folder with a stateful service plus thin components - the service owns
 signals and SDK/browser calls, the component only binds `svc.x()` and
 `(click)="svc.method()"`. Because services are singletons, tab state survives route changes
 while each feature stays independently testable. Presentational cards take data via `@Input`
@@ -714,7 +714,7 @@ export class LocationComponent {
 />
 
 Add screens as routes in the stock `src/app/app.routes.ts` (the hash location from Step 6
-already applies). Sidebar links use `routerLink` + `routerLinkActive` — Angular intercepts
+already applies). Sidebar links use `routerLink` + `routerLinkActive` - Angular intercepts
 these natively, so the hash-desync trap that bites raw anchors cannot occur:
 
 <CodeTabs groupId="angular-code-routes"
@@ -738,7 +738,7 @@ export const appRoutes: Routes = [
 
 ### Full reference layout
 
-The converted project grows into this layout — the stock CLI files plus the mini-app wiring:
+The converted project grows into this layout - the stock CLI files plus the mini-app wiring:
 
 ```
 my-mini-app/
@@ -781,6 +781,6 @@ Follow along and tick off each step:
 - [ ] **Step 7:** `npm start` renders (loading placeholder expected without a host)
 - [ ] **Step 8:** `npm run build:miniapp` passes; `dist/manifest.json` lists entry + files, `framework: "angular"`
 - [ ] **Step 9:** served with CORS and mounted in the Host Playground (`phase() === "ready"`)
-- [ ] All SDK calls go through `sdk.*` — no direct `fetch` to platform endpoints
+- [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 
 </LanguageProvider>
