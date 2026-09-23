@@ -152,7 +152,7 @@ declare global {
       </TabItem>
       <TabItem value="javascript" label="JavaScript">
         <CodeBlock language="javascript">
-          {`// src/global.js — JSDoc hints only, no runtime cost (optional)
+          {`// src/global.js - JSDoc hints only, no runtime cost (optional)
 /**
  * @typedef {import("${pkg}").MiniAppSdkInterface} MiniAppSdk
  * @typedef {import("${pkg}").PlatformUser} SdkPlatformUser

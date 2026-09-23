@@ -270,7 +270,7 @@ const theme = await userStore.get("theme");`,
     method: "isSupported",
     signature: "sdk.device.isSupported(action: DeviceAction): boolean",
     description:
-      "Sync capability guard — call before any device method the host may not grant.",
+      "Sync capability guard - call before any device method the host may not grant.",
     paramsExample: '"location"',
     returnType: "boolean",
     snippet: `if (sdk.device.isSupported("location")) {
@@ -458,7 +458,7 @@ console.log(res.data.taxDue);`,
     method: "request (PUT)",
     signature:
       "sdk.api.request<T, B>(method: 'PUT', params: ApiRequestParams<B>): Promise<ApiResult<T>>",
-    description: "Proxied PUT — full-resource replace through the host.",
+    description: "Proxied PUT - full-resource replace through the host.",
     paramsExample: '\'PUT\', { path: "/profile", body: { name: "..." } }',
     returnType: "Promise<ApiResult<T>>",
     snippet: `const res = await sdk.api.request("PUT", {
@@ -475,7 +475,7 @@ console.log(res.status); // 200`,
     method: "request (PATCH)",
     signature:
       "sdk.api.request<T, B>(method: 'PATCH', params: ApiRequestParams<B>): Promise<ApiResult<T>>",
-    description: "Proxied PATCH — partial update through the host.",
+    description: "Proxied PATCH - partial update through the host.",
     paramsExample: '\'PATCH\', { path: "/profile", body: { locale: "ne-NP" } }',
     returnType: "Promise<ApiResult<T>>",
     snippet: `const res = await sdk.api.request("PATCH", {
@@ -509,7 +509,7 @@ console.log(res.status); // 200`,
     signature:
       "sdk.api.request(method: string, params: ApiRequestParams & { stream: true }): Promise<StreamBuilder>",
     description:
-      "Streaming variant — returns a StreamBuilder of SSE chunks for chat/file streaming.",
+      "Streaming variant - returns a StreamBuilder of SSE chunks for chat/file streaming.",
     paramsExample:
       '\'POST\', { path: "/chat", body: { message: "..." }, stream: true }',
     returnType: "Promise<StreamBuilder>",

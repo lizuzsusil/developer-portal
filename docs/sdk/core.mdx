@@ -10,7 +10,7 @@ import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
 
 # Core SDK & Lifecycle
 
-> **Host-injected, not installed.** In production mini apps the SDK is **injected by the host** at `window.__GSA_SDK__` - see [Getting Started](/docs/getting-started). The host loads the `@lizuz/sewa-sdk` bundle itself (CDN `<script>`); mini apps never install or import the SDK runtime. The instance exposes the lifecycle, capability, and introspection APIs documented here. Direct construction (`new MiniAppSdk(...)` / `createMiniAppSdk`) is host-shell and test-harness only.
+> **Host-injected, not installed.** In production mini apps the SDK is **injected by the host** at `window.__GSA_SDK__` - see [Getting Started](/docs/getting-started). The host loads the required SDK bundle itself via CDN, mini apps never install or import the SDK runtime. The instance exposes the lifecycle, capability, and introspection APIs documented here.
 
 ---
 
@@ -23,15 +23,11 @@ const sdk: MiniAppSdk = window.__GSA_SDK__;`}
 const sdk = window.__GSA_SDK__;`}
 />
 
-`sdk.capabilities: string[]` - granted namespaces. `sdk.capabilityVersions`, `sdk.traceId`, `sdk.hostDescriptor`, `sdk.version`.
-
-`getMiniAppSdk()` / `initMiniAppSdk()` are legacy helpers that operate on the active global instance - prefer reading `window.__GSA_SDK__` directly as shown in [React Guide](/docs/integration/react).
-
 ---
 
 ## Event Bus
 
-Covered in detail in [Events](/docs/sdk/events). Quick reference:
+[//]: # (Covered in detail in [Events]&#40;/docs/sdk/events&#41;. Quick reference:)
 
 <CodeTabs
   typescript={`const off = sdk.on("appearance.theme.changed", (payload) => { /* ... */ });
@@ -50,7 +46,7 @@ sdk.addEventInterceptor((event, payload) => payload);`}
 
 ## RPC Escape Hatches
 
-See [RPC](/docs/sdk/rpc) for full options.
+[//]: # (See [RPC]&#40;/docs/sdk/rpc&#41; for full options.)
 
 <CodeTabs
   typescript={`await sdk.request<T>("auth", "getUser");                    // raw RPC
@@ -65,7 +61,7 @@ await sdk.batch([{ namespace: "storage", action: "get", payload: { key: "a" } }]
 
 ## Middleware
 
-See [RPC](/docs/sdk/rpc) and [Plugins](/docs/sdk/plugins).
+[//]: # (See [RPC]&#40;/docs/sdk/rpc&#41; for full options.)
 
 <CodeTabs
   typescript={`sdk.use(async (ctx, next) => {
@@ -80,19 +76,6 @@ See [RPC](/docs/sdk/rpc) and [Plugins](/docs/sdk/plugins).
   console.log(\`\${ctx.namespace}.\${ctx.action} \${Date.now() - t}ms\`);
   return res;
 });`}
-/>
-
-## Telemetry
-
-See [Observability](/docs/sdk/observability).
-
-<CodeTabs
-  typescript={`sdk.getMetrics();        // totals + per-action percentiles
-sdk.debug.snapshot();    // full health dump
-sdk.debug.diagnose();    // Diagnostic[] with codes`}
-  javascript={`sdk.getMetrics();        // totals + per-action percentiles
-sdk.debug.snapshot();    // full health dump
-sdk.debug.diagnose();    // Diagnostic[] with codes`}
 />
 
 </LanguageProvider>

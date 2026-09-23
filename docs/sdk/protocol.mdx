@@ -23,14 +23,14 @@ sidebar_label: Protocol & Handshake
 
 ```typescript
 interface PlatformMessage<TPayload = unknown> {
-  channel: string;            // "gov-platform-sdk"
-  requestId: string;          // correlation id
+  channel: string;
+  requestId: string;
   type: "request" | "response" | "event" | "handshake" | "stream";
-  namespace: string;          // e.g. "auth", "device"
-  action: string;             // e.g. "getUser", "location"
-  source: string;             // sender miniAppId
-  target: string;             // "shell" or miniAppId
-  gsaProtocolVersion: string; // "1.0.0"
+  namespace: string;
+  action: string;
+  source: string;
+  target: string;
+  gsaProtocolVersion: string;
   traceId: string;
   timestamp: number;
   payload?: TPayload;
@@ -51,9 +51,9 @@ On first `sdk.auth.getUser()` (or any capability call) the SDK sends a `handshak
 interface HandshakePayload {
   miniAppId: string;
   sdkVersion: string;
-  protocolVersion: string;          // "1.0.0"
-  protocolVersionRange?: string;    // "^1.0.0"
-  capabilities: readonly string[];  // 12 domain namespaces
+  protocolVersion: string;
+  protocolVersionRange?: string;
+  capabilities: readonly string[];
 }
 
 interface HandshakeAckPayload {
@@ -61,19 +61,10 @@ interface HandshakeAckPayload {
   reason?: string;
   protocolVersion?: string;
   supportedVersions?: readonly string[];
-  capabilities?: readonly string[] | Record<string, string>; // version map
+  capabilities?: readonly string[] | Record<string, string>;
 }
 ```
 
 - `status: "rejected"` or a major version mismatch throws `HandshakeError`.
 - The granted `capabilities` list gates every subsequent `sdk.*` call - see [Errors](/docs/sdk/errors) for `CAPABILITY_NOT_SUPPORTED`.
 - `initialize()` is idempotent; concurrent callers share the same handshake promise.
-
-## Capability Gating
-
-```typescript
-// SDK_CAPABILITIES = auth, permissions (deprecated), config, navigation, storage,
-//                    platform, device, api, appearance, notifications, links
-sdk.capabilities        // string[] granted by host
-sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)
-```
