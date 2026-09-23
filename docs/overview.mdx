@@ -4,15 +4,35 @@ title: Platform Overview
 sidebar_label: Platform Overview
 ---
 
+import { ZoomableImage } from "@site/src/components/ZoomableImage";
+
 # Platform Overview
 
-The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (Web and Flutter). The host loads each mini app as an ES module, injects the SDK at `window.__GSA_SDK__`, and mediates all privileged operations over an RPC bridge.
+The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (Web and Flutter). The host loads each mini app as an ES module, injects the SDK, and mediates all privileged operations over an RPC bridge.
 
 ## Architecture at a Glance
 
 - **Host shell** - owns the window lifecycle, navigation, theming, and permissions. It fetches your bundle via `manifest.json`, mounts it into an isolated container, and unmounts it when the user leaves.
 - **Mini app** - your UI and logic. You ship only your code; the SDK runtime is not bundled. The host calls your exported `mount` to render and `unmount` to clean up.
 - **SDK bridge** - every `sdk.*` call (auth, storage, device, etc.) is forwarded to the host over a secured RPC channel and the result is returned to your app.
+
+### Mini-App Flow Diagram
+
+A user action in the mini-app UI hits an `sdk.*` call site, which carries intent only - no URLs, no identity. The injected SDK forwards it over the platform bridge (JS bridge on Flutter, `postMessage` on web), crossing the sandbox to the shell's request builder. The shell attaches the route path and mini-app ID, then calls the Citizen BFF. The BFF resolves the mini-app backend via the Service Registry and forwards the request to its contract endpoint. The backend runs the work - synchronously through a system adapter, or asynchronously via a worker queue with a callback client - against the agency system of record, and the result flows back along the same path.
+
+<ZoomableImage
+  src="/img/mini-app-flow-diagram.png"
+  alt="Mini-app flow diagram: SDK call site → injected SDK → platform bridge → Citizen BFF → mini-app backend → agency system of record"
+/>
+
+### Separation of Concerns
+
+The mini app owns only presentation and agency rules - screens and journey, service logic, the bundle it ships, plus the intent (a path, a method, a request body) and capability requests (camera, location, gallery - asked for, never taken). It sends state and intent across the bridge: an operation descriptor in, a platform response out, through the injected SDK - the only client library, never in the bundle - over a single capability-call surface. The shell then acts on that intent and owns everything privileged: identity and assurance, manifest resolution and bundle integrity, mount lifecycle and a single SDK version for every mini app, request construction with credentials, encrypted local store, wallet, push receipts, and a device capability broker mediating every OS permission use.
+
+<ZoomableImage
+  src="/img/soc.png"
+  alt="Separation of concerns: mini app (screens, logic, intent) → bridge (operation descriptor, injected SDK) → container shell (identity, manifest, mount, store, wallet, device broker)"
+/>
 
 ## Security Model
 

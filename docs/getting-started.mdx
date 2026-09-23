@@ -4,46 +4,62 @@ title: Getting Started
 sidebar_label: Getting Started
 ---
 
-import {TypesPackageName, InstallCommandTabs, ImportCodeBlock} from '@site/src/components/TypesPackage';
+import {TypesPackageName, InstallCommandTabs, ImportCodeTabs} from '@site/src/components/TypesPackage';
+import {CodeTabs} from '@site/src/components/CodeTabs';
 
 # Getting Started
 
-The SDK is **injected by the host shell** at `window.__GSA_SDK__` before your app mounts. You do **not** install the SDK runtime. Your app depends only on the shared types package for type-checking; the host provides the live instance at runtime.
+The SDK is **injected by the host shell** before your app mounts. You do **not** install the SDK runtime. Your app depends only on the shared types package for type-checking (if using `Typescript`); the host provides the live instance at runtime.
+
+> Choose your language once - every code sample on this page follows it. Tabs below are synced page-wide (and across the framework guides).
+>
+> - **TypeScript** (recommended): full type-checking via the types package.
+> - **JavaScript**: skip the types package or keep it for editor hints via JSDoc - the runtime contract is identical.
 
 > Framework-specific, copy-pasteable walkthroughs live in [React](/docs/integration/react), [Vue](/docs/integration/vue), [Angular](/docs/integration/angular), [Svelte](/docs/integration/svelte), and [Solid](/docs/integration/solid). This page is the framework-agnostic scaffold.
 
 ## Prerequisites
 
-Add the types package as a dev dependency:
+**TypeScript:** add the types package as a dev dependency:
 
 <InstallCommandTabs />
 
 That gives you `MiniAppSdkInterface`, `PlatformMessage`, `SdkEventMap`, and all namespace result types with no runtime cost.
 
-## 1. Declare the Injected SDK (`global.d.ts`)
+**JavaScript:** the types package is optional. Install it anyway for editor autocompletion via JSDoc, or skip it entirely - `window.__GSA_SDK__` works the same at runtime either way.
 
-So TypeScript knows about the host-injected global:
+## 1. Declare the Injected SDK (`global.d.ts` / JSDoc)
 
-<ImportCodeBlock />
+So your editor knows about the host-injected global:
 
-No runtime import - types are erased at build.
+<ImportCodeTabs />
+
+No runtime import - types are erased at build (TypeScript) or live only in comments (JavaScript).
 
 ## 2. Export the Mount Entry
 
 The host loads your bundle as an ES module and calls `mount`. Honor the optional `runtime.initialPath` when present (deep links) and return an `unmount` handle:
 
-```typescript
-// src/main.ts - shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
+<CodeTabs
+  typescript={`// src/main.ts - shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
-  // render your app into `container` - e.g. createRoot(container).render(<App />)
-  // if `runtime?.initialPath` is set, route there on first render
+  // render your app into \`container\` - e.g. createRoot(container).render(<App />)
+  // if \`runtime?.initialPath\` is set, route there on first render
   return { unmount() { /* teardown your framework tree */ } };
-}
-```
+}`}
+  javascript={`// src/main.js - shape of the contract (see framework guides for concrete React/Vue/etc. rendering)
+export function mount(container, runtime) {
+  // render your app into \`container\` - e.g. createRoot(container).render(<App />)
+  // if \`runtime?.initialPath\` is set, route there on first render
+  return { unmount() { /* teardown your framework tree */ } };
+}`}
+/>
 The host owns the SDK instance and destroys it. your app only cleans up its own render tree.
 
 ## 3. Build Manifest Skeleton(createManifest)
-```typescript
+
+<CodeTabs
+  typescript={`// src/utils/createManifest.ts
 import fs from "node:fs";
 import path from "node:path";
 import type { Plugin } from "vite";
@@ -141,15 +157,110 @@ export function createManifest(): Plugin {
       );
     },
   };
-}
+}`}
+  javascript={`// src/utils/createManifest.js
+import fs from "node:fs";
+import path from "node:path";
 
-```
+/** @returns {import("vite").Plugin} */
+export function createManifest() {
+  return {
+    name: "custom-manifest",
+    async writeBundle(options) {
+      const outDir = options.dir || "dist";
+
+      const possibleManifestPaths = [
+        path.resolve(outDir, "manifest.json"),
+        path.resolve(outDir, ".vite/manifest.json"),
+      ];
+
+      const originalManifestPath = possibleManifestPaths.find((p) =>
+        fs.existsSync(p),
+      );
+
+      if (!originalManifestPath) return;
+
+      const viteManifest = JSON.parse(
+        fs.readFileSync(originalManifestPath, "utf-8"),
+      );
+
+      const entryKey = Object.keys(viteManifest).find(
+        (key) => viteManifest[key].isEntry,
+      );
+
+      const entryItem = entryKey ? viteManifest[entryKey] : null;
+
+      const entryFile = entryItem?.file || "";
+      const styles = entryItem?.css || [];
+
+      const getAllFiles = (dirPath, arrayOfFiles = []) => {
+        const files = fs.readdirSync(dirPath);
+
+        files.forEach((file) => {
+          const fullPath = path.join(dirPath, file);
+          if (fs.statSync(fullPath).isDirectory()) {
+            arrayOfFiles = getAllFiles(fullPath, arrayOfFiles);
+          } else {
+            // Get path relative to outDir
+            const relativePath = path
+              .relative(outDir, fullPath)
+              .replace(/\\/g, "/"); // Normalize Windows path slashes
+
+            // Exclude manifest file itself from files array
+            if (!relativePath.endsWith("manifest.json")) {
+              arrayOfFiles.push(relativePath);
+            }
+          }
+        });
+
+        return arrayOfFiles;
+      };
+
+      const allFiles = getAllFiles(outDir);
+
+      const customManifest = {
+        schemaVersion: "1",
+        framework: "react",
+        application: {
+          id: pkg.name || "mini-revenue-app",
+          name: pkg.name || "revenue-app",
+          version: pkg.version || "1.2.3",
+          type: "mini-app",
+        },
+        platform: {
+          runtime: "^1.0.0",
+          sdk: "^1.0.9",
+        },
+        bundle: {
+          entry: entryFile,
+          styles: styles,
+          files: allFiles,
+        },
+      };
+
+      const finalManifestPath = path.resolve(outDir, "manifest.json");
+
+      if (
+        originalManifestPath.includes(".vite") &&
+        fs.existsSync(originalManifestPath)
+      ) {
+        fs.unlinkSync(originalManifestPath);
+      }
+
+      fs.writeFileSync(
+        finalManifestPath,
+        JSON.stringify(customManifest, null, 2),
+      );
+    },
+  };
+}`}
+/>
 Each mini app build manifest should be similar. So the createManifest function give a general manifest.json after build.
 
 ## 4. Retry function used in every framework to talk with host through sdk with certain number of maxAttempts and other details
 
-```typescript
-//src/utils/retry.ts
+<CodeTabs
+  typescript={`//src/utils/retry.ts
 
 export async function retry<T>(
   fn: () => T | Promise<T>,
@@ -169,16 +280,33 @@ export async function retry<T>(
     }
   }
   throw lastError;
-}
+}`}
+  javascript={`//src/utils/retry.js
 
-```
+export async function retry(fn, options) {
+  let lastError;
+  for (let attempt = 0; attempt < options.maxAttempts; attempt++) {
+    if (options.signal?.aborted)
+      throw new DOMException("Aborted", "AbortError");
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < options.maxAttempts - 1) {
+        await new Promise((r) => setTimeout(r, options.delayMs));
+      }
+    }
+  }
+  throw lastError;
+}`}
+/>
 
 ## 5. Build as a Library
 
 Build an ES library and emit the `manifest.json` the host uses for discovery. The `platform` constraints inside the manifest are host-side version metadata, not a bundle dependency.
 
 See your framework guide for the complete `vite.config.ts` + `createManifest` setup:
-[React](/docs/integration/react#6-vite-build) · [Vue](/docs/integration/vue#6-vite-build) · [Svelte](/docs/integration/svelte#6-vite-build) - same contract, different framework plugins.
+[React](/docs/integration/react#6-vite-build) · [Vue](/docs/integration/vue#6-vite-build) · [Svelte](/docs/integration/svelte#6-vite-build) - same contract, different framework plugins. The guides show TypeScript; for JavaScript use `.js`/`.jsx` files and drop the type annotations - the shape is identical.
 
 ## 6. Verify
 

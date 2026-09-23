@@ -111,8 +111,45 @@ declare global {
   );
 }
 
-export function ReactGovSdkImportBlock() {
+export function ImportCodeTabs({ groupId = "code-language" }: { groupId?: string }) {
   const pkg = useTypesPackage();
+  return (
+    <Tabs groupId={groupId} queryString>
+      <TabItem value="typescript" label="TypeScript">
+        <CodeBlock language="typescript">
+          {`// src/global.d.ts
+import type {
+  MiniAppSdkInterface,
+  PlatformUser,
+  DeviceBiometricOptions,
+  AppearanceState,
+} from "${pkg}";
+
+declare global {
+  type MiniAppSdk = MiniAppSdkInterface;
+  type SdkPlatformUser = PlatformUser;
+
+  interface Window {
+    __GSA_SDK__?: MiniAppSdk;
+  }
+}`}
+        </CodeBlock>
+      </TabItem>
+      <TabItem value="javascript" label="JavaScript">
+        <CodeBlock language="javascript">
+          {`// src/global.js — JSDoc hints only, no runtime cost (optional)
+/**
+ * @typedef {import("${pkg}").MiniAppSdkInterface} MiniAppSdk
+ * @typedef {import("${pkg}").PlatformUser} SdkPlatformUser
+ */
+// Use directly: const sdk = window.__GSA_SDK__;`}
+        </CodeBlock>
+      </TabItem>
+    </Tabs>
+  );
+}
+
+export function ReactGovSdkImportBlock() {  const pkg = useTypesPackage();
   return (
     <CodeBlock language="typescript">
       {`// src/global.d.ts
