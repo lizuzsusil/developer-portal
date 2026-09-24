@@ -28,6 +28,14 @@ import { PROTOCOL_VERSION, MESSAGE_CHANNEL, HOST_TARGET } from "@govtech/mini-ap
 | `MESSAGE_CHANNEL` | `gov-platform-sdk` | Filters SDK traffic from unrelated `postMessage`s. |
 | `HOST_TARGET` | `shell` | `target` of every outbound request. |
 | `SDK_GLOBAL_KEY` | `__SEWA_SDK__` | `window` key the host writes and the SDK overwrites with the live instance. |
+| `PLATFORM_EVENT_NAME` | `gov-platform-event` | `CustomEvent` name for hosts that cannot send a `MessageEvent`, such as a native WebView bridge. |
+| `BROADCAST_TARGET` | `*` | `target` a host uses to reach every connected mini app at once. |
+| `HOST_DESCRIPTOR_GLOBAL_KEY` | `__SEWA_HOST_DESCRIPTOR__` | `window` key holding the static host descriptor (type, version, capabilities, sdkVersion). Read at construction. |
+
+> **Naming.** The platform SDK shipped today still uses the earlier `GSA`
+> names: `__GSA_SDK__`, `__GSA_HOST_DESCRIPTOR__` and `gsaProtocolVersion`.
+> The SDK accepts both spellings, so a mini app written against either one
+> works. New code should use the `SEWA` names shown above.
 
 ## Wire Shape - `PlatformMessage`
 
@@ -51,7 +59,7 @@ interface PlatformMessage<TPayload = unknown> {
 }
 ```
 
-`createMessage()` stamps `channel`, `protocolVersion`, `traceId`, and `timestamp`. `isValidPlatformMessage` / `hasCompatibleMajorVersion` guard inbound traffic.
+`createMessage()` stamps `channel`, `sewaProtocolVersion`, `traceId`, and `timestamp`. `isValidPlatformMessage` / `hasCompatibleMajorVersion` guard inbound traffic.
 
 ## Handshake
 
@@ -88,4 +96,5 @@ sdk.capabilities        // string[] granted by host
 sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)
 ```
 
-Chat streaming is part of `sdk.http`, so it is covered by the `http` capability.
+Streaming is part of `sdk.api`, so it is covered by the `api` capability.
+There is no separate `http` or chat namespace.

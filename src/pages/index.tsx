@@ -305,7 +305,7 @@ function CapabilityTeaser() {
   const caps: { title: string; href: string; desc: string; icon: string; descId: string }[] = [
     { title: "sdk.auth", href: "/docs/sdk/auth", desc: "getUser · isAuthenticated · logout - citizen identity", icon: "🔐", descId: "homepage.capability.auth.desc" },
     { title: "sdk.device", href: "/docs/sdk/device", desc: "location · camera · gallery · files · biometric", icon: "📱", descId: "homepage.capability.device.desc" },
-    { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "🌐", descId: "homepage.capability.http.desc" },
+    { title: "sdk.api", href: "/docs/sdk/api", desc: "call your own backend by path, unary or streaming", icon: "🌐", descId: "homepage.capability.api.desc" },
     { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "💾", descId: "homepage.capability.storage.desc" },
     { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "🎨", descId: "homepage.capability.appearance.desc" },
     { title: "sdk.navigation", href: "/docs/sdk/navigation", desc: "navigate · getCurrent · router back/push sync", icon: "🧭", descId: "homepage.capability.navigation.desc" },

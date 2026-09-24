@@ -79,11 +79,11 @@ See [sdk.auth](/docs/sdk/auth).
 
 ## 4. Call your backend
 
-Your frontend does not know your backend's address. Ask for a method and a path:
+Your frontend does not know your backend's address. Pass the method first,
+then the path:
 
 ```js
-const res = await sdk.api.request({
-  method: "POST",
+const res = await sdk.api.request("POST", {
   path: "/v1/quota",
   body: { vehicleNumber: "WP CAB-1234" },
 });
@@ -126,13 +126,27 @@ origins. For local testing only, add these two tags to the page you serve:
     miniAppId: new URLSearchParams(location.search).get("miniAppId"),
   };
 </script>
-<script src="https://cdn.sewa.gov/mini-app-sdk/cdn.global.js"></script>
+<script src="https://cdn.sewa.gov/mini-app-sdk/sewa-sdk.min.js"></script>
 ```
 
-Then wait for it before you use it:
+The bundle replaces that global with the live SDK instance. It connects in the
+background and fires no ready event, so wait for it before the first call:
 
 ```js
-const sdk = await window.__SEWA_SDK_LOADER__.whenReady();
+async function whenSdkReady(timeoutMs = 10000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const sdk = window.__SEWA_SDK__;
+    if (sdk && typeof sdk.debug?.snapshot === "function") {
+      const { status } = sdk.debug.snapshot();
+      if (status === "ready") return sdk;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  throw new Error("The Sewa shell did not answer.");
+}
+
+const sdk = await whenSdkReady();
 ```
 
 Never hard-code `miniAppId`. Sewa tells your app which mini app it is.
@@ -146,7 +160,7 @@ Types are a dev dependency. The SDK runtime still comes from the platform:
 
 ```ts
 // src/gov-sdk.d.ts
-import type { MiniAppSdkInterface } from "<TypesPackageName />";
+import type { MiniAppSdkInterface } from "@govtech/mini-app-types";
 
 declare global {
   interface Window {

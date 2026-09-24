@@ -23,8 +23,6 @@ try {
 |---|---|---|
 | `CAPABILITY_NOT_SUPPORTED` | You called a namespace your mini app was not granted | Offer a fallback. Check `sdk.capabilities` first |
 | `TIMEOUT` | The platform did not answer in time | Safe to retry. The SDK already retried once |
-| `HTTP_CLIENT_ERROR` | Your backend answered 4xx | A problem with the request. Do not retry |
-| `HTTP_SERVER_ERROR` | Your backend answered 5xx | Transient. Retrying is reasonable |
 | `REQUEST_CANCELLED` | You aborted it | Usually nothing — the citizen moved on |
 | `CIRCUIT_OPEN` | Too many recent failures, calls are paused | Show a "try again shortly" message |
 | `HANDSHAKE_FAILED` | The SDK never connected to Sewa | Your app is running outside Sewa, or is not registered |
@@ -56,7 +54,8 @@ The SDK already retries timeouts and 5xx responses with backoff before the
 error reaches you. By the time you see one, an immediate retry will probably
 fail too. Give the citizen a button rather than looping.
 
-Never retry `HTTP_CLIENT_ERROR`. A 4xx means the request itself was wrong.
+Your backend's own status does not throw. `sdk.api.request` returns it as
+`res.status`, so check that before using `res.data`.
 
 ## Errors from your own backend
 
@@ -75,11 +74,14 @@ render(res.data);
 
 ## When you are not inside Sewa
 
-Opened directly in a browser tab, there is no shell to connect to and
-`whenReady()` rejects. Say so plainly rather than showing a blank screen:
+Opened directly in a browser tab there is no shell to connect to, so the SDK
+never reaches `ready`. Say so plainly rather than showing a blank screen:
 
 ```js
-window.__SEWA_SDK_LOADER__.whenReady()
+whenSdkReady()
   .then(start)
   .catch(() => showMessage("Open this from the Sewa app."));
 ```
+
+`whenSdkReady` is the small poll helper from
+[Getting Started](/docs/getting-started).

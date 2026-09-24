@@ -474,10 +474,6 @@
     "message": "location · camera · gallery · files · biometric",
     "description": "Capability sdk.device description"
   },
-  "homepage.capability.http.desc": {
-    "message": "get/post/put/patch/delete + streaming proxy",
-    "description": "Capability sdk.http description"
-  },
   "homepage.capability.storage.desc": {
     "message": "scoped key-value & JSON helpers per mini app",
     "description": "Capability sdk.storage description"
@@ -539,5 +535,9 @@
   },
   "homepage.final.cta.playground": {
     "message": "Try the playground"
+  },
+  "homepage.capability.api.desc": {
+    "message": "call your own backend by path, unary or streaming",
+    "description": "Homepage capability card description"
   }
 }

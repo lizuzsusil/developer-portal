@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 // ── Protocol constants (docs/sdk/protocol) ────────────────────────────────
 const CHANNEL = "gov-platform-sdk";
 const PROTOCOL_VERSION = "1.0.0";
-const HOST_CAPABILITIES = ["auth", "api", "http", "navigation", "appearance"] as const;
+const HOST_CAPABILITIES = ["auth", "api", "navigation", "appearance"] as const;
 
 // ── Static onboarding context ─────────────────────────────────────────────
 // A real agency is created in Admin Backend and carries a real tenant id.
@@ -197,9 +197,21 @@ export function MiniAppPlayground(): React.ReactNode {
 
       // sdk.api.request -> Citizen BFF. The only capability that leaves the browser.
       if (msg.namespace === "api" && msg.action === "request") {
-        const p = (msg.payload ?? {}) as { method?: string; path?: string; body?: unknown };
-        const method = (p.method ?? "GET").toUpperCase();
-        const path = p.path ?? "/";
+        // The SDK sends the BFF envelope as the wire `body`; the host forwards
+        // it verbatim. Older bundles sent the fields flat, so accept both.
+        const raw = (msg.payload ?? {}) as {
+          body?: unknown;
+          method?: string;
+          path?: string;
+        };
+        const envelope = (
+          raw.body && typeof raw.body === "object" && "path" in (raw.body as object)
+            ? raw.body
+            : raw
+        ) as { method?: string; path?: string; body?: unknown };
+        const method = (envelope.method ?? "POST").toUpperCase();
+        const path = envelope.path ?? "/";
+        const p = envelope;
         addLog("wire", `sdk.api.request ${method} ${path}`, "-> POST /v1/api-orchestrate");
 
         try {
@@ -297,6 +309,10 @@ function frameSrc(frontendUrl: string, miniAppId: string, nonce: number): string
     // Blank means "this is new" — mint an id the way the platform would.
     const miniAppId = cfg.miniAppId.trim() || generateMiniAppId(cfg.displayName);
     const displayName = cfg.displayName.trim() || miniAppId;
+    // Trim the URLs too. A pasted leading space is invisible in the field but
+    // is stored verbatim, and the registered entry then never loads.
+    const frontendUrl = cfg.frontendUrl.trim();
+    const backendUrl = cfg.backendUrl.trim();
     if (miniAppId !== cfg.miniAppId) {
       setCfg((prev) => ({ ...prev, miniAppId, displayName }));
       addLog("info", `Generated mini app id: ${miniAppId}`);
@@ -314,7 +330,7 @@ function frameSrc(frontendUrl: string, miniAppId: string, nonce: number): string
           backingAgencyId: DEMO_AGENCY_ID,
           displayName,
           description: "Registered from the developer portal playground",
-          bundleUrl: cfg.frontendUrl,
+          bundleUrl: frontendUrl,
           version: "1.0.0",
           sdkVersionRequired: "1.0.0",
           loadStrategy: "ON_DEMAND",
@@ -326,14 +342,14 @@ function frameSrc(frontendUrl: string, miniAppId: string, nonce: number): string
           // live dev URL, so the playground keeps its own copy in metadata,
           // which the read DTO does expose.
           metadata: {
-            playgroundFrontendUrl: cfg.frontendUrl,
-            playgroundBackendUrl: cfg.backendUrl,
+            playgroundFrontendUrl: frontendUrl,
+            playgroundBackendUrl: backendUrl,
           },
         }),
       });
       const manifestBody = await readJson(manifestRes);
       if (manifestRes.ok) {
-        addLog("ok", `Frontend registered: ${cfg.frontendUrl}`);
+        addLog("ok", `Frontend registered: ${frontendUrl}`);
       } else if (manifestRes.status === 409) {
         addLog("info", "Frontend already registered, continuing");
       } else {
@@ -349,14 +365,14 @@ function frameSrc(frontendUrl: string, miniAppId: string, nonce: number): string
           miniAppId,
           backingAgencyId: DEMO_AGENCY_ID,
           displayName,
-          pluginBaseUrl: cfg.backendUrl,
+          pluginBaseUrl: backendUrl,
           integrationMode: "SYNC",
           callbackTimeoutSeconds: 30,
         }),
       });
       const serviceBody = await readJson(serviceRes);
       if (serviceRes.ok) {
-        addLog("ok", `Backend registered: ${cfg.backendUrl}`);
+        addLog("ok", `Backend registered: ${backendUrl}`);
       } else if (serviceRes.status === 409) {
         addLog("info", "Backend already registered, continuing");
       } else {
@@ -366,7 +382,7 @@ function frameSrc(frontendUrl: string, miniAppId: string, nonce: number): string
       }
 
       liveRef.current = { miniAppId, gateway: GATEWAY_BASE_URL };
-      setLoadedApp({ miniAppId, frontendUrl: cfg.frontendUrl, nonce: Date.now() });
+      setLoadedApp({ miniAppId, frontendUrl, nonce: Date.now() });
       addLog("info", "Loading your mini app…");
     } catch (err) {
       addLog("err", "Registration failed", err instanceof Error ? err.message : String(err));
@@ -395,7 +411,7 @@ function frameSrc(frontendUrl: string, miniAppId: string, nonce: number): string
   const loadExisting = useCallback(() => {
     const app = existing?.find((a) => a.miniAppId === selected);
     if (!app) return;
-    const frontendUrl = frontendUrlOf(app);
+    const frontendUrl = frontendUrlOf(app)?.trim();
     if (!frontendUrl) {
       addLog(
         "err",

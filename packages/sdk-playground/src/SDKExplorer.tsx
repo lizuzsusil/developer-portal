@@ -220,71 +220,82 @@ if (auth.granted && auth.data.authenticated) {
     category: "device",
   },
 
-  // ── Network ───────────────────────────────────────
+  // ── Backend calls ─────────────────────────────────
   {
-    id: "http-get",
-    module: "http",
-    method: "get",
-    signature: "sdk.http.get<T>(params: HttpGetParams): Promise<HttpResult<T>>",
+    id: "api-request",
+    module: "api",
+    method: "request",
+    signature:
+      "sdk.api.request<T>(method: string, params: ApiRequestParams): Promise<ApiResult<T>>",
     description:
-      "Performs an HTTP GET request routed safely through the host network proxy.",
-    paramsExample: '{ url: "https://api.sewa.gov.np/v1/taxes" }',
-    returnType: "Promise<HttpResult<T>>",
-    snippet: `const res = await sdk.http.get<{ taxDue: number }>({
-  url: "https://api.sewa.gov.np/v1/taxes"
+      "Calls your own backend. Sewa routes the path to the backend registered for your mini app, so your frontend never holds its address.",
+    paramsExample: '"POST", { path: "/v1/quota", body: { vehicleNumber } }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request("POST", {
+  path: "/v1/quota",
+  body: { vehicleNumber: "WP CAB-1234" },
 });
-console.log(res.data.taxDue);`,
+
+if (res.status >= 400) return showProblem(res.data);
+render(res.data);`,
     mockResponse: {
       status: 200,
-      data: { taxDue: 1500, period: "2080/81", currency: "NPR" },
+      data: { allocatedLitres: 20, usedLitres: 12.5, remainingLitres: 7.5 },
+      headers: { "content-type": "application/json" },
     },
     category: "network",
   },
   {
-    id: "http-post",
-    module: "http",
-    method: "post",
+    id: "api-request-query",
+    module: "api",
+    method: "request",
     signature:
-      "sdk.http.post<T, B>(params: HttpPostParams<B>): Promise<HttpResult<T>>",
+      "sdk.api.request<T>(method: string, params: ApiRequestParams): Promise<ApiResult<T>>",
     description:
-      "Performs an HTTP POST request with optional upload progress tracking.",
-    paramsExample:
-      '{ url: "https://api.sewa.gov.np/v1/upload", body: { ... } }',
-    returnType: "Promise<HttpResult<T>>",
-    snippet: `const res = await sdk.http.post<{ id: string }, FormData>(
-  { url: "https://api.sewa.gov.np/v1/upload", body: formData },
-  { onProgress: (p) => console.log(p.percent + "%") }
-);`,
-    mockResponse: {
-      status: 201,
-      data: { id: "doc_abc123", uploaded: true },
-    },
-    category: "network",
-  },
-  {
-    id: "http-chatStream",
-    module: "http",
-    method: "stream",
-    signature:
-      "sdk.http.stream(params: { messages: ChatMessage[] }): StreamBuilder",
-    description:
-      "Streams a generic LLM chat completion. Deprecated alias: sdk.http.getStream().",
-    paramsExample:
-      '[{ role: "user", content: "How do I renew my license?" }]',
-    returnType: "StreamBuilder",
-    snippet: `const stream = sdk.http.stream({
-  messages: [{ role: "user", content: "How do I renew my license?" }]
+      "A query object is folded into the path as a query string, so no routing information is lost.",
+    paramsExample: '"GET", { path: "/v1/transactions", query: { page: "2" } }',
+    returnType: "Promise<ApiResult<T>>",
+    snippet: `const res = await sdk.api.request("GET", {
+  path: "/v1/transactions",
+  query: { from: "2026-09-01", page: "2" },
 });
-for await (const chunk of stream.iterate()) {
-  appendText(chunk);
+// your backend sees /v1/transactions?from=2026-09-01&page=2`,
+    mockResponse: {
+      status: 200,
+      data: { page: 2, items: [{ id: "txn_1", litres: 5 }] },
+      headers: { "content-type": "application/json" },
+    },
+    category: "network",
+  },
+  {
+    id: "api-request-stream",
+    module: "api",
+    method: "request",
+    signature:
+      "sdk.api.request(method: string, params: ApiRequestParams & { stream: true }): Promise<StreamBuilder>",
+    description:
+      "Streaming call. Returns raw bytes from your backend; parse Server-Sent Events with sdk.stream.parseSseStream.",
+    paramsExample: '"POST", { path: "/v1/chat", body: { message }, stream: true }',
+    returnType: "Promise<StreamBuilder>",
+    snippet: `const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message: "How do I renew my licence?" },
+  stream: true,
+});
+
+for await (const event of sdk.stream.parseSseStream(stream.iterate())) {
+  if (event.type === "token") append(event.text);
 }`,
     mockResponse: {
       streamStarted: true,
-      chunks: ["To renew your ", "driver license, ", "visit the portal."],
+      events: [
+        { type: "token", text: "To renew your " },
+        { type: "token", text: "licence, visit the portal." },
+        { type: "done" },
+      ],
     },
     category: "network",
   },
-
 
   // ── Navigation ────────────────────────────────────
   {

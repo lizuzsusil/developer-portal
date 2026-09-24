@@ -4,34 +4,119 @@ title: Calling your backend (sdk.api)
 sidebar_label: sdk.api
 ---
 
-# Backend API Gateway Module (`sdk.api`)
+# Calling your backend (`sdk.api`)
 
-Call your own backend. You give a method and a path; Sewa routes it to the backend
-registered for your mini app, so your frontend never holds its address.
+`sdk.api.request` is the single way a mini app reaches a backend. Normal calls
+and streaming calls both go through it.
 
----
+You give a method and a path. Sewa routes the call to the backend registered
+for your mini app, so your frontend never holds its address.
 
-## Public Methods
+## The shape
 
-### `request(params)`
-
-Sends a request to your own backend. Sewa routes it for you.
-
-- **Signature**: `request<T = unknown, B = unknown>(params?: ApiRequestParams<B>): Promise<ApiResult<T>>`
-
-```typescript
-const response = await sdk.api.request<{ taxDue: number }>({
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: { citizenId: "9921-0012" },
+```js
+const res = await sdk.api.request("POST", {
+  path: "/v1/quota",
+  body: { vehicleNumber: "WP CAB-1234" },
 });
 
-console.log("Status:", response.status);
-console.log("Tax Due:", response.data.taxDue);
+console.log(res.status, res.data);
 ```
 
+Two positional arguments: the method, then everything else.
 
----
+> **The object form no longer works.** `request({ method, path, body })`
+> throws `INVALID_PARAMS`. Pass the method first.
+
+## Parameters
+
+| Field | Type | Notes |
+|---|---|---|
+| `path` | `string` | **Required.** The route on your backend, such as `/v1/quota`. Sewa cannot route without it. |
+| `body` | any | Sent as-is. |
+| `query` | `Record<string, string>` | Folded into `path` as a query string. |
+| `headers` | `Record<string, string>` | Extra headers for your backend. |
+| `stream` | `boolean` | `false` by default. See [Streaming](#streaming). |
+| `signal` | `AbortSignal` | Cancels a stream. |
+| `onProgress` | `(p) => void` | Upload progress, as `{ uploadedBytes, totalBytes? }`. |
+
+The method defaults to `POST`. It describes what you mean, and travels to your
+backend. `endpoint` is accepted as a deprecated alias for `path`.
+
+## What comes back
+
+```ts
+interface ApiResult<T> {
+  status: number;                     // your backend's status
+  data: T;                            // your backend's body
+  headers: Record<string, string>;
+}
+```
+
+`status` is your backend's own status code. A `404` or `422` arrives as a
+normal result with that status, not as a thrown error, so check it:
+
+```js
+const res = await sdk.api.request("POST", { path: "/v1/quota", body });
+
+if (res.status >= 400) {
+  showProblem(res.data);
+  return;
+}
+render(res.data);
+```
+
+A thrown error means the call never reached your backend. See
+[Handling errors](/docs/sdk/errors).
+
+## Query strings
+
+```js
+await sdk.api.request("GET", {
+  path: "/v1/transactions",
+  query: { from: "2026-09-01", page: "2" },
+});
+// your backend sees /v1/transactions?from=2026-09-01&page=2
+```
+
+## Uploads
+
+```js
+await sdk.api.request("POST", {
+  path: "/v1/documents",
+  body: formData,
+  onProgress: ({ uploadedBytes, totalBytes }) => {
+    setPercent(totalBytes ? (uploadedBytes / totalBytes) * 100 : 0);
+  },
+});
+```
+
+You can also subscribe directly with `sdk.on("api.uploadProgress", handler)`.
+
+## Streaming
+
+Pass `stream: true` to get a live stream instead of one answer. You get back a
+`StreamBuilder` of raw bytes from your backend.
+
+```js
+const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message: "Hello" },
+  stream: true,
+});
+
+for await (const event of sdk.stream.parseSseStream(stream.iterate())) {
+  if (event.type === "token") append(event.text);
+}
+```
+
+`sdk.stream.parseSseStream` turns Server-Sent Events into objects. Your backend decides
+the event names. Starting a session is a normal call: only the streaming leg
+needs `stream: true`.
+
+See [Streaming](/docs/sdk/stream) for cancelling and chunk handling.
+
+## Long-running work
 
 If the work cannot finish inside one call, your backend answers later instead.
 See [Long-running requests](/docs/async-requests).

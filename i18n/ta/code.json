@@ -418,10 +418,6 @@
     "message": "location · camera · gallery · files · biometric",
     "description": "Capability sdk.device description"
   },
-  "homepage.capability.http.desc": {
-    "message": "get/post/put/patch/delete + streaming proxy",
-    "description": "Capability sdk.http description"
-  },
   "homepage.capability.storage.desc": {
     "message": "mini app க்கான scoped key-value & JSON உதவியாளர்கள்",
     "description": "Capability sdk.storage description"
@@ -477,5 +473,9 @@
   "homepage.integrations.playground.cta": {
     "message": "விளையாட்டு மைதானத்தைத் திறக்கவும் →",
     "description": "Playground CTA"
+  },
+  "homepage.capability.api.desc": {
+    "message": "call your own backend by path, unary or streaming",
+    "description": "Homepage capability card description"
   }
 }

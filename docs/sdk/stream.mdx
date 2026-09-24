@@ -6,47 +6,81 @@ sidebar_label: Streaming
 
 # Streaming
 
-Long-lived responses (`http.getStream` and `http.stream` chat) use `StreamBuilder`.
+A streaming call answers in pieces instead of all at once. Use it for chat
+replies, long exports and progress output.
 
-## `StreamBuilder`
+Ask for one with `stream: true`:
 
-```typescript
-const builder = sdk.http.getStream({ path: "/v1/export" });
-// or: const builder = sdk.http.stream({ messages });  - chat
-// or: const builder = sdk.http.stream({ user_id, session_id, message }, { onEvent });
+```js
+const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message: "Hello" },
+  stream: true,
+});
+```
 
-for await (const chunk of builder.iterate()) {
-  // chunk: string | Uint8Array (auto-ordered by streamIndex)
+You get a `StreamBuilder`. It carries raw bytes from your backend, exactly as
+your backend sent them. The SDK does not interpret them.
+
+## Reading events
+
+Most backends send Server-Sent Events. `parseSseStream` turns those bytes into
+objects:
+
+```js
+for await (const event of sdk.stream.parseSseStream(stream.iterate())) {
+  switch (event.type) {
+    case "token": append(event.text); break;
+    case "done":  finish();           break;
+    case "error": showProblem(event); break;
+  }
 }
-
-await builder.waitUntilDone();
-
-builder.cancel();              // → StreamCancelledError, notifies host (http.cancel)
-builder.isDone;                // boolean
-builder.isRejected;            // boolean
-builder.receivedBytes;         // number
-builder.receivedChunks;        // number
-builder.total;                 // number | null (from streamTotal)
 ```
 
-Ordering is by `streamIndex`; the host marks the final chunk with `streamLast: true`.
+`sdk.stream.parseSseStream` is on the injected SDK, so there is nothing to
+import.
 
-## Cancellation
+Each event is `{ type, ...fields }`. The `type` comes from the SSE `event:`
+line, and the rest from its `data:` line. Your backend chooses those names.
 
-Two ways to cancel:
+Three things worth knowing:
 
-```typescript
-// AbortSignal (preferred)
+- An event split across two chunks is reassembled for you.
+- `data:` that is not JSON arrives as `{ text: "<raw>" }`.
+- `parseSseStream` never throws. A backend `error` event is yielded last, then
+  the loop ends. Handle `error` inside the loop.
+
+## Reading raw chunks
+
+If your backend does not send SSE, read the chunks yourself:
+
+```js
+for await (const chunk of stream.iterate()) {
+  // chunk is a string or a Uint8Array
+}
+```
+
+A stream has **one consumer**. Iterate it once.
+
+## Stopping early
+
+```js
 const controller = new AbortController();
-const builder = sdk.http.getStream({ path }, { signal: controller.signal });
-controller.abort();
 
-// Direct
-builder.cancel();
+const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message },
+  stream: true,
+  signal: controller.signal,
+});
+
+cancelButton.onclick = () => controller.abort();
 ```
 
-Both reject `iterate()` / `waitUntilDone()` with `StreamCancelledError` and send `http.cancel { requestId }` to the host.
+Aborting tells the host to stop the stream, so your backend can stop working.
+Always abort when the citizen navigates away.
 
-## Wire
+## Next
 
-Stream frames are `PlatformMessage` with `type: "stream"`, `streamIndex`, `streamTotal`, and `streamLast`. See [Protocol](/docs/sdk/protocol).
+- [sdk.api](/docs/sdk/api) — the call itself.
+- [Handling errors](/docs/sdk/errors) — what a thrown error means.

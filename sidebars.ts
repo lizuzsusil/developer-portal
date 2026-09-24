@@ -37,7 +37,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Backend integration",
       collapsed: true,
-      items: ["mini-app-backend", "async-requests", "sdk/http", "sdk/ai-chat", "sdk/stream"],
+      items: ["mini-app-backend", "async-requests", "sdk/stream"],
     },
     {
       type: "category",
