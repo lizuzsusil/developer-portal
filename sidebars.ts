@@ -14,7 +14,7 @@ const sidebars: SidebarsConfig = {
       collapsed: false,
       items: [
         "sdk/auth",
-        "sdk/permissions",
+        // "sdk/permissions",
         // "sdk/flags",
         // "sdk/config",
         "sdk/navigation",
@@ -24,8 +24,8 @@ const sidebars: SidebarsConfig = {
         "sdk/api",
         // "sdk/ai-chat",
         "sdk/appearance",
-        "sdk/notifications",
-        "sdk/links",
+        // "sdk/notifications",
+        // "sdk/links",
       ],
     },
     {
