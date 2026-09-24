@@ -507,7 +507,7 @@
     "description": "React badge"
   },
   "homepage.integrations.react.desc": {
-    "message": "குறிப்பு செயல்படுத்தல். Hooks + Provider முழு வகைகளுடன் window.__GSA_SDK__ ஐ மூடுகிறது.",
+    "message": "குறிப்பு செயல்படுத்தல். Hooks + Provider முழு வகைகளுடன் window.__SEWA_SDK__ ஐ மூடுகிறது.",
     "description": "React description"
   },
   "homepage.integrations.react.cta": {

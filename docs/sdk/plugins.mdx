@@ -51,14 +51,14 @@ const analytics = await sdk.getModuleAsync("analytics");
 
 Multi-mini-app hosts track live instances in a registry (`getMiniAppSdk()` returns the active
 one; `getAllInstances()`, `clearInstances()`, `registerInstance()` exist for multi-tab shells).
-This is host-shell machinery - mini apps always read `window.__GSA_SDK__` (or their provider
+This is host-shell machinery - mini apps always read `window.__SEWA_SDK__` (or their provider
 hook) instead.
 
 ## CDN Build
 
 This is how the instance gets to you: the host loads the `@lizuz/sewa-sdk` bundle via a
-`<script>` tag (`.../dist/sewa-sdk.min.js`), with a pre-load config on `window.__GSA_SDK__`
+`<script>` tag (`.../dist/sewa-sdk.min.js`), with a pre-load config on `window.__SEWA_SDK__`
 carrying at least `{ miniAppId }`. The bundle auto-initializes (handshake + hydration) and then
 overwrites the same global with the live instance - which is what your provider polls for.
-You never load this script yourself; understand it so the `window.__GSA_SDK__` polling in
+You never load this script yourself; understand it so the `window.__SEWA_SDK__` polling in
 [Getting Started](/docs/getting-started) makes sense.

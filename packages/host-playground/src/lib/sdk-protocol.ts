@@ -2,15 +2,15 @@ import type { SdkSource } from '../types'
 
 /**
  * The Mini App SDK (v1) hands the host an object-shaped config
- * `window.__GSA_SDK__` that it reads at boot. The required field is
+ * `window.__SEWA_SDK__` that it reads at boot. The required field is
  * `miniAppId`; the SDK pins its host origin via `targetOrigin` (see
  * `et = {allowedOrigin: ve.targetOrigin}` in the minified bundle), and the
  * RPC client uses `window.parent.postMessage`.
  *
  * Mirrors `shell/src/platform/sdk/bootstrap/core.ts:33 seedSdkConfig`:
- *  - `window.__GSA_SDK__` = { miniAppId, timeout, retryAttempts, retryDelayMs, maxRetryDelayMs, targetOrigin }
+ *  - `window.__SEWA_SDK__` = { miniAppId, timeout, retryAttempts, retryDelayMs, maxRetryDelayMs, targetOrigin }
  *  - `window.__GSA_HOST_DESCRIPTOR__` = { type, version, capabilities, sdkVersion }
- * The SDK overwrites `window.__GSA_SDK__` with the live instance after load
+ * The SDK overwrites `window.__SEWA_SDK__` with the live instance after load
  * and reads the descriptor separately - do not merge them.
  */
 

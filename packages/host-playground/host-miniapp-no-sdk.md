@@ -30,7 +30,7 @@ module** bundled with the mini app:
 | With SDK | Without SDK |
 |---|---|
 | SDK owns the `window.addEventListener('message')` loop | The mini app side packs a tiny `host-client` module (a few KB) that posts/receives messages on the host channel |
-| SDK reads `window.__GSA_SDK__` seeded by the host | The mini app reads **config values** passed at invocation time (global, closure param, or a host-published global) |
+| SDK reads `window.__SEWA_SDK__` seeded by the host | The mini app reads **config values** passed at invocation time (global, closure param, or a host-published global) |
 | SDK exposes `query({namespace, action, payload})` | The client exposes the same shape but without handshake/capability acknowledgement |
 
 So "no SDK" ≠ "no client at all". You still need **some transport code** - it is just
@@ -625,7 +625,7 @@ cd miniapp && npm run dev     # miniapp on :5174
 | Aspect | Referenced (with SDK) | This blueprint (no SDK) |
 |---|---|---|
 | SDK script | `injectScript(sdk.url)` loads `sewa-sdk.min.js` | No script; the mini app bundles `host-client.ts` instead |
-| Seed globals | `__GSA_SDK__` + `__GSA_HOST_DESCRIPTOR__` | Single `__MYAPP_CONFIG__` (or `mount(container, configParam)` invocation) |
+| Seed globals | `__SEWA_SDK__` + `__GSA_HOST_DESCRIPTOR__` | Single `__MYAPP_CONFIG__` (or `mount(container, configParam)` invocation) |
 | Handshake | SDK's `handshake.connect` - SDK replies | Mini app's `host-client` does `request("handshake","connect")` |
 | Capability source | SDK's named `getHandshakeCapabilities` | Host's `capabilities.ts` (drawer + `isActionAllowed`) |
 | Event bus | SDK's `EventBus` | Mini app's `eventBusSubscribe` + host's `broadcast` |

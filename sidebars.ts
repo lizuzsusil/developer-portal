@@ -6,30 +6,11 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Getting Started",
       collapsed: false,
-      items: ["overview", "getting-started"],
+      items: ["what-is-a-mini-app","overview", "getting-started", "mini-app-playground"],
     },
     {
       type: "category",
-      label: "SDK Reference",
-      collapsed: false,
-      items: [
-        "sdk/core",
-        "sdk/protocol",
-        // "sdk/transport",
-        // "sdk/rpc",
-        // "sdk/events",
-        "sdk/errors",
-        // "sdk/stream",
-        // "sdk/reliability",
-        // "sdk/observability",
-        // "sdk/offline",
-        // "sdk/plugins",
-        // "sdk/logging",
-      ],
-    },
-    {
-      type: "category",
-      label: "Capability Namespaces",
+      label: "Sdk Features",
       collapsed: false,
       items: [
         "sdk/auth",
@@ -48,7 +29,16 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Framework Adapters",
+      label: "Backend integration",
+      collapsed: false,
+      items: [
+       "mini-app-backend",
+       "async-requests"
+      ],
+    },
+    {
+      type: "category",
+      label: "Framework Guides",
       collapsed: false,
       items: [
         "integration/react",
@@ -60,11 +50,37 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Playground",
+      label: "Going live",
+      collapsed: false,
+      items: [ "going-live"
+      ],
+    },
+    // {
+    //   type: "category",
+    //   label: "Playground",
+    //   collapsed: false,
+    //   items: [
+    //       "playground",
+    //       "host-playground"
+    //   ],
+    // },
+        {
+      type: "category",
+      label: "Platform Internals",
       collapsed: false,
       items: [
-          "playground",
-          "host-playground"
+        "sdk/core",
+        "sdk/protocol",
+        // "sdk/transport",
+        // "sdk/rpc",
+        // "sdk/events",
+        "sdk/errors",
+        // "sdk/stream",
+        // "sdk/reliability",
+        // "sdk/observability",
+        // "sdk/offline",
+        // "sdk/plugins",
+        // "sdk/logging",
       ],
     },
   ],

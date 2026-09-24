@@ -212,7 +212,7 @@ function mountWithIsolation(
 function destroyPreviousSdkIfNeeded(): void {
   try {
     const w = window as unknown as Record<string, unknown>
-    const cur = w['__GSA_SDK__'] as { destroy?: () => void; initialize?: unknown } | undefined
+    const cur = w['__SEWA_SDK__'] as { destroy?: () => void; initialize?: unknown } | undefined
     if (cur && typeof cur.destroy === 'function' && typeof cur.initialize === 'function') {
       cur.destroy()
     }
@@ -462,7 +462,7 @@ export async function loadAndMountMiniApp(
 }
 
 /**
- * The Mini App SDK reads globals `window.__GSA_SDK__` and
+ * The Mini App SDK reads globals `window.__SEWA_SDK__` and
  * `window.__GSA_HOST_DESCRIPTOR__` that must be in place *before* the SDK
  * script is injected. Mirrors shell/src/platform/sdk/bootstrap/core.ts:33 seedSdkConfig.
  * Host descriptor capabilities are now derived from the drawer toggles via
@@ -478,10 +478,10 @@ function setSdkGlobalConfig(miniAppId: string, sdk: SdkSource): void {
     sdkVersion: sdk.version,
   }
   const w = window as unknown as Record<string, unknown>
-  w['__GSA_SDK__'] = cfg
+  w['__SEWA_SDK__'] = cfg
   w['__GSA_HOST_DESCRIPTOR__'] = hostDesc
   const g = globalThis as unknown as Record<string, unknown>
-  g['__GSA_SDK__'] = cfg
+  g['__SEWA_SDK__'] = cfg
   g['__GSA_HOST_DESCRIPTOR__'] = hostDesc
 }
 

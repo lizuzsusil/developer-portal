@@ -15,7 +15,7 @@ import { CodeTabs, LanguageProvider } from "@site/src/components/CodeTabs";
 Angular is a supported framework for Sewa mini apps. This guide starts from a **standard
 `ng new` project** and converts it step by step into a **basic, working Angular 21 mini app**:
 a Vite ES-library build exporting the host-called `mount`/`unmount` lifecycle, with the SDK
-injected by the host via `window.__GSA_SDK__` and strict lifecycle handling.
+injected by the host via `window.__SEWA_SDK__` and strict lifecycle handling.
 
 By the end you will have a mini app that builds to `dist/` with a `manifest.json` and loads
 inside the [Host Playground](/docs/host-playground). Deeper patterns (appearance sync, i18n,
@@ -33,7 +33,7 @@ router sync, per-screen feature folders) are covered under
 > show the equivalent untyped logic for comparison.
 
 > **No runtime install.** A Sewa mini app must **not** `npm install` or `import` the SDK
-> runtime. The host shell injects the SDK instance as `window.__GSA_SDK__` at runtime. Your
+> runtime. The host shell injects the SDK instance as `window.__SEWA_SDK__` at runtime. Your
 > app only needs the shared types package as a dev dependency for compile-time safety.
 
 ---
@@ -86,7 +86,7 @@ there from `ng new` - don't reinstall them.)
 
 <InstallProdCommandTabs pkgName="@analogjs/vite-plugin-angular @lucide/angular tailwindcss @tailwindcss/vite" groupId="angular-pm-deps" />
 
-<InstallCommandTabs pkgName="@lizuz/mini-app-types @types/node vite" groupId="angular-pm-devdeps" />
+<InstallCommandTabs pkgName="@@sewa/sdk-types @types/node vite" groupId="angular-pm-devdeps" />
 
 What each addition is for:
 
@@ -95,7 +95,7 @@ What each addition is for:
 | `@analogjs/vite-plugin-angular` | Lets the production Vite build understand Angular components/templates |
 | `tailwindcss`, `@tailwindcss/vite` | Styling (wired into `styles.css` in Step 5) |
 | `@lucide/angular` | Icons (used once you add screens - [Going further](#going-further)) |
-| `@lizuz/mini-app-types` (dev) | Compile-time typings for the host-injected SDK - no runtime code |
+| `@@sewa/sdk-types` (dev) | Compile-time typings for the host-injected SDK - no runtime code |
 | `@types/node` (dev) | Types for the manifest plugin's `node:fs` / `node:path` usage |
 | `vite` (dev) | Direct dependency for the dev/build commands below |
 
@@ -351,8 +351,8 @@ Three small files. First, switch the stock `styles.css` to Tailwind v4:
 
 <ReactGovSdkImportBlock />
 
-Only `@lizuz/mini-app-types` is a dev dependency - there is no `npm install` for the runtime
-SDK. This `global.d.ts` declares the host-injected `window.__GSA_SDK__` so TypeScript knows
+Only `@@sewa/sdk-types` is a dev dependency - there is no `npm install` for the runtime
+SDK. This `global.d.ts` declares the host-injected `window.__SEWA_SDK__` so TypeScript knows
 about it; the types are erased at build.
 
 ---
@@ -410,7 +410,7 @@ export class SdkService {
 
   private async waitForSdk(): Promise<void> {
     for (let attempt = 0; attempt < 30; attempt++) {
-      const sdk = window.__GSA_SDK__;
+      const sdk = window.__SEWA_SDK__;
       if (sdk) {
         this.sdk = sdk;
         this.phase.set("ready");
@@ -435,7 +435,7 @@ export class SdkService {
 
   async waitForSdk() {
     for (let attempt = 0; attempt < 30; attempt++) {
-      const sdk = window.__GSA_SDK__;
+      const sdk = window.__SEWA_SDK__;
       if (sdk) {
         this.sdk = sdk;
         this.phase.set("ready");
@@ -612,7 +612,7 @@ Verify the conversion typechecks (template errors fail the production build, so 
 `ng serve` compiles the converted project as-is - the `import.meta.env.DEV` block at the
 bottom of `main.ts` mounts the app locally, so no extra dev bootstrap is needed. You will see
 **"Connecting to platform..."** - that is expected: there is no host shell in local dev, so
-`window.__GSA_SDK__` never appears and the phase stays `loading`. The dev server proves your
+`window.__SEWA_SDK__` never appears and the phase stays `loading`. The dev server proves your
 components compile and render; the real SDK arrives in Step 9.
 
 ---
@@ -772,7 +772,7 @@ my-mini-app/
 Follow along and tick off each step:
 
 - [ ] **Step 1:** `ng new` answered (routing Yes, CSS, no SSR); `npm start` serves the stock page
-- [ ] **Step 2:** bridge deps + `@lizuz/mini-app-types` + `@types/node` + `vite` installed
+- [ ] **Step 2:** bridge deps + `@@sewa/sdk-types` + `@types/node` + `vite` installed
 - [ ] **Step 3:** `typecheck` / `build:miniapp` scripts; `tsconfig.app.json` types set; `tsconfig.emit.json` added
 - [ ] **Step 4:** `vite.lib.config.ts` + `src/app/utils/createManifest.ts` added
 - [ ] **Step 5:** `styles.css` on Tailwind; `vite-env.d.ts` + `global.d.ts` added

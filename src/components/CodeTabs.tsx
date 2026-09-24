@@ -33,8 +33,8 @@ interface CodeTabsProps {
  *
  * Usage in MDX:
  * <CodeTabs
- *   typescript={`const sdk: MiniAppSdk = window.__GSA_SDK__;`}
- *   javascript={`const sdk = window.__GSA_SDK__;`}
+ *   typescript={`const sdk: MiniAppSdk = window.__SEWA_SDK__;`}
+ *   javascript={`const sdk = window.__SEWA_SDK__;`}
  * />
  */
 export function CodeTabs({ typescript, javascript, title, groupId: groupIdProp }: CodeTabsProps) {

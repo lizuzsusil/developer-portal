@@ -11,7 +11,7 @@ import { ScaffoldTabs } from "@site/src/components/FrameworkTabs";
 
 > **Package:** no framework runtime package - Solid + `@solidjs/router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Solid integration pattern for Sewa mini apps, verified against `mini-apps/solid-mini-app`.
 
-Solid is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and a provider component with strict lifecycle handling - expressed with Solid idioms (signals, `createContext`/`useContext`, `<Show>`, `onMount`/`onCleanup`, `HashRouter` + `useLocation`/`useNavigate`).
+Solid is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__SEWA_SDK__`, and a provider component with strict lifecycle handling - expressed with Solid idioms (signals, `createContext`/`useContext`, `<Show>`, `onMount`/`onCleanup`, `HashRouter` + `useLocation`/`useNavigate`).
 
 ---
 
@@ -25,7 +25,7 @@ Add routing, icons, Tailwind, and the types package (`vite-plugin-solid` already
 
 <InstallProdCommandTabs pkgName ="@solidjs/router lucide-solid" />
 
-<InstallCommandTabs pkgName= "tailwindcss @tailwindcss/vite @lizuz/mini-app-types @types/node" />
+<InstallCommandTabs pkgName= "tailwindcss @tailwindcss/vite @@sewa/sdk-types @types/node" />
 
 
 Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3010` (`vite --port 3010 --host`).
@@ -36,7 +36,7 @@ Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provid
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
+Only the types package (`@@sewa/sdk-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set:
 
 ```typescript
 // src/global.d.ts
@@ -54,7 +54,7 @@ import type {
   FileModule,
   MiniAppSdkInterface,
   PlatformUser,
-} from "@lizuz/mini-app-types";
+} from "@@sewa/sdk-types";
 
 declare global {
   type MiniAppSdk = MiniAppSdkInterface;
@@ -62,7 +62,7 @@ declare global {
   // ... SdkDevice* / SdkFileModule / SdkBiometricOptions aliases
 
   interface Window {
-    __GSA_SDK__?: MiniAppSdk;
+    __SEWA_SDK__?: MiniAppSdk;
   }
 }
 
@@ -154,7 +154,7 @@ Routing is a single catch-all `Route path="/*"`: tab switching happens inside `c
 
 ```typescript
 // src/store.ts
-import type { PlatformUser } from "@lizuz/mini-app-types";
+import type { PlatformUser } from "@@sewa/sdk-types";
 
 export type ProviderState =
   | { phase: "loading" }
@@ -193,7 +193,7 @@ export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
 
 `PlatformSDKProvider.tsx` owns a `createSignal<ProviderState>`, populates it in `onMount` (with `onCleanup` abort semantics mirroring React's `AbortController`), and gates rendering on three `<Show>` phases - identical to the React provider:
 
-1. **loading** - polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
+1. **loading** - polls `window.__SEWA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
 2. **ready** - provides state, mounts the renderless `PlatformSDKRuntime` component (which runs `useHostRouter()`), and renders children.
 3. **error** - renders `LoadError` with the failure message.
 ```typescript
@@ -206,7 +206,7 @@ import type { ProviderState } from "./store";
 import { retry } from "./utils/retry";
 
 function getSDK() {
-  const instance = window.__GSA_SDK__ ?? null;
+  const instance = window.__SEWA_SDK__ ?? null;
   if (!instance) throw new Error("SDK not available");
   return instance;
 }
@@ -231,7 +231,7 @@ export function PlatformSDKProvider(props: { children: JSX.Element }) {
           signal: controller.signal,
         });
         await new Promise<void>((res) => {
-          if (window.__GSA_SDK__) return res();
+          if (window.__SEWA_SDK__) return res();
           window.addEventListener("__GSA_SDK_READY__", () => res(), { once: true });
         });
         const user = await instance.auth.getUser();
@@ -504,7 +504,7 @@ The reference dependency set (`mini-apps/solid-mini-app/package.json`):
     "tailwindcss": "4.3.3"
   },
   "devDependencies": {
-    "@lizuz/mini-app-types": "1.1.2",
+    "@@sewa/sdk-types": "1.1.2",
     "@types/node": "26.5.0",
     "vite-plugin-solid": "2.11.14",
     "typescript": "7.0.2",
@@ -627,11 +627,11 @@ solid-mini-app/
 ## Checklist
 
 - [ ] Scaffolded `solid-ts` plus `@solidjs/router`, `lucide-solid`, Tailwind, and the types package
-- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__SEWA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.tsx` exports `mount(container, runtime?)` returning `{ unmount() }` via `render()`/`dispose()`
 - [ ] Hash is seeded before `render()`; single catch-all `Route path="/*"` with `<Show>` tab switching
 - [ ] Sidebar navigates via `<A>` (never raw hash writes)
-- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates children on ready
+- [ ] `PlatformSDKProvider` polls `window.__SEWA_SDK__` and gates children on ready
 - [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 - [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
 - [ ] `vite.config.ts` builds an ES library + host manifest (`framework: "solid"`)

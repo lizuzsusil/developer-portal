@@ -1,0 +1,131 @@
+---
+id: async-requests
+title: Long-running requests
+sidebar_label: Long-running requests
+---
+
+# Long-running requests
+
+Some work cannot finish inside one request. A payment clears, a certificate is
+issued, a record is checked against another agency. For these, your backend
+declares **ASYNC** mode and answers later.
+
+You choose SYNC or ASYNC per mini app, when you onboard.
+
+| Mode | Your backend | Your frontend |
+|---|---|---|
+| **SYNC** | Answers on the same request | Gets the result from `sdk.api.request()` |
+| **ASYNC** | Acknowledges, then calls back | Gets `202` and a `requestId`, then polls |
+
+## What your frontend sees
+
+In ASYNC mode the call returns immediately with status `202`:
+
+```js
+const res = await sdk.api.request({
+  method: "POST",
+  path: "/v1/apply",
+  body: form,
+});
+
+if (res.status === 202) {
+  const { requestId } = res.data;
+  pollUntilDone(requestId);
+}
+```
+
+Then poll:
+
+```js
+async function pollUntilDone(requestId) {
+  const res = await sdk.api.request({
+    method: "GET",
+    path: `/v1/requests/${requestId}`,
+  });
+
+  // status: "PENDING" | "COMPLETED" | "TIMED_OUT" | "FAILED"
+  if (res.data.status === "PENDING") {
+    setTimeout(() => pollUntilDone(requestId), 3000);
+    return;
+  }
+  render(res.data);
+}
+```
+
+Poll every few seconds, not continuously. The citizen is also sent a push
+notification when the work finishes, so they do not have to keep the screen
+open — expect them to come back later rather than wait.
+
+## What your backend receives
+
+Sewa dispatches your request with three extra headers:
+
+| Header | Meaning |
+|---|---|
+| `X-Request-Id` | Identifies this piece of work |
+| `X-Callback-Url` | Where to post the result |
+| `X-Callback-Token` | Proves the callback is really yours |
+
+Acknowledge immediately with a `2xx`. Do not do the work on that request —
+Sewa is not waiting.
+
+## What your backend posts back
+
+When the work finishes, `POST` to the `X-Callback-Url` you were given:
+
+```json
+{
+  "callbackToken": "the token from X-Callback-Token",
+  "status": "SUCCESS",
+  "notificationTitle": "Your licence is ready",
+  "notificationBody": "Tap to view your renewed licence.",
+  "miniAppId": "vehicle-tax",
+  "deepLinkIntent": "/licences/4471"
+}
+```
+
+| Field | Required | Notes |
+|---|---|---|
+| `callbackToken` | yes | Echo it back exactly. A mismatch is rejected with `401` |
+| `status` | yes | `SUCCESS` or `FAILURE` |
+| `notificationTitle` | yes | Shown in the push notification |
+| `notificationBody` | yes | Shown in the push notification |
+| `miniAppId` | no | Your mini app id |
+| `deepLinkIntent` | no | Where tapping the notification should land |
+
+Sewa verifies the token, notifies the citizen, and marks the request resolved.
+
+:::caution The callback is not reachable from the internet
+`X-Callback-Url` resolves inside the platform network. Your backend calls it
+server to server. It is not a public endpoint, and it is not something your
+frontend can call.
+:::
+
+## Timeouts
+
+Every ASYNC request carries a deadline, set per mini app when you onboard and
+defaulting to **300 seconds**. Miss it and the request is marked `TIMED_OUT`,
+the citizen is told, and a late callback will be rejected.
+
+Pick a timeout you can meet on a bad day, not a good one.
+
+## Getting the result itself
+
+The callback carries a status and notification text, not your business data.
+When your frontend sees `COMPLETED`, fetch the result with a normal call:
+
+```js
+const result = await sdk.api.request({
+  method: "GET",
+  path: `/v1/applications/${applicationId}`,
+});
+```
+
+## What this means for your design
+
+- **Be idempotent.** A request may be dispatched more than once. Use
+  `X-Request-Id` to recognise a repeat rather than doing the work twice.
+- **Own your queue.** Sewa dispatches once and waits for your callback. Your
+  backend manages its own throughput.
+- **Never lose a callback.** If posting it fails, retry. Until Sewa receives
+  it, nothing tells the citizen.

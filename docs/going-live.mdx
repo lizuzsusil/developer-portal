@@ -1,0 +1,110 @@
+---
+id: going-live
+title: Going live
+sidebar_label: Going live
+---
+
+# Going live
+
+Testing in the playground registers your mini app against a local or shared
+development stack. Production is a separate, reviewed process.
+
+## What the platform needs from you
+
+| Item | What you provide |
+|---|---|
+| **Agency** | The organisation that owns the mini app. Created once, by the Sewa team. |
+| **Mini app frontend bundle** | An ES-module build exporting `mount`. You submit it; you do not host it. |
+| **Mini app backend** | Source, or a deployment descriptor, so the platform can deploy and run it. You do not supply a URL. |
+| **Capabilities** | The namespaces you need, and why. You are granted only these. |
+| **Assurance class** | How strongly the citizen must be verified before your app opens. |
+
+Two things you do **not** provide:
+
+- **The mini app id.** The platform generates it when your mini app is created,
+  and it identifies you on every call from then on.
+- **The backend URL.** The platform deploys your backend and records its
+  address itself, so it can move or rebuild it without involving you.
+
+## Assurance classes
+
+Sewa verifies citizens to different levels, and your mini app declares the
+minimum it needs. A citizen below that level is asked to step up before your app
+loads, so you never have to check it yourself.
+
+| Class | Meaning |
+|---|---|
+| `T0` | Anonymous or self-asserted |
+| `T1` | Phone number verified |
+| `T2` | Identity verified |
+| `T3` | Identity verified on a bound device |
+
+Ask for the lowest class that your service genuinely requires. A higher class
+turns citizens away at the door.
+
+## Where your bundle lives
+
+Agencies never self-host mini app bundles. You submit a build; the platform
+scans it and publishes it to its own CDN, and the manifest that points at it is
+signed. At mount time Sewa verifies that signature and then checks the
+bundle's hash before running a line of your code.
+
+Two consequences worth planning for:
+
+- **Shipping an update means submitting a new bundle**, not deploying to your
+  own host. Build that into your release process.
+- **A mismatched hash is refused**, so the bundle you submit is the bundle that
+  runs. Nothing can be patched in place afterwards.
+
+The [playground](/docs/mini-app-playground) is the one exception, for development only:
+there you point Sewa at a URL you serve yourself.
+
+## What your bundle must be
+
+| Requirement | Rule |
+|---|---|
+| **Format** | A single ES module exporting `mount` |
+| **Self-contained** | All code and assets in the bundle. Nothing fetched from another CDN at runtime |
+| **No runtime injection** | No `eval`, no scripts added to the page after load. The scan rejects it and signing makes it pointless |
+| **Versioned** | Every submission is a new version. Bundles are never edited in place |
+
+Fonts, images and styles ship inside the bundle. A bundle that reaches out to a
+third-party origin at runtime will be refused, because the signature only
+covers what you submitted.
+
+## Versions and rollout
+
+| Control | How it works |
+|---|---|
+| **SDK version** | You declare the minimum SDK your bundle needs. A shell older than that will not load it |
+| **Rollout** | A new version can go to a percentage of citizens first |
+| **Kill switch** | Your mini app can be disabled immediately, without a release. It disappears from the home screen |
+
+A disabled mini app stops being offered. Citizens already inside finish what
+they are doing; nothing new starts. Plan for your backend to keep answering
+briefly after you are switched off.
+
+## The sequence
+
+1. **Your agency is created** in the Sewa Back Office by the platform team.
+2. **You submit the mini app** with the details above.
+3. **Your bundle is scanned**, then published to the platform CDN.
+4. **Your backend is deployed** by the platform from what you supplied, and
+   its address is recorded against your mini app.
+5. **Go live** is approved by the platform team, and the mini app appears for
+   citizens. It can be switched off again at any time, without a release.
+
+## Before you submit
+
+- Your backend answers only Sewa, not the public internet.
+- Your app works when a capability is refused.
+- Your app works on a slow connection, and says something useful when a call fails.
+- You have tested the whole flow in the [playground](/docs/playground).
+- Your bundle exports `mount` and cleans up in `unmount`.
+- Your backend reads its own configuration from the environment, because the
+  platform decides where it runs.
+
+:::note Not yet settled
+The public submission route and its service levels are still being finalised.
+Contact the Sewa platform team to start onboarding.
+:::

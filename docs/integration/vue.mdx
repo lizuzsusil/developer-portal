@@ -12,7 +12,7 @@ import {ScaffoldTabs} from "@site/src/components/FrameworkTabs";
 
 > **Package:** no framework runtime package - Vue 3 + vue-router from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Vue 3 integration pattern for Sewa mini apps.
 
-Vue 3 is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and a provider component with strict lifecycle handling - expressed with Vue idioms (Composition API, `provide`/`inject`, vue-router hash history).
+Vue 3 is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__SEWA_SDK__`, and a provider component with strict lifecycle handling - expressed with Vue idioms (Composition API, `provide`/`inject`, vue-router hash history).
 
 ---
 
@@ -26,7 +26,7 @@ Add routing, icons, Tailwind, and the types package (`@vitejs/plugin-vue` alread
 
 <InstallProdCommandTabs pkgName="vue-router lucide-vue-next" />
 
-<InstallCommandTabs pkgName="tailwindcss @tailwindcss/vite @lizuz/mini-app-types @types/node" />
+<InstallCommandTabs pkgName="tailwindcss @tailwindcss/vite @@sewa/sdk-types @types/node" />
 
 
 Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provider (§4), and build the library (§6). The full working layout is shown in §8.
@@ -37,7 +37,7 @@ Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the provid
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React and Vue apps alike.
+Only the types package (`@@sewa/sdk-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React and Vue apps alike.
 
 ---
 
@@ -157,7 +157,7 @@ export const SdkKey: InjectionKey<SdkState> = Symbol("sdk");
 
 `PlatformSDKProvider.vue` creates a `reactive<SdkState>`, `provide`s it, and gates rendering on three phases - identical to the React provider:
 
-1. **loading** - polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
+1. **loading** - polls `window.__SEWA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, then fetches the user. Renders `Connecting to platform...`.
 2. **ready** - provides state, mounts a renderless `HostRouterSync` component (which runs `useHostRouter()`), and renders the default slot.
 3. **error** - renders `LoadError` with the failure message.
 
@@ -181,7 +181,7 @@ const state = reactive<SdkState>({
 provide(SdkKey, state);
 
 function getSDK(): MiniAppSdk {
-  const instance = window.__GSA_SDK__ ?? null;
+  const instance = window.__SEWA_SDK__ ?? null;
   if (!instance) throw new Error("SDK not available");
   return instance;
 }
@@ -196,7 +196,7 @@ async function init() {
       signal: controller.signal,
     });
     await new Promise<void>((res) => {
-      if (window.__GSA_SDK__) return res();
+      if (window.__SEWA_SDK__) return res();
       window.addEventListener("__GSA_SDK_READY__", () => res(), {
         once: true,
       });
@@ -684,7 +684,7 @@ Only the types package is needed at dev time, plus the Vue toolchain:
     "vue-router": "5.3.1"
   },
   "devDependencies": {
-    "@lizuz/mini-app-types": "1.1.2",
+    "@@sewa/sdk-types": "1.1.2",
     "@vitejs/plugin-vue": "6.0.8",
     "typescript": "^5.9.3",
     "vite": "8.2.2",
@@ -730,11 +730,11 @@ vue-mini-app/
 ## Checklist
 
 - [ ] Scaffolded `vue-ts` plus `vue-router`, `lucide-vue-next`, Tailwind, and the types package
-- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__SEWA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.ts` exports `mount(container, runtime?)` returning `{ unmount() }`
 - [ ] Router is created per mount via the factory - never a shared singleton
 - [ ] Sidebar and links navigate via `navigate()`, never raw hash writes
-- [ ] `PlatformSDKProvider` polls `window.__GSA_SDK__` and gates the slot on ready
+- [ ] `PlatformSDKProvider` polls `window.__SEWA_SDK__` and gates the slot on ready
 - [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints
 - [ ] `useAppearance` subscribes to `sdk.appearance.state()` and `sdk.appearance.subscribe()`
 - [ ] `vite.config.ts` builds an ES library + host manifest (`framework: "vue"`)

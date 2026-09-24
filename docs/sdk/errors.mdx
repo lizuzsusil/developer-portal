@@ -8,7 +8,7 @@ sidebar_label: Errors
 
 All SDK failures are `SdkError` subclasses carrying a machine-readable `code` and, usually, a `retryable` flag. Branch on the guards - prefer the exported helpers over string-matching `code` by hand.
 
-> Scope: this page covers only what a mini-app developer can observe through the host-injected instance (`window.__GSA_SDK__`). Construction- and lifecycle-time failures (`initialize()` / `destroy()` / bad options) belong to the host - see [Host-only errors](#host-only-errors) at the bottom.
+> Scope: this page covers only what a mini-app developer can observe through the host-injected instance (`window.__SEWA_SDK__`). Construction- and lifecycle-time failures (`initialize()` / `destroy()` / bad options) belong to the host - see [Host-only errors](#host-only-errors) at the bottom.
 
 ## Hierarchy
 
@@ -76,7 +76,7 @@ Three modules also expose their own guard: `sdk.device.isSupported(action)`, `sd
 
 ## Host-only errors
 
-Thrown where the host constructs and owns the instance - never catchable from the injected `window.__GSA_SDK__`. Listed here so you can recognize them in host logs and `sdk.debug.diagnose()` output:
+Thrown where the host constructs and owns the instance - never catchable from the injected `window.__SEWA_SDK__`. Listed here so you can recognize them in host logs and `sdk.debug.diagnose()` output:
 
 | Code | Meaning | Thrown from |
 |---|---|---|

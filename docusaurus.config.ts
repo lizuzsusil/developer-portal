@@ -83,7 +83,7 @@ const config: Config = {
       (process.env.TYPES_PACKAGE?.trim() ||
         process.env.SEWA_TYPES_PACKAGE?.trim() ||
         process.env.MINI_APP_TYPES_PACKAGE?.trim() ||
-        "@lizuz/mini-app-types") as string,
+        "@@sewa/sdk-types") as string,
   },
 
   themeConfig: {

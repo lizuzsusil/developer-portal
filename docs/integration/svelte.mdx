@@ -11,7 +11,7 @@ import { SvelteScaffoldBlock } from "@site/src/components/FrameworkTabs";
 
 > **Package:** no framework runtime package - Svelte 5 + `svelte-spa-router` from npm, types from the shared types package, and the host-injected SDK at runtime. This guide documents the Svelte integration pattern for Sewa mini apps, verified against `mini-apps/svelte-mini-app`.
 
-Svelte is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__GSA_SDK__`, and strict SDK lifecycle handling - expressed with Svelte 5 idioms (runes, `writable`/`derived` stores, hash-location `Router`). Feature state lives in the `MiniAppState` rune class rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
+Svelte is a supported framework for Sewa mini apps. The pattern mirrors React one-to-one: a Vite ES-library build exporting `mount(container, runtime?)`, host-injected SDK via `window.__SEWA_SDK__`, and strict SDK lifecycle handling - expressed with Svelte 5 idioms (runes, `writable`/`derived` stores, hash-location `Router`). Feature state lives in the `MiniAppState` rune class rather than a hoisted component, which gives the same cross-tab persistence with cleaner segregation.
 
 ---
 
@@ -25,7 +25,7 @@ Add routing, icons, Tailwind, and the types package:
 
 <InstallProdCommandTabs pkgName = "svelte-spa-router @lucide/svelte" />
 
-<InstallCommandTabs pkgName="tailwindcss @tailwindcss/vite @lizuz/mini-app-types @types/node" />
+<InstallCommandTabs pkgName="tailwindcss @tailwindcss/vite @@sewa/sdk-types @types/node" />
 
 Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the stores (§4), and build the library (§6). The full working layout is shown in §8. The reference app serves dev on port `3003` (`vite --port 3003 --host`) and typechecks templates with `svelte-check --tsconfig ./tsconfig.app.json`.
 
@@ -35,7 +35,7 @@ Then declare `global.d.ts` (§2), write the `mount` entry (§3), wire the stores
 
 <ReactGovSdkImportBlock />
 
-Only the types package (`@lizuz/mini-app-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set (`SdkDeviceLocationResult`, `SdkDeviceCameraResult`, `SdkDeviceGalleryResult`, `SdkDeviceFileResult`, `SdkDeviceDownloadResult`, `SdkDeviceContactResult`, `SdkFileModule`, `SdkDeviceBiometricResult`, …) plus `window.__GSA_SDK__`.
+Only the types package (`@@sewa/sdk-types`) is a dev dependency - there is no `npm install` for the runtime SDK. The same `global.d.ts` serves React, Vue, Angular, Svelte, and Solid apps alike. The reference app declares the full device-result alias set (`SdkDeviceLocationResult`, `SdkDeviceCameraResult`, `SdkDeviceGalleryResult`, `SdkDeviceFileResult`, `SdkDeviceDownloadResult`, `SdkDeviceContactResult`, `SdkFileModule`, `SdkDeviceBiometricResult`, …) plus `window.__SEWA_SDK__`.
 
 ---
 
@@ -81,7 +81,7 @@ export function mount(
   };
 }
 
-// Standalone dev-mode boot (host injects __GSA_SDK__ when embedded).
+// Standalone dev-mode boot (host injects __SEWA_SDK__ when embedded).
 if (import.meta.env.DEV) {
   const el = document.getElementById("app");
   if (el) mount(el);
@@ -140,7 +140,7 @@ The root component is the Svelte counterpart of the provider gate: SDK failure �
 
 ### SDK stores (`stores/sdk.ts`)
 
-`sdkInstance` / `sdkUser` / `sdkPhase` (`loading | ready | error`) / `sdkError` writables plus a derived `isSdkReady`. `initSdk(signal?)` polls `window.__GSA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, fetches the user, and publishes - identical to the React provider. `getSdkOrThrow()` is the guarded accessor feature code calls (the counterpart of React's `usePlatformSDK` throw-outside-provider).
+`sdkInstance` / `sdkUser` / `sdkPhase` (`loading | ready | error`) / `sdkError` writables plus a derived `isSdkReady`. `initSdk(signal?)` polls `window.__SEWA_SDK__` with retry (30 × 500 ms), waits on the `__GSA_SDK_READY__` event, fetches the user, and publishes - identical to the React provider. `getSdkOrThrow()` is the guarded accessor feature code calls (the counterpart of React's `usePlatformSDK` throw-outside-provider).
 
 ```typescript
 //stores/sdk.ts
@@ -158,7 +158,7 @@ export const sdkError = writable<Error | null>(null);
 export const isSdkReady = derived(sdkPhase, ($p) => $p === "ready");
 
 function getSDK(): MiniAppSdk {
-  const instance = window.__GSA_SDK__ ?? null;
+  const instance = window.__SEWA_SDK__ ?? null;
   if (!instance) throw new Error("SDK not available");
   return instance;
 }
@@ -175,7 +175,7 @@ export async function initSdk(signal?: AbortSignal): Promise<void> {
       signal,
     });
     await new Promise<void>((res) => {
-      if (window.__GSA_SDK__) return res();
+      if (window.__SEWA_SDK__) return res();
       window.addEventListener("__GSA_SDK_READY__", () => res(), { once: true });
     });
     const user = await instance.auth.getUser();
@@ -207,7 +207,7 @@ export function getSdkOrThrow(): MiniAppSdk {
 
 ```typescript
 //stores/appearance.ts
-import type { AppearanceState } from "@lizuz/mini-app-types";
+import type { AppearanceState } from "@@sewa/sdk-types";
 import { derived, writable } from "svelte/store";
 import { sdkInstance } from "./sdk.ts";
 
@@ -603,7 +603,7 @@ The reference dependency set (`mini-apps/svelte-mini-app/package.json`):
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@lizuz/mini-app-types": "1.1.2",
+    "@@sewa/sdk-types": "1.1.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
     "@types/node": "^26.4.1",
@@ -652,10 +652,10 @@ svelte-mini-app/
 ## Checklist
 
 - [ ] Svelte 5 + `svelte-spa-router` + `@lucide/svelte` installed; types package as devDependency
-- [ ] `src/global.d.ts` declares `window.__GSA_SDK__` with full `MiniAppSdkInterface` typing
+- [ ] `src/global.d.ts` declares `window.__SEWA_SDK__` with full `MiniAppSdkInterface` typing
 - [ ] `src/main.ts` exports `mount(container, runtime?)` returning `{ unmount() }`
 - [ ] Hash is seeded via `replaceState` before mount; mirror started/stopped with app lifetime
-- [ ] `initSdk` polls `window.__GSA_SDK__` and `App.svelte` gates on `sdkPhase`
+- [ ] `initSdk` polls `window.__SEWA_SDK__` and `App.svelte` gates on `sdkPhase`
 - [ ] Each page binds the `miniApp` rune singleton (state survives route changes)
 - [ ] Sidebar and programmatic navigation go through `goTo()` (`pushState`, never raw hash writes)
 - [ ] All SDK calls go through `sdk.*` - no direct `fetch` to platform endpoints

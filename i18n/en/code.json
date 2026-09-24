@@ -515,7 +515,7 @@
     "description": "React badge"
   },
   "homepage.integrations.react.desc": {
-    "message": "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
+    "message": "Reference implementation. Hooks + Provider wrap window.__SEWA_SDK__ with full typings.",
     "description": "React description"
   },
   "homepage.integrations.vue.badge": {

@@ -42,7 +42,7 @@ request<T = unknown, B = unknown>(
 | Parameter | Type | Required | Default | Description |
 |---|---|---|---|---|
 | `method` | `string` | No | `"POST"` | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`. |
-| `params.endpoint` | `string` | No | - | Mini-app route, e.g. `"/v1/taxes"`. Must be a relative path; the host joins it onto its backend base URL. |
+| `params.path` | `string` | No | - | Mini-app route, e.g. `"/v1/taxes"`. Must be a relative path; the host joins it onto its backend base URL. |
 | `params.query` | `Record<string, string>` | No | - | URL query string. Sent on `GET` requests. |
 | `params.body` | `B` | No | - | Request payload. Serialized as JSON for non-`GET`/`DELETE` calls. Stays opaque to the SDK - no validation. |
 | `params.headers` | `Record<string, string>` | No | - | Extra headers (e.g. `x-mini-app-id`). Mini-app values win over host defaults. |
@@ -62,7 +62,7 @@ request<T = unknown, B = unknown>(
 <CodeTabs
   typescript={`// Unary POST (method defaults to "POST")
 const response = await sdk.api.request<{ taxDue: number }>("POST", {
-  endpoint: "/v1/taxes",
+  path: "/v1/taxes",
   headers: { "Content-Type": "application/json" },
   body: { citizenId: "9921-0012" },
 });
@@ -71,7 +71,7 @@ console.log("Status:", response.status);
 console.log("Tax Due:", response.data.taxDue);`}
   javascript={`// Unary POST (method defaults to "POST")
 const response = await sdk.api.request("POST", {
-  endpoint: "/v1/taxes",
+  path: "/v1/taxes",
   headers: { "Content-Type": "application/json" },
   body: { citizenId: "9921-0012" },
 });
@@ -83,7 +83,7 @@ console.log("Tax Due:", response.data.taxDue);`}
 <CodeTabs
   typescript={`// File download over the same path - stream the bytes, assemble client-side
 const builder = await sdk.api.request("GET", {
-  endpoint: "/v1/tax-receipt",
+  path: "/v1/tax-receipt",
   query: { citizenId: "9921-0012" },
   stream: true,
 });
@@ -95,7 +95,7 @@ for await (const chunk of builder.iterate()) {
 await builder.waitUntilDone();`}
   javascript={`// File download over the same path - stream the bytes, assemble client-side
 const builder = await sdk.api.request("GET", {
-  endpoint: "/v1/tax-receipt",
+  path: "/v1/tax-receipt",
   query: { citizenId: "9921-0012" },
   stream: true,
 });
@@ -110,12 +110,12 @@ await builder.waitUntilDone();`}
 <CodeTabs
   typescript={`// Live chat stream - init is just a unary call, then stream with \`stream: true\`
 const session = await sdk.api.request("POST", {
-  endpoint: "/citizen/v1/chat-session/start",
+  path: "/citizen/v1/chat-session/start",
   headers: { "x-mini-app-id": "my-mini-app" },
 });
 
 const builder = await sdk.api.request("POST", {
-  endpoint: "/citizen/v1/chat-session/stream",
+  path: "/citizen/v1/chat-session/stream",
   headers: { "x-mini-app-id": "my-mini-app" },
   body: { user_id: session.data.user_id, session_id: session.data.session_id, message },
   stream: true,
@@ -130,12 +130,12 @@ for await (const chunk of builder.iterate()) {
 await builder.waitUntilDone();`}
   javascript={`// Live chat stream - init is just a unary call, then stream with \`stream: true\`
 const session = await sdk.api.request("POST", {
-  endpoint: "/citizen/v1/chat-session/start",
+  path: "/citizen/v1/chat-session/start",
   headers: { "x-mini-app-id": "my-mini-app" },
 });
 
 const builder = await sdk.api.request("POST", {
-  endpoint: "/citizen/v1/chat-session/stream",
+  path: "/citizen/v1/chat-session/stream",
   headers: { "x-mini-app-id": "my-mini-app" },
   body: { user_id: session.data.user_id, session_id: session.data.session_id, message },
   stream: true,

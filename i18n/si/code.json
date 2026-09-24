@@ -507,7 +507,7 @@
     "description": "React badge"
   },
   "homepage.integrations.react.desc": {
-    "message": "යොමු ක්‍රියාත්මක කිරීම. Hooks + Provider මගින් සම්පූර්ණ typings සමඟ window.__GSA_SDK__ ඔතයි.",
+    "message": "යොමු ක්‍රියාත්මක කිරීම. Hooks + Provider මගින් සම්පූර්ණ typings සමඟ window.__SEWA_SDK__ ඔතයි.",
     "description": "React description"
   },
   "homepage.integrations.react.cta": {

@@ -4,7 +4,7 @@ import CodeBlock from "@theme/CodeBlock";
 import Tabs from "@theme/Tabs";
 import TabItem from "@theme/TabItem";
 
-const FALLBACK = "@lizuz/mini-app-types";
+const FALLBACK = "@@sewa/sdk-types";
 
 /**
  * Resolves the tab sync group: an explicit groupId keeps shared selection
@@ -118,7 +118,7 @@ declare global {
   type SdkPlatformUser = PlatformUser;
 
   interface Window {
-    __GSA_SDK__?: MiniAppSdk;
+    __SEWA_SDK__?: MiniAppSdk;
   }
 }`}
     </CodeBlock>
@@ -145,7 +145,7 @@ declare global {
   type SdkPlatformUser = PlatformUser;
 
   interface Window {
-    __GSA_SDK__?: MiniAppSdk;
+    __SEWA_SDK__?: MiniAppSdk;
   }
 }`}
         </CodeBlock>
@@ -157,7 +157,7 @@ declare global {
  * @typedef {import("${pkg}").MiniAppSdkInterface} MiniAppSdk
  * @typedef {import("${pkg}").PlatformUser} SdkPlatformUser
  */
-// Use directly: const sdk = window.__GSA_SDK__;`}
+// Use directly: const sdk = window.__SEWA_SDK__;`}
         </CodeBlock>
       </TabItem>
     </Tabs>
@@ -173,7 +173,7 @@ import type { MiniAppSdkInterface, PlatformUser } from "${pkg}";
 declare global {
   type MiniAppSdk = MiniAppSdkInterface;
   type SdkPlatformUser = PlatformUser;
-  interface Window { __GSA_SDK__?: MiniAppSdk; }
+  interface Window { __SEWA_SDK__?: MiniAppSdk; }
 }`}
     </CodeBlock>
   );
