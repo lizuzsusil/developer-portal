@@ -134,49 +134,49 @@ console.log(cfg.api_gateway_url);`,
     },
     category: "config",
   },
-  {
-    id: "flags-isEnabled",
-    module: "flags",
-    method: "isEnabled",
-    signature: "sdk.flags.isEnabled(flag: string): Promise<boolean>",
-    description: "Checks a single host-provided feature flag.",
-    paramsExample: '"new_payment_flow"',
-    returnType: "Promise<boolean>",
-    snippet: `if (await sdk.flags.isEnabled("new_payment_flow")) {
-  renderNewFlow();
-}`,
-    mockResponse: true,
-    category: "flags",
-  },
-  {
-    id: "flags-getAll",
-    module: "flags",
-    method: "getAll",
-    signature: "sdk.flags.getAll(): Promise<Record<string, boolean>>",
-    description: "Returns all feature flags granted to this mini app.",
-    paramsExample: "None",
-    returnType: "Promise<Record<string, boolean>>",
-    snippet: `const flags = await sdk.flags.getAll();
-// { new_payment_flow: true, chat: false }`,
-    mockResponse: { new_payment_flow: true, chat: false },
-    category: "flags",
-  },
-  {
-    id: "platform-type",
-    module: "platform",
-    method: "type / isWeb / isFlutter / isMobile",
-    signature: 'sdk.platform.type: "web" | "flutter" (sync, no RPC)',
-    description: "Inspects the host platform container type. All checks are sync local state.",
-    paramsExample: "None",
-    returnType: '"web" | "flutter"',
-    snippet: `if (sdk.platform.isFlutter()) {
-  console.log("Running inside Flutter native shell");
-} else {
-  console.log("Running in web WebView");
-}`,
-    mockResponse: { type: "web", isWeb: true, isFlutter: false },
-    category: "platform",
-  },
+//   {
+//     id: "flags-isEnabled",
+//     module: "flags",
+//     method: "isEnabled",
+//     signature: "sdk.flags.isEnabled(flag: string): Promise<boolean>",
+//     description: "Checks a single host-provided feature flag.",
+//     paramsExample: '"new_payment_flow"',
+//     returnType: "Promise<boolean>",
+//     snippet: `if (await sdk.flags.isEnabled("new_payment_flow")) {
+//   renderNewFlow();
+// }`,
+//     mockResponse: true,
+//     category: "flags",
+//   },
+//   {
+//     id: "flags-getAll",
+//     module: "flags",
+//     method: "getAll",
+//     signature: "sdk.flags.getAll(): Promise<Record<string, boolean>>",
+//     description: "Returns all feature flags granted to this mini app.",
+//     paramsExample: "None",
+//     returnType: "Promise<Record<string, boolean>>",
+//     snippet: `const flags = await sdk.flags.getAll();
+// // { new_payment_flow: true, chat: false }`,
+//     mockResponse: { new_payment_flow: true, chat: false },
+//     category: "flags",
+//   },
+//   {
+//     id: "platform-type",
+//     module: "platform",
+//     method: "type / isWeb / isFlutter / isMobile",
+//     signature: 'sdk.platform.type: "web" | "flutter" (sync, no RPC)',
+//     description: "Inspects the host platform container type. All checks are sync local state.",
+//     paramsExample: "None",
+//     returnType: '"web" | "flutter"',
+//     snippet: `if (sdk.platform.isFlutter()) {
+//   console.log("Running inside Flutter native shell");
+// } else {
+//   console.log("Running in web WebView");
+// }`,
+//     mockResponse: { type: "web", isWeb: true, isFlutter: false },
+//     category: "platform",
+//   },
 
   // ── Data ──────────────────────────────────────────
   {
@@ -247,21 +247,21 @@ if (draft) {
     mockResponse: { success: true, removedKey: "draft_form" },
     category: "storage",
   },
-  {
-    id: "storage-scoped",
-    module: "storage",
-    method: "scoped",
-    signature: "sdk.storage.scoped(prefix: string): StorageSdkModule",
-    description:
-      "Creates a sub-scoped storage module where all keys are auto-prefixed.",
-    paramsExample: '"user_settings"',
-    returnType: "StorageSdkModule",
-    snippet: `const userStore = sdk.storage.scoped("user_settings");
-await userStore.set("theme", "dark");
-const theme = await userStore.get("theme");`,
-    mockResponse: { scopedPrefix: "user_settings:", created: true },
-    category: "storage",
-  },
+//   {
+//     id: "storage-scoped",
+//     module: "storage",
+//     method: "scoped",
+//     signature: "sdk.storage.scoped(prefix: string): StorageSdkModule",
+//     description:
+//       "Creates a sub-scoped storage module where all keys are auto-prefixed.",
+//     paramsExample: '"user_settings"',
+//     returnType: "StorageSdkModule",
+//     snippet: `const userStore = sdk.storage.scoped("user_settings");
+// await userStore.set("theme", "dark");
+// const theme = await userStore.get("theme");`,
+//     mockResponse: { scopedPrefix: "user_settings:", created: true },
+//     category: "storage",
+//   },
 
   // ── Device ────────────────────────────────────────
   {
@@ -529,42 +529,42 @@ for await (const chunk of stream.iterate()) {
   },
 
   // ── Notifications ─────────────────────────────────
-  {
-    id: "notifications-register",
-    module: "notifications",
-    method: "register",
-    signature:
-      "sdk.notifications.register(options?: NotificationsRegisterOptions): Promise<NotificationsRegisterResult>",
-    description:
-      "Requests notification permission and returns the push token. Gate with `isSupported()` first.",
-    paramsExample: "None",
-    returnType: "Promise<NotificationsRegisterResult>",
-    snippet: `if (sdk.notifications.isSupported()) {
-  const reg = await sdk.notifications.register();
-  console.log(reg.token);
-}`,
-    mockResponse: { granted: true, token: "push_tok_abc123" },
-    category: "notifications",
-  },
-  {
-    id: "notifications-onOpen",
-    module: "notifications",
-    method: "onOpen",
-    signature:
-      "sdk.notifications.onOpen(handler: (event: NotificationOpenEvent) => void): () => void",
-    description:
-      "Subscribes to notification-tap events. Returns an unsubscribe function.",
-    paramsExample: "(event) => console.log(event.notificationId)",
-    returnType: "() => void (unsubscribe)",
-    snippet: `useEffect(() => {
-  const unsub = sdk.notifications.onOpen((event) => {
-    navigate(event deeplink);
-  });
-  return () => unsub();
-}, []);`,
-    mockResponse: { notificationId: "ntf_123", deeplink: "/services/pay" },
-    category: "notifications",
-  },
+//   {
+//     id: "notifications-register",
+//     module: "notifications",
+//     method: "register",
+//     signature:
+//       "sdk.notifications.register(options?: NotificationsRegisterOptions): Promise<NotificationsRegisterResult>",
+//     description:
+//       "Requests notification permission and returns the push token. Gate with `isSupported()` first.",
+//     paramsExample: "None",
+//     returnType: "Promise<NotificationsRegisterResult>",
+//     snippet: `if (sdk.notifications.isSupported()) {
+//   const reg = await sdk.notifications.register();
+//   console.log(reg.token);
+// }`,
+//     mockResponse: { granted: true, token: "push_tok_abc123" },
+//     category: "notifications",
+//   },
+//   {
+//     id: "notifications-onOpen",
+//     module: "notifications",
+//     method: "onOpen",
+//     signature:
+//       "sdk.notifications.onOpen(handler: (event: NotificationOpenEvent) => void): () => void",
+//     description:
+//       "Subscribes to notification-tap events. Returns an unsubscribe function.",
+//     paramsExample: "(event) => console.log(event.notificationId)",
+//     returnType: "() => void (unsubscribe)",
+//     snippet: `useEffect(() => {
+//   const unsub = sdk.notifications.onOpen((event) => {
+//     navigate(event deeplink);
+//   });
+//   return () => unsub();
+// }, []);`,
+//     mockResponse: { notificationId: "ntf_123", deeplink: "/services/pay" },
+//     category: "notifications",
+//   },
 
   // ── Links ─────────────────────────────────────────
   {
@@ -601,22 +601,22 @@ for await (const chunk of stream.iterate()) {
   },
 
   // ── Navigation ────────────────────────────────────
-  {
-    id: "navigation-navigate",
-    module: "navigation",
-    method: "navigate",
-    signature: "sdk.navigation.navigate(target: NavigationTarget): Promise<void>",
-    description:
-      "Requests the host shell to navigate to a target destination or mini app.",
-    paramsExample: '{ path: "/services/pay", params: { serviceId: "water_tax" } }',
-    returnType: "Promise<void>",
-    snippet: `await sdk.navigation.navigate({
-  path: "/services/pay",
-  params: { serviceId: "water_tax" }
-});`,
-    mockResponse: { status: "navigated", target: "/services/pay" },
-    category: "navigation",
-  },
+//   {
+//     id: "navigation-navigate",
+//     module: "navigation",
+//     method: "navigate",
+//     signature: "sdk.navigation.navigate(target: NavigationTarget): Promise<void>",
+//     description:
+//       "Requests the host shell to navigate to a target destination or mini app.",
+//     paramsExample: '{ path: "/services/pay", params: { serviceId: "water_tax" } }',
+//     returnType: "Promise<void>",
+//     snippet: `await sdk.navigation.navigate({
+//   path: "/services/pay",
+//   params: { serviceId: "water_tax" }
+// });`,
+//     mockResponse: { status: "navigated", target: "/services/pay" },
+//     category: "navigation",
+//   },
   {
     id: "navigation-getCurrent",
     module: "navigation",
@@ -700,29 +700,29 @@ console.log(theme.mode); // "dark"`,
     },
     category: "appearance",
   },
-  {
-    id: "appearance-subscribe",
-    module: "appearance",
-    method: "subscribe",
-    signature:
-      "sdk.appearance.subscribe(listener: (state) => void): () => void",
-    description:
-      "Subscribes to host theme and locale changes. Returns an unsubscribe function.",
-    paramsExample: "(state) => console.log(state.theme.mode)",
-    returnType: "() => void (unsubscribe)",
-    snippet: `useEffect(() => {
-  const unsub = sdk.appearance.subscribe(state => {
-    setTheme(state.theme.mode);
-    setLocale(state.locale.language);
-  });
-  return () => unsub();
-}, []);`,
-    mockResponse: {
-      locale: { locale: "ne-NP", language: "ne", direction: "ltr" },
-      theme: { preference: "system", mode: "dark" },
-    },
-    category: "appearance",
-  },
+//   {
+//     id: "appearance-subscribe",
+//     module: "appearance",
+//     method: "subscribe",
+//     signature:
+//       "sdk.appearance.subscribe(listener: (state) => void): () => void",
+//     description:
+//       "Subscribes to host theme and locale changes. Returns an unsubscribe function.",
+//     paramsExample: "(state) => console.log(state.theme.mode)",
+//     returnType: "() => void (unsubscribe)",
+//     snippet: `useEffect(() => {
+//   const unsub = sdk.appearance.subscribe(state => {
+//     setTheme(state.theme.mode);
+//     setLocale(state.locale.language);
+//   });
+//   return () => unsub();
+// }, []);`,
+//     mockResponse: {
+//       locale: { locale: "ne-NP", language: "ne", direction: "ltr" },
+//       theme: { preference: "system", mode: "dark" },
+//     },
+//     category: "appearance",
+//   },
 ];
 
 const CATEGORY_LABELS: Record<MethodSpec["category"], string> = {
