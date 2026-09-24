@@ -6,12 +6,17 @@ sidebar_label: Logging & Dev Mode
 
 # Logging & Dev Mode
 
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
 Control SDK verbosity and dev-time warnings.
 
 ## Logger
 
 ```typescript
-import { ConsoleLogger, NoopLogger } from "@lizuz/mini-app-sdk";
+import { ConsoleLogger, NoopLogger } from "@govtech/mini-app-sdk";
 
 const logger = new ConsoleLogger({ minLevel: "warn" }); // debug | info | warn | error
 ```
@@ -33,7 +38,7 @@ Handler-leak warning: >20 handlers on a single event emits a dev warning.
 ## `validateSdkOptions`
 
 ```typescript
-import { validateSdkOptions } from "@lizuz/mini-app-sdk";
+import { validateSdkOptions } from "@govtech/mini-app-sdk";
 
 validateSdkOptions({ miniAppId: "" }); // throws with details
 ```

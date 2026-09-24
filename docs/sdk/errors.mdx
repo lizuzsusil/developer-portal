@@ -1,45 +1,85 @@
 ---
 id: errors
-title: Errors
-sidebar_label: Errors
+title: Handling errors
+sidebar_label: Handling errors
 ---
 
-# Errors
+# Handling errors
 
-All SDK failures are `SdkError` subclasses with a `code` and optional `retryable` flag.
+Every SDK call rejects with an error carrying a `code`. Branch on the code —
+the SDK is injected by the platform, so there is nothing to import.
 
-## Hierarchy
-
-```
-SdkError
-├── HandshakeError        - handshake rejected / timeout / version mismatch
-├── TransportError        - transport send/start failure
-├── ProtocolError         - malformed wire message
-├── TimeoutError          - per-request timeout (retryable)
-├── RequestCancelledError - AbortSignal aborted
-├── StreamCancelledError  - StreamBuilder.cancel()
-├── HttpClientError       - 4xx (not retryable)
-└── HttpServerError       - 5xx (retryable)
-```
-
-## Codes
-
-Common `SdkError.code` values: `HANDSHAKE_FAILED`, `CAPABILITY_NOT_SUPPORTED`, `SDK_NOT_INITIALIZED`, `SDK_ALREADY_DESTROYED`, `CIRCUIT_OPEN`, `REQUEST_CANCELLED`, `STREAM_CANCELLED`.
-
-## Guards
-
-```typescript
-import { isSdkError, isTimeout, isRetryable, isHandshakeError, isTransportError, getErrorCode } from "@lizuz/mini-app-sdk";
-
+```js
 try {
-  await sdk.auth.getUser();
+  const user = await sdk.auth.getUser();
 } catch (err) {
-  if (isTimeout(err)) { /* retry or show spinner */ }
-  if (isRetryable(err)) { /* safe to retry */ }
-  console.log(getErrorCode(err)); // string | undefined
+  console.log(err.code, err.message);
 }
 ```
 
-`isAuthError` covers `AUTH_FAILED | AUTH_REQUIRED | UNAUTHENTICATED | FORBIDDEN`.
+## The codes you will actually see
 
-`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake.
+| Code | What happened | What to do |
+|---|---|---|
+| `CAPABILITY_NOT_SUPPORTED` | You called a namespace your mini app was not granted | Offer a fallback. Check `sdk.capabilities` first |
+| `TIMEOUT` | The platform did not answer in time | Safe to retry. The SDK already retried once |
+| `HTTP_CLIENT_ERROR` | Your backend answered 4xx | A problem with the request. Do not retry |
+| `HTTP_SERVER_ERROR` | Your backend answered 5xx | Transient. Retrying is reasonable |
+| `REQUEST_CANCELLED` | You aborted it | Usually nothing — the citizen moved on |
+| `CIRCUIT_OPEN` | Too many recent failures, calls are paused | Show a "try again shortly" message |
+| `HANDSHAKE_FAILED` | The SDK never connected to Sewa | Your app is running outside Sewa, or is not registered |
+
+## A capability you were not granted
+
+This is the one most mini apps meet first. Your app is granted a specific set of
+namespaces, and anything outside it fails immediately, without a round trip:
+
+```js
+if (!sdk.capabilities.includes("device")) {
+  showManualAddressForm();
+  return;
+}
+
+try {
+  const loc = await sdk.device.location();
+} catch (err) {
+  if (err.code === "CAPABILITY_NOT_SUPPORTED") showManualAddressForm();
+}
+```
+
+Checking `sdk.capabilities` up front is better than catching: you can render the
+right UI instead of an error after the fact.
+
+## Retrying
+
+The SDK already retries timeouts and 5xx responses with backoff before the
+error reaches you. By the time you see one, an immediate retry will probably
+fail too. Give the citizen a button rather than looping.
+
+Never retry `HTTP_CLIENT_ERROR`. A 4xx means the request itself was wrong.
+
+## Errors from your own backend
+
+Your backend's response body reaches you unchanged on success. Design it so
+your frontend can tell a business outcome from a failure:
+
+```js
+const res = await sdk.api.request({ method: "POST", path: "/v1/quota", body });
+
+if (res.data.error) {
+  showFieldErrors(res.data.errors);   // a business answer, not a failure
+  return;
+}
+render(res.data);
+```
+
+## When you are not inside Sewa
+
+Opened directly in a browser tab, there is no shell to connect to and
+`whenReady()` rejects. Say so plainly rather than showing a blank screen:
+
+```js
+window.__SEWA_SDK_LOADER__.whenReady()
+  .then(start)
+  .catch(() => showMessage("Open this from the Sewa app."));
+```

@@ -1,0 +1,97 @@
+---
+id: mini-app-backend
+title: Mini app backend
+sidebar_label: Mini app backend
+---
+
+# Mini app backend
+
+Every mini app has two halves: the frontend Sewa mounts, and the backend you
+run. Sewa never sends the citizen's browser to that backend — every call
+arrives from the platform, server to server.
+
+## What that means immediately
+
+- **No CORS configuration** is needed for the citizen path. The browser never
+  calls you.
+- **Do not expose it publicly.** Sewa reaches it over the platform network.
+- **Your address stays yours.** The frontend sends a path; Sewa resolves it
+  against the backend you registered.
+
+## What arrives
+
+Sewa forwards the method, path and body your frontend asked for, plus:
+
+| Header | Always | Meaning |
+|---|---|---|
+| `Authorization: Bearer …` | yes | A short-lived token minted by Sewa for this call. It is **not** the citizen's own token |
+| `X-Request-Id` | ASYNC only | Identifies the piece of work |
+| `X-Callback-Url` | ASYNC only | Where to post the result |
+| `X-Callback-Token` | ASYNC only | Proves your callback is genuine |
+
+Treat anything else as untrusted. Sewa strips identity headers sent by a
+client before your backend ever sees them, so only Sewa can set them.
+
+## What to return
+
+Return ordinary HTTP. Sewa passes your response to the mini app unchanged.
+
+| You return | Your frontend gets | Sewa's view |
+|---|---|---|
+| `2xx` | Your body | Success |
+| `4xx` | Your body, with the status | Your answer — passed through |
+| `5xx` | An error | A failure. Repeated 5xx will pause calls to you |
+
+**A `4xx` is an answer, not an outage.** Use it for real business outcomes —
+invalid input, not the owner, already claimed. It reaches the mini app intact
+and does not count against you.
+
+Keep `5xx` for cases where something is genuinely broken. Too many in a row and
+Sewa stops calling you for a while, to protect the citizen from a stalled
+service.
+
+```json
+{
+  "error": "NOT_VEHICLE_OWNER",
+  "message": "That vehicle is not registered to this mobile number."
+}
+```
+
+Send a stable `error` code your frontend can branch on, and a `message` a person
+can read. Do not put anything sensitive in either — both reach the device.
+
+## Validation errors
+
+Field-level errors let the mini app point at the right input:
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "errors": [
+    { "field": "phoneNumber", "message": "Expected a Sri Lankan mobile number" }
+  ]
+}
+```
+
+Return this with `400`.
+
+## Timeouts
+
+A SYNC call must answer quickly — the citizen is waiting. Anything slower
+belongs in [ASYNC mode](/docs/async-requests).
+
+## Health
+
+Expose a health endpoint that checks what you depend on. Sewa checks it during
+onboarding and can use it to detect an unhealthy backend later.
+
+```json
+{ "status": "ok" }
+```
+
+## Before you go live
+
+- Answers only Sewa, not the public internet.
+- Returns `4xx` for business outcomes and `5xx` only for real failures.
+- Is idempotent where a request could arrive twice.
+- Logs the request id it was given, so a citizen's problem can be traced.

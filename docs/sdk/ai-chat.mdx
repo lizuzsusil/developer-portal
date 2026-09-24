@@ -1,34 +1,24 @@
 ---
 id: ai-chat
-title: Chat Modules Overview
-sidebar_label: Chat Overview
+title: Chat streaming
+sidebar_label: Chat streaming
 ---
 
-# Chat Modules Overview
+# Chat streaming
 
-:::info Migration Notice
-The previous `sdk.ai` namespace has been removed. Chat functionality is now split into two dedicated modules:
+Chat is part of `sdk.http`. There is no separate chat namespace: a chat
+response is an HTTP stream, so it uses the same transport, error mapping and
+cancellation as every other `sdk.http` call, and is covered by the same
+**`http`** capability.
 
-| Module | Purpose | Namespace |
-|---|---|---|
-| `sdk.http` | Generic LLM chat streaming | `HTTP.CHAT_STREAM` |
-| `sdk.gicChat` | GIC-specific agent chat (tool calls, SSE events) | `GIC_CHAT.STREAM` |
-
-Both modules are gated by the **`http`** capability during handshake.
-:::
-
----
-
-## Generic Chat (`sdk.http.stream`)
-
-Streams a generic LLM completion through the host network proxy. Use this for general-purpose AI chat that does not require GIC-specific tool calling or SSE event types.
+## Streaming a conversation
 
 ```typescript
-import { ChatMessages } from "@lizuz/mini-app-sdk";
+import { ChatMessages } from "@govtech/mini-app-sdk";
 
 const stream = sdk.http.stream({
   messages: [
-    ChatMessages.system("You are a helpful government tax assistant."),
+    ChatMessages.system("You are a helpful government assistant."),
     ChatMessages.user("How do I renew my vehicle tax?"),
   ],
 });
@@ -38,44 +28,31 @@ for await (const chunk of stream.iterate()) {
 }
 ```
 
-See the full [HTTP Module reference](/docs/sdk/http) for more details.
+## Session-scoped turns
 
----
-
-## GIC Chat (`sdk.gicChat`)
-
-Streams responses from the GIC Chat Agent, which supports tool calls (knowledge-base lookups), structured SSE events, and session management. Use this when you need the GIC-specific agent features.
+Some agent backends keep conversation state server-side and expect a session
+identifier rather than the full message list. Pass that shape instead:
 
 ```typescript
-// 1. Start a session
-const session = await sdk.gicChat.startSession();
-
-// 2. Stream a response
-const { invocation_id } = await sdk.gicChat.stream(
-  {
-    user_id: session.user_id,
-    session_id: session.session_id,
-    message: "How do I apply for a National Identity Card?",
-  },
-  {
-    onEvent: (event) => {
-      switch (event.type) {
-        case "tool_call":
-          showSearching();
-          break;
-        case "token":
-          appendText(event.text);
-          break;
-        case "done":
-          finalize();
-          break;
-        case "error":
-          showError(event.detail);
-          break;
-      }
-    },
-  }
+const stream = sdk.http.stream(
+  { user_id, session_id, message: "How do I apply for a NIC?" },
+  { onEvent: (event) => render(event) },
 );
+
+await stream.waitUntilDone();
 ```
 
-See the full [GIC Chat Module reference](/docs/sdk/gic-chat) for SSE event details and the `streamText` convenience method.
+`onEvent` consumes the stream, so use either `onEvent` or `iterate()` — not
+both. A single stream has one consumer.
+
+## Cancelling
+
+```typescript
+const controller = new AbortController();
+const stream = sdk.http.stream({ messages }, { signal: controller.signal });
+
+controller.abort(); // rejects with StreamCancelledError
+```
+
+See [Streaming](/docs/sdk/stream) for `StreamBuilder`, chunk ordering and
+progress, and [Errors](/docs/sdk/errors) for the error hierarchy.

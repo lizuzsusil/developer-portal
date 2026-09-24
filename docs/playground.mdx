@@ -1,17 +1,32 @@
 ---
 id: playground
-title: Interactive SDK Playground
-sidebar_label: Interactive SDK Playground
+title: Test your mini app
+sidebar_label: Test your mini app
 ---
 
 import { SDKExplorer } from "@site/src/components/SDKExplorer";
+import { MiniAppPlayground } from "@site/src/components/MiniAppPlayground";
 
-# Interactive SDK Playground
+# Test your mini app
 
-The explorer below is part of the portal itself - a live documentation widget in `packages/sdk-playground` that lets you test any public SDK method, inspect parameter shapes, and copy code snippets. It is not a standalone installable package; it runs here as a documentation aid.
+Run your mini app inside a real Sewa shell. Give it two URLs and press **Start testing**.
 
-- **Modules covered:** `auth`, `permissions`, `flags`, `config`, `navigation`, `storage`, `platform`, `device`, `http` (incl. `chatStream`), `gicChat`, `appearance`
-- **Source:** `packages/sdk-playground/src/SDKExplorer.tsx` inside the portal monorepo
-- **Design tokens:** `packages/design-tokens/tokens.css`
+| URL | What it is for |
+|---|---|
+| **Frontend URL** | Where your app is served from. |
+| **Backend URL** | Where your app's API calls are sent. |
+
+Your frontend must load the SDK — see [Getting Started](/docs/getting-started).
+
+<MiniAppPlayground />
+
+---
+
+## Explore the SDK surface
+
+Inspect any public SDK method, see its parameter shapes, and copy snippets. The
+responses here are illustrative — nothing is sent to a real host.
+
+- **Modules covered:** `auth`, `permissions`, `navigation`, `storage`, `platform`, `device`, `http`, `appearance`
 
 <SDKExplorer />

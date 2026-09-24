@@ -77,8 +77,7 @@ function Hero() {
                 maxWidth: "520px",
               }}
             >
-              <Translate id="homepage.hero.subtitle" description="Hero subtitle">Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime — you just declare types and export</Translate>{" "}
-              <code style={{ color: "var(--hero-inline-code-text)", background: "var(--hero-inline-code-bg)", padding: "1px 6px", borderRadius: 4, fontSize: "0.9em" }}>mount(container, runtime)</code>.
+              <Translate id="homepage.hero.subtitle" description="Hero subtitle">Build one government service and put it in the app citizens already have. Sewa signs them in, provides the SDK, and routes calls to your backend.</Translate>
             </p>
 
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
@@ -91,7 +90,7 @@ function Hero() {
               </Link>
               <Link
                 className="button button--secondary button--lg"
-                to="/docs/sdk/core"
+                to="/docs/sdk/auth"
                 style={{
                   fontWeight: 600,
                   padding: "10px 22px",
@@ -102,6 +101,12 @@ function Hero() {
                 }}
               >
                 <Translate id="homepage.hero.cta.apiReference" description="Hero CTA">API reference</Translate>
+              </Link>
+              <Link
+                to="/docs/what-is-a-mini-app"
+                style={{ alignSelf: "center", fontSize: "0.85rem", fontWeight: 600, color: "var(--hero-subtext)" }}
+              >
+                <Translate id="homepage.hero.cta.whatIs" description="Hero CTA">Not a developer? Start here →</Translate>
               </Link>
             </div>
 
@@ -124,7 +129,7 @@ function Hero() {
                 }}
               >
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399" }} />
-                <Translate id="homepage.hero.badge1" description="Hero badge">Host-injected · zero runtime install</Translate>
+                <Translate id="homepage.hero.badge1" description="Hero badge">Nothing to install · the SDK is provided</Translate>
               </span>
               <span>·</span>
               <span><Translate id="homepage.hero.badge2" description="Hero badge" values={{package: typesPackage}}>{'Type-safe with {package}'}</Translate></span>
@@ -168,11 +173,11 @@ function Hero() {
                 background: "var(--hero-code-bg)",
               }}
             >
-              <code>{`// No SDK npm install - host injects it
+              <code>{`// Nothing to install - Sewa provides the SDK
 import type { MiniAppSdkInterface } from "${typesPackage}";
 
 export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
-  const sdk = window.__GSA_SDK__!; // injected by host shell
+  const sdk = window.__SEWA_SDK__!; // already provided by Sewa
 
   // type-safe from day one
   const user = await sdk.auth.getUser();
@@ -194,7 +199,7 @@ export function mount(container: HTMLElement, runtime?: { initialPath?: string }
             >
               <span style={{ color: "var(--hero-code-footer-text)", fontFamily: "monospace" }}><Translate id="homepage.hero.code.footer" description="Hero code footer">vite build --lib → ES module</Translate></span>
               <Link to="/docs/getting-started" style={{ color: "var(--hero-code-link)", fontWeight: 600, textDecoration: "none" }}>
-                <Translate id="homepage.hero.code.craft" description="Hero code craft">Scaffold in 4 steps →</Translate>
+                <Translate id="homepage.hero.code.craft" description="Hero code craft">Get started in 6 steps →</Translate>
               </Link>
             </div>
           </div>
@@ -252,12 +257,7 @@ function HowItWorks() {
             <Translate id="homepage.howItWorks.title" description="How it works title">Three steps to a shippable mini app</Translate>
           </Heading>
           <p style={{ color: "var(--color-text-secondary)", fontSize: "0.95rem", lineHeight: 1.6, margin: 0 }}>
-            <Translate id="homepage.howItWorks.description" description="How it works description">The pattern mirrors</Translate>{" "}
-            <code style={{ fontSize: "0.85em" }}>test-mini-app/</code> <Translate id="homepage.howItWorks.description2" description="How it works description 2">in the</Translate>{" "}
-            <a href="https://github.com/anomalyco/sewa-platform" style={{ color: "var(--color-text-link)", fontWeight: 600 }}>
-              sewa-platform repo
-            </a>
-            <Translate id="homepage.howItWorks.description3" description="How it works description 3">. You keep your stack - the host handles auth, permissions, and device access.</Translate>
+            <Translate id="homepage.howItWorks.description" description="How it works description">You keep your stack. Sewa handles sign-in, permissions, device access and routing to your backend.</Translate>
           </p>
         </div>
 
@@ -308,7 +308,7 @@ function CapabilityTeaser() {
     { title: "sdk.http", href: "/docs/sdk/http", desc: "get/post/put/patch/delete + streaming proxy", icon: "🌐", descId: "homepage.capability.http.desc" },
     { title: "sdk.storage", href: "/docs/sdk/storage", desc: "scoped key-value & JSON helpers per mini app", icon: "💾", descId: "homepage.capability.storage.desc" },
     { title: "sdk.appearance", href: "/docs/sdk/appearance", desc: "getLocale · getTheme · theme/locale subscriptions", icon: "🎨", descId: "homepage.capability.appearance.desc" },
-    { title: "sdk.gicChat", href: "/docs/sdk/gic-chat", desc: "startSession · streamText - AI chat gateway", icon: "✦", descId: "homepage.capability.gicChat.desc" },
+    { title: "sdk.navigation", href: "/docs/sdk/navigation", desc: "navigate · getCurrent · router back/push sync", icon: "🧭", descId: "homepage.capability.navigation.desc" },
   ];
   return (
     <section style={{ padding: "40px 0 16px" }}>
@@ -351,13 +351,12 @@ function CapabilityTeaser() {
         >
           <span style={{ fontWeight: 600, color: "var(--color-text-primary)" }}><Translate id="homepage.capability.alsoAvailable" description="Capability also">Also available:</Translate></span>
           <Link to="/docs/sdk/permissions" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>permissions</Link>
-          <span>·</span> <Link to="/docs/sdk/flags" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>flags</Link>
           <span>·</span> <Link to="/docs/sdk/navigation" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>navigation</Link>
           <span>·</span> <Link to="/docs/sdk/notifications" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>notifications</Link>
           <span>·</span> <Link to="/docs/sdk/links" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>links</Link>
-          <span>·</span> <Link to="/docs/sdk/config" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>config</Link>
+          <span>·</span> <Link to="/docs/sdk/platform" style={{ fontWeight: 500, color: "var(--color-text-link)" }}>platform</Link>
           <span style={{ marginLeft: "auto" }}>
-            <Link to="/docs/sdk/core" style={{ fontWeight: 700, color: "var(--color-text-link)" }}><Translate id="homepage.capability.browseAll" description="Capability browse">Browse all 14 namespaces →</Translate></Link>
+            <Link to="/docs/sdk/auth" style={{ fontWeight: 700, color: "var(--color-text-link)" }}><Translate id="homepage.capability.browseAll" description="Capability browse">See everything the SDK offers →</Translate></Link>
           </span>
         </div>
       </div>
@@ -376,7 +375,7 @@ function IntegrationGrid() {
       badge: "Active · Production ready",
       badgeId: "homepage.integrations.react.badge",
       badgeVariant: "active",
-      desc: "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
+      desc: "Reference implementation. Hooks + Provider wrap window.__SEWA_SDK__ with full typings.",
       descId: "homepage.integrations.react.desc",
       cta: "View React guide →",
       ctaId: "homepage.integrations.react.cta",
@@ -574,7 +573,7 @@ function FinalCTA() {
           <Translate id="homepage.final.title" description="Final CTA title">Ready to build for Sewa?</Translate>
         </Heading>
         <p style={{ color: "#9aa0b0", maxWidth: 560, margin: "0 auto 20px", fontSize: "0.95rem", lineHeight: 1.6 }}>
-          <Translate id="homepage.final.subtitle" description="Final CTA subtitle">Scaffold from test-mini-app/, read the platform overview, or dive straight into the API reference.</Translate>
+          <Translate id="homepage.final.subtitle" description="Final CTA subtitle">Start with the overview, follow Getting Started, then test your app in the playground.</Translate>
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <Link to="/docs/getting-started" className="button button--primary button--lg landing-cta-primary" style={{ borderRadius: 10, padding: "10px 22px" }}>
@@ -594,10 +593,8 @@ function FinalCTA() {
           >
             <Translate id="homepage.final.cta.overview" description="Final CTA">Platform overview</Translate>
           </Link>
-          <a
-            href="https://github.com/anomalyco/sewa-platform"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            to="/docs/playground"
             className="button button--secondary button--lg"
             style={{
               borderRadius: 10,
@@ -608,8 +605,8 @@ function FinalCTA() {
               fontWeight: 500,
             }}
           >
-            GitHub ↗
-          </a>
+            <Translate id="homepage.final.cta.playground" description="Final CTA">Try the playground</Translate>
+          </Link>
         </div>
       </div>
     </section>

@@ -8,21 +8,21 @@ import {TypesPackageName} from '@site/src/components/TypesPackage';
 
 # වේදිකා දළ විශ්ලේෂණය
 
-සේවා වේදිකාව සැපයුම්කරුගේ කුඩා යෙදුම් (mini apps) සේවා පුරවැසි කවචය (web සහ Flutter) තුළ සත්කාරකත්වය දරයි. සත්කාරකය (host) එක් එක් කුඩා යෙදුම ES මොඩියුලයක් ලෙස පූරණය කරයි, SDK එක `window.__GSA_SDK__` හිදී එන්නත් කරයි, සහ සියලු වරප්‍රසාද ලත් මෙහෙයුම් RPC පාලම හරහා මැදිහත් කරයි.
+සේවා වේදිකාව සැපයුම්කරුගේ කුඩා යෙදුම් (mini apps) සේවා පුරවැසි කවචය (web සහ Flutter) තුළ සත්කාරකත්වය දරයි. සත්කාරකය (host) එක් එක් කුඩා යෙදුම ES මොඩියුලයක් ලෙස පූරණය කරයි, SDK එක `window.__SEWA_SDK__` හිදී එන්නත් කරයි, සහ සියලු වරප්‍රසාද ලත් මෙහෙයුම් RPC පාලම හරහා මැදිහත් කරයි.
 
 ## ක්‍රියාත්මක කිරීමේ ආකෘතිය
 
 - **කුඩා යෙදුම් බණ්ඩලය**: Vite `lib` ගොඩනැගීම `mount(container, runtime)` අපනයනය කරයි - [`ආරම්භ කිරීම`](/docs/getting-started) සහ [`test-mini-app/`](https://github.com/anomalyco/sewa-platform/tree/main/test-mini-app) බලන්න.
-- **SDK එන්නත් කිරීම**: සත්කාරකය `mount` ඇමතීමට පෙර `window.__GSA_SDK__` සකසයි. SDK හි `npm install` අවශ්‍ය නොවේ.
+- **SDK එන්නත් කිරීම**: සත්කාරකය `mount` ඇමතීමට පෙර `window.__SEWA_SDK__` සකසයි. SDK හි `npm install` අවශ්‍ය නොවේ.
 - **වර්ග**: <code>pnpm add -D <TypesPackageName /></code>.
 
 ```mermaid
 sequenceDiagram
     participant Host as Host shell
     participant MiniApp as Mini app
-    participant SDK as window.__GSA_SDK__
+    participant SDK as window.__SEWA_SDK__
     Host->>MiniApp: mount(container, { initialPath })
-    MiniApp->>SDK: window.__GSA_SDK__
+    MiniApp->>SDK: window.__SEWA_SDK__
     MiniApp->>SDK: sdk.auth.getUser()
     SDK->>Host: RPC request (auth.getUser)
     Host-->>SDK: response

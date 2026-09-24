@@ -1,47 +1,67 @@
 ---
 id: platform
-title: Platform Module (sdk.platform)
+title: Where you are running (sdk.platform)
 sidebar_label: sdk.platform
 ---
 
-# Platform Module (`sdk.platform`)
+# Where you are running (`sdk.platform`)
 
-The `sdk.platform` module allows mini apps to inspect the host container runtime (Web browser iframe vs Flutter mobile native container).
+Your mini app runs in the Sewa browser shell and in the native Sewa app. Use
+`sdk.platform` to adapt layout and behaviour to that.
 
----
+Every value is synchronous, because layout decisions happen while rendering and
+cannot wait for a round trip.
 
-## Public Properties & Methods
+## What you can read
 
-### `type`
-
-Read-only getter returning `"web"` or `"flutter"`.
-
-- **Type**: `"web" | "flutter"`
-
-```typescript
-console.log("Current platform container:", sdk.platform.type);
+```js
+sdk.platform.type;        // "web" | "mobile"
+sdk.platform.os;          // "ios" | "android" | "web" | "unknown"
+sdk.platform.formFactor;  // "phone" | "tablet" | "desktop"
 ```
 
-### `isWeb()`
+| Check | True when |
+|---|---|
+| `isWeb()` | Running in a browser shell |
+| `isMobile()` | Running in the native Sewa app, either OS |
+| `isIOS()` / `isAndroid()` | The native OS |
+| `isPhone()` / `isTablet()` | Form factor |
 
-Returns `true` if running inside a Web host container.
-
-- **Signature**: `isWeb(): boolean`
-
-### `isFlutter()`
-
-Returns `true` if running inside a Flutter mobile host container.
-
-- **Signature**: `isFlutter(): boolean`
-
-### `isMobile()`
-
-Alias for `isFlutter()`.
-
-- **Signature**: `isMobile(): boolean`
-
-```typescript
-if (sdk.platform.isFlutter()) {
-  // Mobile container specific UI styling or behavior
+```js
+if (sdk.platform.isPhone()) {
+  renderSingleColumn();
+} else {
+  renderTwoColumn();
 }
+```
+
+## Branch on form factor, not OS
+
+`isPhone()` is almost always the check you want. Screen size decides layout;
+the operating system rarely does. Reach for `isIOS()` or `isAndroid()` only
+when the behaviour genuinely differs, such as platform naming conventions.
+
+## What you cannot read, deliberately
+
+There is no way to ask which framework Sewa is built with. That is an
+implementation detail of the platform, not a fact about your environment — a
+mini app that branched on it would break the day Sewa was rewritten.
+
+If you need to know whether something is available, ask for the capability
+instead:
+
+```js
+if (sdk.capabilities.includes("device")) {
+  // device features are available here
+}
+```
+
+## Asking Sewa directly
+
+The values above are captured when your mini app connects. To ask Sewa for the
+current answer, including the app version when it reports one:
+
+```js
+const info = await sdk.platform.getInfo();
+// { type, os, formFactor, shellVersion? }
 ```

@@ -6,6 +6,11 @@ sidebar_label: Plugins & Registry
 
 # Plugins & Module Registry
 
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
 Extend the SDK without forking it.
 
 ## Plugins - `SdkPlugin`
@@ -45,7 +50,7 @@ const analytics = await sdk.getModuleAsync("analytics");
 ## Instance Registry
 
 ```typescript
-import { createMiniAppSdk, getMiniAppSdk } from "@lizuz/mini-app-sdk";
+import { createMiniAppSdk, getMiniAppSdk } from "@govtech/mini-app-sdk";
 
 const sdk = createMiniAppSdk({ miniAppId: "tax-calc" });
 await sdk.initialize();
@@ -56,4 +61,4 @@ getMiniAppSdk(); // active instance
 
 ## CDN Build
 
-`src/cdn.ts` is an IIFE that reads a pre-load config from `window.__GSA_SDK__` (a `MiniAppSdkOptions` object), auto-initializes, and then overwrites the global with the live instance. Used when the host injects the SDK via a `<script>` tag.
+`src/cdn.ts` is an IIFE that reads a pre-load config from `window.__SEWA_SDK__` (a `MiniAppSdkOptions` object), auto-initializes, and then overwrites the global with the live instance. Used when the host injects the SDK via a `<script>` tag.

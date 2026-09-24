@@ -1,10 +1,14 @@
 ---
 id: http
-title: HTTP Module (sdk.http)
+title: Calling other services (sdk.http)
 sidebar_label: sdk.http
 ---
 
 # HTTP Module (`sdk.http`)
+
+You pass a **path, never a domain**. Sewa resolves it against the destination
+registered for your mini app, so you can move a backend without shipping a new
+frontend — and a mini app cannot be pointed somewhere it was not granted.
 
 The `sdk.http` module provides typed HTTP methods routed safely through the host network proxy. All requests avoid CORS issues and automatically inject host authorization headers.
 
@@ -18,7 +22,7 @@ Performs an HTTP GET request.
 
 ```typescript
 const res = await sdk.http.get<{ taxDue: number }>({
-  url: "https://api.sewa.gov.np/v1/taxes",
+  path: "/v1/taxes",
   headers: { "X-App": "tax-calc" },
 });
 console.log(res.data.taxDue);
@@ -33,7 +37,7 @@ Performs an HTTP POST request with optional upload progress tracking.
 ```typescript
 const res = await sdk.http.post<{ id: string }, FormData>(
   {
-    url: "https://api.sewa.gov.np/v1/upload",
+    path: "/v1/upload",
     body: formData,
   },
   {
@@ -60,7 +64,7 @@ Requests a streaming binary/HTTP response.
 
 ```typescript
 const builder = sdk.http.getStream({
-  url: "https://api.sewa.gov.np/v1/export/csv",
+  path: "/v1/export/csv",
 });
 for await (const chunk of builder.iterate()) {
   // chunk is Uint8Array
@@ -71,10 +75,10 @@ for await (const chunk of builder.iterate()) {
 
 ### `stream(params)` (Chat Streaming)
 
-Streams a generic LLM chat completion through the host proxy. Each chunk contains a `text` fragment.
+Streams a chat completion through the host proxy. Each chunk contains a `text` fragment.
 
 ```typescript
-import { ChatMessages } from "@lizuz/mini-app-sdk";
+import { ChatMessages } from "@govtech/mini-app-sdk";
 
 const stream = sdk.http.stream({
   messages: [
@@ -88,11 +92,18 @@ for await (const chunk of stream.iterate()) {
 }
 ```
 
-**Signature:** `stream(params: { messages: ChatMessage[] }): StreamBuilder`
+**Signature:** `stream(params: ChatStreamParams, options?): StreamBuilder`
 
-:::tip
-This is the **generic chat** endpoint. For GIC-specific chat with tool calls and SSE events, use [`sdk.gicChat`](/docs/sdk/gic-chat) instead.
-:::
+`ChatStreamParams` accepts either a plain message list, or a session-scoped turn
+for agent backends that keep conversation state:
+
+```typescript
+sdk.http.stream({ messages });
+sdk.http.stream({ user_id, session_id, message }, { onEvent });
+```
+
+Chat streaming is an HTTP stream, so it uses the same transport, error mapping
+and cancellation as every other `sdk.http` call.
 
 ---
 
@@ -105,7 +116,7 @@ interface HttpResult<T> {
   status: number;       // HTTP status code
   data: T;              // Parsed response body
   headers: Record<string, string>;
-  url: string;          // Final URL (after redirects)
+  path: string;         // The path that was called
 }
 ```
 
@@ -117,7 +128,7 @@ interface HttpResult<T> {
 
 ```typescript
 const res = await sdk.http.post(
-  { url: "...", body: fileData },
+  { path: "/v1/upload", body: fileData },
   {
     onProgress: ({ loaded, total, percent }) => {
       setProgress(percent);
@@ -135,7 +146,7 @@ Success payloads are mapped via `mapPayload`: 4xx throws `HttpClientError` (not 
 ## Helpers
 
 ```typescript
-import { ChatMessages } from "@lizuz/mini-app-sdk";
+import { ChatMessages } from "@govtech/mini-app-sdk";
 
 ChatMessages.system("You are a helpful assistant.");
 ChatMessages.user("How do I renew my license?");

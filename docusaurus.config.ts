@@ -76,7 +76,7 @@ const config: Config = {
       (process.env.TYPES_PACKAGE?.trim() ||
         process.env.SEWA_TYPES_PACKAGE?.trim() ||
         process.env.MINI_APP_TYPES_PACKAGE?.trim() ||
-        "@lizuz/mini-app-types") as string,
+        "@govtech/mini-app-types") as string,
   },
 
   themeConfig: {
@@ -100,8 +100,8 @@ const config: Config = {
           label: "Docs",
         },
         {
-          href: "https://github.com/anomalyco/sewa-platform",
-          label: "GitHub",
+          to: "/docs/going-live",
+          label: "Going live",
           position: "right",
         },
         {
@@ -151,8 +151,8 @@ const config: Config = {
           title: "Platform",
           items: [
             {
-              label: "Sewa Platform GitHub",
-              href: "https://github.com/anomalyco/sewa-platform",
+              label: "Going live",
+              to: "/docs/going-live",
             },
           ],
         },

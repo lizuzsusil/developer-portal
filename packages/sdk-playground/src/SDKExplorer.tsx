@@ -12,7 +12,7 @@ export interface MethodSpec {
   returnType: string;
   snippet: string;
   mockResponse: unknown;
-  category: "core" | "data" | "device" | "network" | "ai";
+  category: "core" | "data" | "device" | "network";
 }
 
 const METHODS: MethodSpec[] = [
@@ -92,60 +92,23 @@ if (canUseCamera) {
     category: "core",
   },
   {
-    id: "flags-isEnabled",
-    module: "flags",
-    method: "isEnabled",
-    signature: 'sdk.flags.isEnabled(flagKey: string): Promise<boolean>',
-    description: "Checks whether a feature flag is enabled for this mini app.",
-    paramsExample: '"new_checkout_flow"',
-    returnType: "Promise<boolean>",
-    snippet: `const isNewFlow = await sdk.flags.isEnabled("new_checkout_flow");
-if (isNewFlow) {
-  renderNewCheckout();
-}`,
-    mockResponse: true,
-    category: "core",
-  },
-  {
-    id: "flags-getAll",
-    module: "flags",
-    method: "getAll",
-    signature: "sdk.flags.getAll(): Promise<Record<string, boolean>>",
-    description: "Returns a dictionary of all active feature flags.",
-    paramsExample: "None",
-    returnType: "Promise<Record<string, boolean>>",
-    snippet: `const flags = await sdk.flags.getAll();
-// { new_ui: true, beta_biometric: true, fast_payment: false }`,
-    mockResponse: { new_ui: true, beta_biometric: true, fast_payment: false },
-    category: "core",
-  },
-  {
-    id: "config-get",
-    module: "config",
-    method: "get",
-    signature: "sdk.config.get<T>(key: string): Promise<T | undefined>",
-    description: "Retrieves a configuration value set by the host.",
-    paramsExample: '"api_gateway_url"',
-    returnType: "Promise<T | undefined>",
-    snippet: `const apiHost = await sdk.config.get<string>("api_gateway_url");
-// "https://api.sewa.gov.np/v1"`,
-    mockResponse: "https://api.sewa.gov.np/v1",
-    category: "core",
-  },
-  {
     id: "platform-type",
     module: "platform",
-    method: "type / isFlutter / isWeb",
-    signature: 'sdk.platform.type: "web" | "flutter"',
-    description: "Inspects the host platform container type.",
+    method: "type / os / formFactor",
+    signature: 'sdk.platform.type: "web" | "mobile"',
+    description:
+      "Where your mini app is running. Synchronous, so it can be read during a render pass.",
     paramsExample: "None",
-    returnType: '"web" | "flutter"',
-    snippet: `if (sdk.platform.isFlutter()) {
-  console.log("Running inside Flutter native shell");
-} else {
-  console.log("Running in web WebView");
-}`,
-    mockResponse: { type: "web", isWeb: true, isFlutter: false },
+    returnType: '"web" | "mobile"',
+    snippet: `if (sdk.platform.isPhone()) {
+      renderSingleColumn();
+    } else {
+      renderTwoColumn();
+    }
+
+    sdk.platform.os;         // "ios" | "android" | "web"
+    sdk.platform.formFactor; // "phone" | "tablet" | "desktop"`,
+    mockResponse: { type: "web", os: "web", formFactor: "desktop", isWeb: true, isMobile: false },
     category: "core",
   },
 
@@ -322,79 +285,6 @@ for await (const chunk of stream.iterate()) {
     category: "network",
   },
 
-  // ── GIC Chat ──────────────────────────────────────
-  {
-    id: "gicChat-startSession",
-    module: "gicChat",
-    method: "startSession",
-    signature: "sdk.gicChat.startSession(): Promise<GicChatSession>",
-    description:
-      "Initializes a new GIC chat session. Returns user_id and session_id for subsequent stream calls.",
-    paramsExample: "None",
-    returnType: "Promise<{ user_id: string; session_id: string }>",
-    snippet: `const session = await sdk.gicChat.startSession();
-console.log(session.user_id, session.session_id);`,
-    mockResponse: {
-      status: "success",
-      user_id: "8a9f1653-4c7b-44f4-b6eb-9055da85ba24",
-      session_id: "9d58028d-af89-4dad-bd9b-5567981942e1",
-    },
-    category: "ai",
-  },
-  {
-    id: "gicChat-stream",
-    module: "gicChat",
-    method: "stream",
-    signature:
-      "sdk.gicChat.stream(request: GicChatStreamRequest, options?: GicChatStreamOptions): Promise<{ invocation_id?: string }>",
-    description:
-      "Streams a GIC chat response as typed SSE events (tool_call, token, meta, done, error).",
-    paramsExample:
-      '{ user_id: "...", session_id: "...", message: "How do I apply for a NIC?" }',
-    returnType: "Promise<{ invocation_id?: string }>",
-    snippet: `const session = await sdk.gicChat.startSession();
-const result = await sdk.gicChat.stream(
-  { user_id: session.user_id, session_id: session.session_id,
-    message: "How do I apply for a NIC?" },
-  { onEvent: (event) => {
-    if (event.type === "token") appendText(event.text);
-    if (event.type === "done") finalize();
-  }}
-);`,
-    mockResponse: {
-      invocation_id: "e-c6fee063-cf84-45e3-aa92-9fea96a50433",
-      events: [
-        { type: "tool_call" },
-        { type: "token", text: "To apply for a NIC, " },
-        { type: "token", text: "you need Form 1..." },
-        { type: "done" },
-      ],
-    },
-    category: "ai",
-  },
-  {
-    id: "gicChat-streamText",
-    module: "gicChat",
-    method: "streamText",
-    signature:
-      "sdk.gicChat.streamText(request, options?): Promise<{ text: string; invocation_id?: string }>",
-    description:
-      "Convenience wrapper: collects all token events and returns the full text response.",
-    paramsExample:
-      '{ user_id: "...", session_id: "...", message: "What are the office hours?" }',
-    returnType: "Promise<{ text: string; invocation_id?: string }>",
-    snippet: `const session = await sdk.gicChat.startSession();
-const { text, invocation_id } = await sdk.gicChat.streamText(
-  { user_id: session.user_id, session_id: session.session_id,
-    message: "What are the office hours?" }
-);
-console.log(text); // Full response text`,
-    mockResponse: {
-      text: "GIC office hours are 9 AM to 5 PM, Sunday through Thursday.",
-      invocation_id: "e-3fa2b8c1-9d4e-4a1b-8c2d-1a2b3c4d5e6f",
-    },
-    category: "ai",
-  },
 
   // ── Navigation ────────────────────────────────────
   {
@@ -460,7 +350,6 @@ const CATEGORY_LABELS: Record<MethodSpec["category"], string> = {
   data: "Data & Storage",
   device: "Device",
   network: "Network & HTTP",
-  ai: "AI & Chat",
 };
 
 const CATEGORY_COLORS: Record<MethodSpec["category"], string> = {
@@ -468,7 +357,6 @@ const CATEGORY_COLORS: Record<MethodSpec["category"], string> = {
   data: "var(--teal-500)",
   device: "var(--purple-500)",
   network: "var(--blue-500)",
-  ai: "var(--green-500)",
 };
 
 const darkTheme: PrismTheme = {

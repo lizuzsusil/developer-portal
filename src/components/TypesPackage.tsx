@@ -2,7 +2,7 @@ import React from "react";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import CodeBlock from "@theme/CodeBlock";
 
-const FALLBACK = "@lizuz/mini-app-types";
+const FALLBACK = "@govtech/mini-app-types";
 
 export function useTypesPackage(): string {
   const { siteConfig } = useDocusaurusContext();
@@ -41,7 +41,7 @@ declare global {
   type SdkPlatformUser = PlatformUser;
 
   interface Window {
-    __GSA_SDK__?: MiniAppSdk; // set by host before mount()
+    __SEWA_SDK__?: MiniAppSdk; // set by host before mount()
   }
 }`}
     </CodeBlock>
@@ -58,7 +58,7 @@ import type { MiniAppSdkInterface, PlatformUser } from "${pkg}";
 declare global {
   type MiniAppSdk = MiniAppSdkInterface;
   type SdkPlatformUser = PlatformUser;
-  interface Window { __GSA_SDK__?: MiniAppSdk; }
+  interface Window { __SEWA_SDK__?: MiniAppSdk; }
 }`}
     </CodeBlock>
   );

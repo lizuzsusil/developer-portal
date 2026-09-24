@@ -339,7 +339,7 @@
     "description": "Hero title line 2"
   },
   "homepage.hero.subtitle": {
-    "message": "Ship lightweight ES modules that run inside the Sewa Citizen shell. The host injects the SDK at runtime — you just declare types and export",
+    "message": "Build one government service and put it in the app citizens already have. Sewa signs them in, provides the SDK, and routes calls to your backend.",
     "description": "Hero subtitle"
   },
   "homepage.hero.cta.getStarted": {
@@ -351,7 +351,7 @@
     "description": "Hero CTA"
   },
   "homepage.hero.badge1": {
-    "message": "Host-injected · zero runtime install",
+    "message": "Nothing to install · the SDK is provided",
     "description": "Hero badge"
   },
   "homepage.hero.badge2": {
@@ -359,31 +359,31 @@
     "description": "Hero badge"
   },
   "homepage.hero.code.footer": {
-    "message": "vite build --lib → ES module",
+    "message": "one ES module · nothing else to ship",
     "description": "Hero code footer"
   },
   "homepage.hero.code.craft": {
-    "message": "Scaffold in 4 steps →",
+    "message": "Get started →",
     "description": "Hero code craft"
   },
   "homepage.howItWorks.step1.title": {
-    "message": "Install types",
+    "message": "Export mount()",
     "description": "How it works step 1 title"
   },
   "homepage.howItWorks.step2.title": {
-    "message": "Export mount()",
+    "message": "Use the SDK",
     "description": "How it works step 2 title"
   },
   "homepage.howItWorks.step2.desc": {
-    "message": "Your bundle exports mount(container, runtime). The host calls it when the user opens the mini app.",
+    "message": "Read window.__SEWA_SDK__ for the signed-in citizen, and call your backend by path.",
     "description": "How it works step 2 desc"
   },
   "homepage.howItWorks.step3.title": {
-    "message": "Build as ES lib",
+    "message": "Build and test",
     "description": "How it works step 3 title"
   },
   "homepage.howItWorks.step3.desc": {
-    "message": "Vite lib mode outputs a single ES module the shell loads on demand. No SDK bundling.",
+    "message": "Build a single ES module, then run it in the playground inside a real Sewa shell.",
     "description": "How it works step 3 desc"
   },
   "homepage.howItWorks.kicker": {
@@ -391,20 +391,12 @@
     "description": "How it works kicker"
   },
   "homepage.howItWorks.title": {
-    "message": "Three steps to a shippable mini app",
+    "message": "Three steps to a working mini app",
     "description": "How it works title"
   },
   "homepage.howItWorks.description": {
-    "message": "The pattern mirrors",
+    "message": "You keep your stack. Sewa handles sign-in, permissions, device access and routing to your backend.",
     "description": "How it works description"
-  },
-  "homepage.howItWorks.description2": {
-    "message": "in the",
-    "description": "How it works description 2"
-  },
-  "homepage.howItWorks.description3": {
-    "message": ". You keep your stack - the host handles auth, permissions, and device access.",
-    "description": "How it works description 3"
   },
   "homepage.capability.title": {
     "message": "What you can build with",
@@ -419,7 +411,7 @@
     "description": "Capability also"
   },
   "homepage.capability.browseAll": {
-    "message": "Browse all 14 namespaces →",
+    "message": "See everything the SDK offers →",
     "description": "Capability browse"
   },
   "homepage.integrations.kicker": {
@@ -459,7 +451,7 @@
     "description": "Final CTA title"
   },
   "homepage.final.subtitle": {
-    "message": "Scaffold from test-mini-app/, read the platform overview, or dive straight into the API reference.",
+    "message": "Start with the overview, follow Getting started, then test your app in the playground.",
     "description": "Final CTA subtitle"
   },
   "homepage.final.cta.getStarted": {
@@ -471,7 +463,7 @@
     "description": "Final CTA"
   },
   "homepage.howItWorks.step1.desc": {
-    "message": "Add {package} as a devDependency for full sdk.* typings.",
+    "message": "Your entry point exports mount(container, runtime). Sewa calls it when a citizen opens your service.",
     "description": "How it works step 1 desc"
   },
   "homepage.capability.auth.desc": {
@@ -494,16 +486,12 @@
     "message": "getLocale · getTheme · theme/locale subscriptions",
     "description": "Capability sdk.appearance description"
   },
-  "homepage.capability.gicChat.desc": {
-    "message": "startSession · streamText - AI chat gateway",
-    "description": "Capability sdk.gicChat description"
-  },
   "homepage.integrations.react.badge": {
     "message": "Active · Production ready",
     "description": "React badge"
   },
   "homepage.integrations.react.desc": {
-    "message": "Reference implementation. Hooks + Provider wrap window.__GSA_SDK__ with full typings.",
+    "message": "Reference implementation. Hooks + Provider wrap window.__SEWA_SDK__ with full typings.",
     "description": "React description"
   },
   "homepage.integrations.react.cta": {
@@ -545,5 +533,11 @@
   "homepage.integrations.playground.cta": {
     "message": "Open playground →",
     "description": "Playground CTA"
+  },
+  "homepage.hero.cta.whatIs": {
+    "message": "Not a developer? Start here →"
+  },
+  "homepage.final.cta.playground": {
+    "message": "Try the playground"
   }
 }

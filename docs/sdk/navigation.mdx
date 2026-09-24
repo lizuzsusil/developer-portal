@@ -1,12 +1,14 @@
 ---
 id: navigation
-title: Navigation Module (sdk.navigation)
+title: Navigation and back (sdk.navigation)
 sidebar_label: sdk.navigation
 ---
 
 # Navigation Module (`sdk.navigation`)
 
-The `sdk.navigation` module manages platform route transitions and synchronizes internal mini app routers with the host shell back button.
+Move the citizen between screens, and keep your own router in step with Sewa's
+back button. Get this right and back behaves the way the citizen expects; get it
+wrong and they get stuck.
 
 ---
 
@@ -59,3 +61,45 @@ Notifies the host shell that the mini app pushed an internal route step.
 ```typescript
 await sdk.navigation.router.push(true);
 ```
+
+
+---
+
+## Deep links into your mini app
+
+A citizen can arrive already pointed at a screen: from a push notification, or
+from another mini app. Sewa passes that as `runtime.initialPath` when it calls
+your `mount`:
+
+```js
+export function mount(container, runtime) {
+  const startAt = runtime?.initialPath ?? "/";
+  router.replace(startAt);
+}
+```
+
+`initialPath` is a path inside **your** app, the same shape your own router
+uses. It is absent on a normal open, so always provide a default.
+
+When your backend finishes long-running work it can set `deepLinkIntent` on the
+callback, and tapping the notification opens your mini app at that path. See
+[Long-running requests](/docs/async-requests).
+
+## Keeping the back button honest
+
+The shell has one back control and your app has its own history. Tell the shell
+which of you consumed the press:
+
+```js
+sdk.on("navigation.back.requested", async () => {
+  if (router.canGoBack()) {
+    router.back();
+    await sdk.navigation.router.back(true);   // you handled it
+  } else {
+    await sdk.navigation.router.back(false);  // close the mini app
+  }
+});
+```
+
+Answer every time. Staying silent leaves the citizen pressing back with nothing
+happening.

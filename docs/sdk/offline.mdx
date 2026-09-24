@@ -6,12 +6,17 @@ sidebar_label: Offline Queue
 
 # Offline Queue
 
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
 Queue capability-gated requests while the host is unreachable and replay them when connectivity returns.
 
 ## Plugin
 
 ```typescript
-import { createOfflineQueuePlugin } from "@lizuz/mini-app-sdk";
+import { createOfflineQueuePlugin } from "@govtech/mini-app-sdk";
 
 const offline = createOfflineQueuePlugin({
   allowlist: ["storage", "api", "navigation"], // default

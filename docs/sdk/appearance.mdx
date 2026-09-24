@@ -1,12 +1,13 @@
 ---
 id: appearance
-title: Appearance Module (sdk.appearance)
+title: Language and theme (sdk.appearance)
 sidebar_label: sdk.appearance
 ---
 
 # Appearance Module (`sdk.appearance`)
 
-The `sdk.appearance` module tracks platform theme preferences (`light` | `dark`) and active locale state (`language`, `region`, `direction`), enabling automatic dark-mode and localization sync across shells.
+Follow the citizen's language and light or dark preference. They chose it once in
+Sewa; your mini app should match without asking again.
 
 ---
 
@@ -54,3 +55,43 @@ const unsubscribe = sdk.appearance.subscribe((nextState) => {
   document.documentElement.classList.toggle("dark", nextState.theme.mode === "dark");
 });
 ```
+
+
+---
+
+## Languages you are expected to support
+
+Sewa ships in **Sinhala, Tamil and English**, and the citizen chooses. Your mini
+app is expected to follow that choice rather than impose its own.
+
+```js
+const { locale } = sdk.appearance.state();
+// "si-LK" | "ta-LK" | "en-GB"
+
+i18n.changeLanguage(locale.language);   // "si" | "ta" | "en"
+```
+
+Subscribe, because the citizen can change it while your app is open:
+
+```js
+const stop = sdk.appearance.subscribe((next) => {
+  i18n.changeLanguage(next.locale.language);
+});
+```
+
+Do not build your own language switcher. Two switches that disagree is worse
+than one you do not control.
+
+Sinhala and Tamil are both left to right, but they set taller than Latin text.
+Give headings and buttons room to grow rather than fixing their height.
+
+## Following the theme
+
+```js
+sdk.appearance.subscribe((next) => {
+  document.documentElement.classList.toggle("dark", next.theme.mode === "dark");
+});
+```
+
+`theme.preference` is what the citizen chose, including `"system"`.
+`theme.mode` is what it resolves to right now — that is the one to render with.

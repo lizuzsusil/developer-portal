@@ -1,12 +1,17 @@
 ---
 id: device
-title: Device Capabilities Module (sdk.device)
+title: Device features (sdk.device)
 sidebar_label: sdk.device
 ---
 
 # Device Capabilities Module (`sdk.device`)
 
-The `sdk.device` module grants mini apps access to native hardware sensors, camera, GPS location, gallery, contacts, file system, network info, and biometric authentication via host bridge guards.
+Use the camera, location, files, contacts and biometrics. Sewa asks the citizen
+for permission and mediates every call — your mini app never touches the device
+directly.
+
+You only get the features you were granted. Check first with
+`sdk.capabilities`, and always offer a way to continue without them.
 
 ---
 

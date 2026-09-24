@@ -8,6 +8,11 @@ import { FrameworkBadge } from "@site/src/components/FrameworkBadge";
 
 # Angular (NG) Integration Guide
 
+> **Preview.** There is no Angular adapter yet. The patterns below show how one
+> would work, and the code is not published or supported. For a mini app you
+> intend to ship, use the [React guide](/docs/integration/react) or read the
+> SDK directly — it is framework-agnostic.
+
 <FrameworkBadge framework="angular" status="upcoming" />
 
 > **Package:** `@sewa/framework-angular` - internal workspace package at `packages/framework-angular`. Preview pattern; not a separately published package.
@@ -25,7 +30,7 @@ Wrap the SDK instance inside an Angular `@Injectable({ providedIn: 'root' })` se
 // src/app/services/mini-app-sdk.service.ts (Angular Preview)
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, from } from 'rxjs';
-import { initMiniAppSdk, type MiniAppSdkInterface, type PlatformUser, type AppearanceState } from '@lizuz/mini-app-sdk';
+import { initMiniAppSdk, type MiniAppSdkInterface, type PlatformUser, type AppearanceState } from '@govtech/mini-app-sdk';
 
 @Injectable({
   providedIn: 'root',
@@ -88,7 +93,7 @@ export class MiniAppSdkService implements OnDestroy {
 import { Component, OnInit } from '@angular/core';
 import { MiniAppSdkService } from '../../services/mini-app-sdk.service';
 import { Observable } from 'rxjs';
-import { PlatformUser } from '@lizuz/mini-app-sdk';
+import { PlatformUser } from '@govtech/mini-app-sdk';
 
 @Component({
   selector: 'app-home',

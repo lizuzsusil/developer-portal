@@ -6,14 +6,14 @@ sidebar_label: Streaming
 
 # Streaming
 
-Long-lived responses (HTTP `getStream`, `http.stream` chat, GIC `gicChat.stream`) use `StreamBuilder`.
+Long-lived responses (`http.getStream` and `http.stream` chat) use `StreamBuilder`.
 
 ## `StreamBuilder`
 
 ```typescript
-const builder = sdk.http.getStream({ url: "https://api.example.com/export" });
+const builder = sdk.http.getStream({ path: "/v1/export" });
 // or: const builder = sdk.http.stream({ messages });  - chat
-// or: await sdk.gicChat.stream({ user_id, session_id, message }, { onEvent });
+// or: const builder = sdk.http.stream({ user_id, session_id, message }, { onEvent });
 
 for await (const chunk of builder.iterate()) {
   // chunk: string | Uint8Array (auto-ordered by streamIndex)
@@ -38,7 +38,7 @@ Two ways to cancel:
 ```typescript
 // AbortSignal (preferred)
 const controller = new AbortController();
-const builder = sdk.http.getStream({ url }, { signal: controller.signal });
+const builder = sdk.http.getStream({ path }, { signal: controller.signal });
 controller.abort();
 
 // Direct

@@ -1,46 +1,80 @@
 ---
 id: overview
-title: Platform Overview
-sidebar_label: Platform Overview
+title: Platform overview
+sidebar_label: Platform overview
 ---
 
-import {TypesPackageName} from '@site/src/components/TypesPackage';
+# What a mini app is
 
-# Platform Overview
+*New to Sewa, or not a developer? Start with
+[What is a mini app?](/docs/what-is-a-mini-app).*
 
-The Sewa Platform hosts vendor mini apps inside the Sewa Citizen shell (web and Flutter). The host loads each mini app as an ES module, injects the SDK at `window.__GSA_SDK__`, and mediates all privileged operations over an RPC bridge.
+A mini app is your own web app, running inside the Sewa Citizen app. Citizens
+reach it from the Sewa home screen without installing anything.
 
-## Runtime Model
+You write it and you own its backend. Sewa hosts the bundle, provides the
+surrounding shell, identifies the citizen, and routes your API calls.
 
-- **Mini app bundle**: Vite `lib` build exporting `mount(container, runtime)` - see [`Getting Started`](/docs/getting-started) and [`test-mini-app/`](https://github.com/anomalyco/sewa-platform/tree/main/test-mini-app).
-- **SDK injection**: The host sets `window.__GSA_SDK__` before calling `mount`. No `npm install` of the SDK.
-- **Types**: <code>pnpm add -D <TypesPackageName /></code>.
+## What you build
 
-```mermaid
-sequenceDiagram
-    participant Host as Host shell
-    participant MiniApp as Mini app
-    participant SDK as window.__GSA_SDK__
-    Host->>MiniApp: mount(container, { initialPath })
-    MiniApp->>SDK: window.__GSA_SDK__
-    MiniApp->>SDK: sdk.auth.getUser()
-    SDK->>Host: RPC request (auth.getUser)
-    Host-->>SDK: response
-    SDK-->>MiniApp: PlatformUser
+An **ES-module bundle that exports `mount`**. Sewa loads it and calls that
+function with a container element:
+
+```js
+export function mount(container, runtime) {
+  // render your app into `container`
+  return { unmount() { /* clean up */ } };
+}
 ```
 
-## Capability Negotiation
+You do not ship an HTML page, and you do not host it. You hand Sewa a bundle.
 
-On first use the SDK performs a handshake (`handshake.connect`) carrying `miniAppId`, `sdkVersion`, `protocolVersion`, and the requested capability list. The host replies with the granted set. Ungranted capabilities throw `CAPABILITY_NOT_SUPPORTED`.
+## What Sewa does at runtime
 
-See [Protocol & Handshake](/docs/sdk/protocol) for the wire format.
+1. Reads the signed manifest for your mini app: bundle URL, version, SDK
+   requirement, and whether you are switched on.
+2. Fetches your bundle from the platform CDN and **verifies its hash** against
+   the signed manifest. A mismatch is refused.
+3. Injects the SDK at `window.__SEWA_SDK__`.
+4. Calls your `mount(container, runtime)`.
 
-## Transport
+So by the time your code runs, the SDK is already there. You read it — you never
+install or import it.
 
-`DefaultTransport` uses `postMessage` + `CustomEvent (gov-platform-event)` with origin pinning. Alternatives (`WebSocketTransport`, `BroadcastTransport`, `MessagePortTransport`, `SsrTransport`) are documented in [Transport](/docs/sdk/transport).
+```js
+const sdk = window.__SEWA_SDK__;
+const user = await sdk.auth.getUser();
+```
 
-## Next Steps
+## What you get
 
-- [Getting Started](/docs/getting-started) - scaffold a mini app
-- [SDK Reference](/docs/sdk/core) - all namespaces
-- [React Guide](/docs/integration/react) - reference implementation
+| What you get | What it means |
+|---|---|
+| **The signed-in citizen** | Already authenticated. You never build a login screen. |
+| **A route to your backend** | You call it by path. Sewa forwards the request. |
+| **Device features** | Camera, location, files, biometrics, through one API. |
+| **Storage** | A private key-value store, scoped to your mini app. |
+| **Theme and language** | Follows the citizen's choice automatically. |
+
+## Two facts that surprise people
+
+- **Your frontend never holds your backend address.** It asks for a path and
+  Sewa routes it, so you can move your backend without shipping a new frontend.
+- **Your backend never talks to the browser.** Sewa calls it server to server,
+  so it needs no CORS configuration for the citizen path.
+
+## Where your bundle lives
+
+Agencies do not self-host mini app bundles. You submit a bundle, the platform
+scans it, and it is published to the platform's own signed CDN. That signing is
+what lets Sewa trust the code it is about to run.
+
+The [playground](/docs/playground) is the exception, and only for development:
+there you point Sewa at a URL you are serving yourself.
+
+## Next
+
+1. [Getting Started](/docs/getting-started) — your first working mini app.
+2. [Mini app backend](/docs/mini-app-backend) — the other half of a mini app.
+3. [Test your mini app](/docs/playground) — run it inside a real shell.
+4. [Going live](/docs/going-live) — submission and review.

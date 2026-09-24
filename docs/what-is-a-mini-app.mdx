@@ -1,0 +1,75 @@
+---
+id: what-is-a-mini-app
+title: What is a mini app?
+sidebar_label: What is a mini app?
+---
+
+# What is a mini app?
+
+*No technical knowledge needed. If you are here to write code, start at the
+[Platform Overview](/docs/overview) instead.*
+
+Sewa is the Government of Sri Lanka's citizen app. A **mini app** is one
+service inside it — renewing a licence, checking a fuel quota, paying a fee.
+
+Citizens open Sewa, tap your service, and use it. They install nothing extra
+and sign in only once, to Sewa itself.
+
+## Why do it this way
+
+| Reason | What it means |
+|---|---|
+| **Citizens already have it** | No new app to market, download or explain. |
+| **They are already signed in** | Sewa has verified who they are. You never build a login. |
+| **One place for government** | Someone renewing a licence can also pay a fee, without leaving. |
+| **You keep control** | Your service, your data, your release schedule. |
+
+## Who does what
+
+**Your agency provides**
+
+- The screens the citizen sees.
+- The service behind them, and the data it uses.
+- Someone to keep it running.
+
+**Sewa provides**
+
+- The app citizens already have, and the citizen's verified identity.
+- Hosting and delivery of your screens.
+- Device features such as camera and location, where you are permitted them.
+- Notifications when something finishes.
+
+## What a citizen experiences
+
+1. Opens Sewa and taps your service on the home screen.
+2. Your screens appear inside Sewa, already knowing who they are.
+3. They do the thing — check a quota, submit a form, pay.
+4. If it takes time, they get a notification and can come back later.
+
+They are never sent to a website and never asked to sign in again.
+
+## What it takes to add a service
+
+| Stage | What happens |
+|---|---|
+| **Build** | A small web app and the service behind it. Weeks, not months, for something focused. |
+| **Review** | Sewa checks the code and agrees what citizen data you may use. |
+| **Launch** | Sewa publishes it. It can be switched off instantly if something is wrong. |
+
+## Questions worth settling early
+
+- **What is the smallest useful version?** One task done well beats five done
+  partly. Mini apps are meant to be narrow.
+- **How certain must you be who the citizen is?** Checking a quota needs less
+  certainty than transferring money. That choice affects how many citizens can
+  use it on day one.
+- **What happens when it is slow or down?** Some services answer in seconds,
+  others take minutes. Both are supported; they feel different to the citizen
+  and need deciding up front.
+- **Who answers when a citizen has a problem?** Sewa runs the app. Your agency
+  runs the service inside it.
+
+## Next
+
+- [Platform Overview](/docs/overview) — the same picture, for developers.
+- [Going live](/docs/going-live) — what review and launch involve.

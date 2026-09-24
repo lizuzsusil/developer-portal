@@ -8,7 +8,7 @@ import {TypesPackageName, InstallCommandBlock, ImportCodeBlock} from '@site/src/
 
 # தொடங்குதல்
 
-சேவா மினி ஆப் SDK ஹோஸ்ட் ஷெல் மூலம் இயக்க நேரத்தில் `window.__GSA_SDK__` வழியாக **செலுத்தப்படுகிறது**. நீங்கள் SDK ஐ `npm install` செய்ய வேண்டாம். அதற்கு பதிலாக, உங்கள் மினி ஆப் மேம்பாட்டிற்காக பகிரப்பட்ட வகை தொகுப்பை சார்ந்துள்ளது, மற்றும் ஹோஸ்ட் உங்கள் ஆப் கொள்கலனுக்குள் ஏற்றப்படும் போது நேரடி SDK நிகழ்வை வழங்குகிறது.
+சேவா மினி ஆப் SDK ஹோஸ்ட் ஷெல் மூலம் இயக்க நேரத்தில் `window.__SEWA_SDK__` வழியாக **செலுத்தப்படுகிறது**. நீங்கள் SDK ஐ `npm install` செய்ய வேண்டாம். அதற்கு பதிலாக, உங்கள் மினி ஆப் மேம்பாட்டிற்காக பகிரப்பட்ட வகை தொகுப்பை சார்ந்துள்ளது, மற்றும் ஹோஸ்ட் உங்கள் ஆப் கொள்கலனுக்குள் ஏற்றப்படும் போது நேரடி SDK நிகழ்வை வழங்குகிறது.
 
 முழு செயல்பாட்டு உதாரணத்தை [`test-mini-app/`](/ta/docs/getting-started) இல் காணலாம்.
 
@@ -24,9 +24,9 @@ SDK இயக்க நேரம் ஹோஸ்ட்-வழங்கப்ப�
 
 ```mermaid
 flowchart LR
-    A["வகை தொகுப்பு<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["gov-sdk.d.ts<br/>declare global Window.__GSA_SDK__"]
+    A["வகை தொகுப்பு<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["gov-sdk.d.ts<br/>declare global Window.__SEWA_SDK__"]
     B --> C["உங்கள் குறியீடு<br/>sdk.auth.getUser() — முழுமையாக வகைப்படுத்தப்பட்டது"]
-    D["ஹோஸ்ட் ஷெல்<br/>(CDN / native bridge)"] -->|"இயக்க நேரத்தில் செலுத்தப்பட்டது"| E["window.__GSA_SDK__"]
+    D["ஹோஸ்ட் ஷெல்<br/>(CDN / native bridge)"] -->|"இயக்க நேரத்தில் செலுத்தப்பட்டது"| E["window.__SEWA_SDK__"]
     E --> C
 ```
 

@@ -338,10 +338,6 @@
     "message": "சேவா தளத்திற்காக.",
     "description": "Hero title line 2"
   },
-  "homepage.hero.subtitle": {
-    "message": "சேவா குடிமகன் ஷெல் உள்ளே இயங்கும் இலகுவான ES தொகுதிகளை அனுப்புங்கள். ஹோஸ்ட் SDK ஐ இயக்க நேரத்தில் செலுத்துகிறது — நீங்கள் வகைகளை அறிவித்து",
-    "description": "Hero subtitle"
-  },
   "homepage.hero.cta.getStarted": {
     "message": "தொடங்குங்கள்",
     "description": "Hero CTA"
@@ -350,61 +346,13 @@
     "message": "API குறிப்பு",
     "description": "Hero CTA"
   },
-  "homepage.hero.badge1": {
-    "message": "ஹோஸ்ட்-செலுத்தப்பட்டது · பூஜ்ஜிய இயக்க நிறுவல்",
-    "description": "Hero badge"
-  },
   "homepage.hero.badge2": {
     "message": "வகை-பாதுகாப்பானது {package} உடன்",
     "description": "Hero badge"
   },
-  "homepage.hero.code.footer": {
-    "message": "vite build --lib → ES தொகுதி",
-    "description": "Hero code footer"
-  },
-  "homepage.hero.code.craft": {
-    "message": "4 படிகளில் உருவாக்கவும் →",
-    "description": "Hero code craft"
-  },
-  "homepage.howItWorks.step1.title": {
-    "message": "வகைகளை நிறுவவும்",
-    "description": "How it works step 1 title"
-  },
-  "homepage.howItWorks.step2.title": {
-    "message": "mount() ஏற்றுமதி செய்யவும்",
-    "description": "How it works step 2 title"
-  },
-  "homepage.howItWorks.step2.desc": {
-    "message": "உங்கள் தொகுப்பு mount(container, runtime) ஐ ஏற்றுமதி செய்கிறது. பயனர் மினி ஆப்பைத் திறக்கும்போது ஹோஸ்ட் அதை அழைக்கிறது.",
-    "description": "How it works step 2 desc"
-  },
-  "homepage.howItWorks.step3.title": {
-    "message": "ES நூலகமாக உருவாக்கவும்",
-    "description": "How it works step 3 title"
-  },
-  "homepage.howItWorks.step3.desc": {
-    "message": "Vite lib பயன்முறை தேவைக்கேற்ப ஏற்றப்படும் ஒற்றை ES தொகுதியை வெளியிடுகிறது. SDK தொகுப்பு இல்லை.",
-    "description": "How it works step 3 desc"
-  },
   "homepage.howItWorks.kicker": {
     "message": "இது எவ்வாறு செயல்படுகிறது",
     "description": "How it works kicker"
-  },
-  "homepage.howItWorks.title": {
-    "message": "அனுப்பக்கூடிய மினி ஆப்பிற்கு மூன்று படிகள்",
-    "description": "How it works title"
-  },
-  "homepage.howItWorks.description": {
-    "message": "மாதிரி பிரதிபலிக்கிறது",
-    "description": "How it works description"
-  },
-  "homepage.howItWorks.description2": {
-    "message": "இல்",
-    "description": "How it works description 2"
-  },
-  "homepage.howItWorks.description3": {
-    "message": ". நீங்கள் உங்கள் தொழில்நுட்ப அடுக்கை வைத்திருங்கள் - ஹோஸ்ட் அங்கீகாரம், அனுமதிகள் மற்றும் சாதன அணுகலைக் கையாளுகிறது.",
-    "description": "How it works description 3"
   },
   "homepage.capability.title": {
     "message": "நீங்கள் எதை உருவாக்க முடியும்",
@@ -417,10 +365,6 @@
   "homepage.capability.alsoAvailable": {
     "message": "மேலும் கிடைக்கிறது:",
     "description": "Capability also"
-  },
-  "homepage.capability.browseAll": {
-    "message": "14 பெயர்வெளிகளையும் உலாவுக →",
-    "description": "Capability browse"
   },
   "homepage.integrations.kicker": {
     "message": "உங்கள் தொழில்நுட்ப அடுக்கைத் தேர்வுசெய்க",
@@ -458,10 +402,6 @@
     "message": "சேவாவுக்காக உருவாக்க தயாரா?",
     "description": "Final CTA title"
   },
-  "homepage.final.subtitle": {
-    "message": "test-mini-app/ இலிருந்து உருவாக்கவும், தள மேலோட்டத்தைப் படிக்கவும், அல்லது API குறிப்புக்கு நேரடியாகச் செல்லவும்.",
-    "description": "Final CTA subtitle"
-  },
   "homepage.final.cta.getStarted": {
     "message": "தொடங்குங்கள்",
     "description": "Final CTA"
@@ -469,10 +409,6 @@
   "homepage.final.cta.overview": {
     "message": "தள மேலோட்டம்",
     "description": "Final CTA"
-  },
-  "homepage.howItWorks.step1.desc": {
-    "message": "{package} ஐ முழு sdk.* வகைகளுக்கான devDependency ஆகச் சேர்க்கவும்.",
-    "description": "How it works step 1 desc"
   },
   "homepage.capability.auth.desc": {
     "message": "getUser · isAuthenticated · logout - குடிமகன் அடையாளம்",
@@ -494,16 +430,12 @@
     "message": "getLocale · getTheme · theme/locale சந்தாக்கள்",
     "description": "Capability sdk.appearance description"
   },
-  "homepage.capability.gicChat.desc": {
-    "message": "startSession · streamText - AI chat நுழைவாயில்",
-    "description": "Capability sdk.gicChat description"
-  },
   "homepage.integrations.react.badge": {
     "message": "செயலில் · தயாரிப்பு தயார்",
     "description": "React badge"
   },
   "homepage.integrations.react.desc": {
-    "message": "குறிப்பு செயல்படுத்தல். Hooks + Provider முழு வகைகளுடன் window.__GSA_SDK__ ஐ மூடுகிறது.",
+    "message": "குறிப்பு செயல்படுத்தல். Hooks + Provider முழு வகைகளுடன் window.__SEWA_SDK__ ஐ மூடுகிறது.",
     "description": "React description"
   },
   "homepage.integrations.react.cta": {

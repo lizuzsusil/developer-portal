@@ -1,69 +1,72 @@
 import type { SidebarsConfig } from "@docusaurus/plugin-content-docs";
 
+/**
+ * Ordered as a mini app developer moves: understand, build, test, ship.
+ *
+ * Everything describing how the SDK and the container shell talk to each other
+ * sits under "Platform internals", collapsed. A mini app developer never calls
+ * that surface — it is here for people working on the shell or the SDK itself.
+ */
 const sidebars: SidebarsConfig = {
   tutorialSidebar: [
     {
       type: "category",
-      label: "Getting Started",
+      label: "Start here",
       collapsed: false,
-      items: ["overview", "getting-started"],
+      items: ["what-is-a-mini-app", "overview", "getting-started", "playground"],
     },
     {
       type: "category",
-      label: "SDK Reference",
+      label: "Build your mini app",
       collapsed: false,
       items: [
+        "sdk/auth",
+        "sdk/api",
+        "sdk/storage",
+        "sdk/navigation",
+        "sdk/appearance",
+        "sdk/device",
+        "sdk/permissions",
+        "sdk/notifications",
+        "sdk/links",
+        "sdk/platform",
+        "sdk/errors",
+      ],
+    },
+    {
+      type: "category",
+      label: "Backend integration",
+      collapsed: true,
+      items: ["mini-app-backend", "async-requests", "sdk/http", "sdk/ai-chat", "sdk/stream"],
+    },
+    {
+      type: "category",
+      label: "Framework guides",
+      collapsed: true,
+      items: ["integration/react", "integration/vue", "integration/angular"],
+    },
+    {
+      type: "category",
+      label: "Going live",
+      collapsed: false,
+      items: ["going-live"],
+    },
+    {
+      type: "category",
+      label: "Platform internals",
+      collapsed: true,
+      items: [
         "sdk/core",
+        "sdk/events",
         "sdk/protocol",
         "sdk/transport",
         "sdk/rpc",
-        "sdk/events",
-        "sdk/errors",
-        "sdk/stream",
         "sdk/reliability",
         "sdk/observability",
         "sdk/offline",
         "sdk/plugins",
         "sdk/logging",
       ],
-    },
-    {
-      type: "category",
-      label: "Capability Namespaces",
-      collapsed: false,
-      items: [
-        "sdk/auth",
-        "sdk/permissions",
-        "sdk/flags",
-        "sdk/config",
-        "sdk/navigation",
-        "sdk/storage",
-        "sdk/platform",
-        "sdk/device",
-        "sdk/api",
-        "sdk/http",
-        "sdk/ai-chat",
-        "sdk/gic-chat",
-        "sdk/appearance",
-        "sdk/notifications",
-        "sdk/links",
-      ],
-    },
-    {
-      type: "category",
-      label: "Framework Adapters",
-      collapsed: false,
-      items: [
-        "integration/react",
-        "integration/vue",
-        "integration/angular",
-      ],
-    },
-    {
-      type: "category",
-      label: "Playground",
-      collapsed: false,
-      items: ["playground"],
     },
   ],
 };

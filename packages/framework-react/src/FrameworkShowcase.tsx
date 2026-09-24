@@ -48,7 +48,7 @@ import { SDKContext } from "../context/SDKContext";
 import { retry } from "../utils/retry";
 
 function getSDK(): MiniAppSdk {
-  return window.__GSA_SDK__ ?? createStandaloneMockSDK();
+  return window.__SEWA_SDK__ ?? createStandaloneMockSDK();
 }`}</code>
       </pre>
     </div>

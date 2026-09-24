@@ -1,116 +1,164 @@
 ---
 id: getting-started
-title: Getting Started
-sidebar_label: Getting Started
+title: Getting started
+sidebar_label: Getting started
 ---
 
-import {TypesPackageName, InstallCommandBlock, ImportCodeBlock} from '@site/src/components/TypesPackage';
+import {TypesPackageName, InstallCommandBlock} from '@site/src/components/TypesPackage';
 
-# Getting Started
+# Getting started
 
-The Sewa Mini App SDK is **injected by the host shell** at runtime via `window.__GSA_SDK__`. You do not `npm install` the SDK itself. Instead, your mini app depends on the shared type package for development, and the host provides the live SDK instance when your app is mounted inside the container.
+By the end of this page you will have a mini app that reads the signed-in
+citizen and calls your backend.
 
-You can see the full working example in [`test-mini-app/`](/).
+## 1. Export `mount`
 
----
+Your bundle's entry point exports one function. Sewa calls it with a container
+element and gives you back nothing else to wire up:
 
-## Prerequisites
+```js
+// src/main.js
+export function mount(container, runtime) {
+  const sdk = window.__SEWA_SDK__;   // Sewa has already injected it
 
-The SDK runtime is host-provided - your app installs only the type package for compile-time safety:
+  container.innerHTML = `<h1>Loading…</h1>`;
+  start(container, sdk, runtime?.initialPath);
 
-<InstallCommandBlock />
-
-Your mini app is built as an **ES library** that exports a `mount` / `unmount` lifecycle. The host loads your bundle and calls `mount(container, runtime)` when the user opens the mini app.
-
-```mermaid
-flowchart LR
-    A["Types package<br/>(devDependency)"] -->|"import type MiniAppSdkInterface"| B["gov-sdk.d.ts<br/>declare global Window.__GSA_SDK__"]
-    B --> C["Your code<br/>sdk.auth.getUser() - fully typed"]
-    D["Host shell<br/>(CDN / native bridge)"] -->|"injected at runtime"| E["window.__GSA_SDK__"]
-    E --> C
-```
-
-`mini-app-sdk` itself re-exports every shared type from the same <TypesPackageName /> package as its single source - see `src/types/sdk.types.ts` in the SDK. Host, SDK, and mini app all agree on `PlatformMessage`, `MiniAppSdkInterface`, `SdkEventMap`, etc., from one place. Adding the dev dependency gives you the full `sdk.*` surface, `PlatformUser`, `AppearanceState`, `Device*` results, and `SdkEventMap` without any runtime bundle cost.
-
----
-
-## 1. Type Declarations (`gov-sdk.d.ts`)
-
-Declare the globals that the host injects so TypeScript knows about them. This is the file from [`test-mini-app/src/gov-sdk.d.ts`](/):
-
-<ImportCodeBlock />
-
-`MiniAppSdkInterface` covers every namespace (`sdk.auth`, `sdk.device`, `sdk.http`, `sdk.appearance`, `sdk.gicChat`, `sdk.debug`, `sdk.getMetrics`, …), `request`/`requestSafe`/`batch`, `on`/`once`/`events`/`emit`, `use`/`usePlugin`/`registerModule`, and the `SdkEventMap` event catalog. Types for hooks follow directly:
-
-```typescript
-// src/hooks/usePlatformSDK.ts - typed via the global
-import { useContext } from "react";
-import { SDKContext } from "../context/SDKContext";
-
-export function usePlatformSDK(): SDKContextValue & { sdk: MiniAppSdk } {
-  const ctx = useContext(SDKContext);
-  if (!ctx.sdk) throw new Error("usePlatformSDK must be used within PlatformSDKProvider");
-  return { ...ctx, sdk: ctx.sdk };
+  return {
+    unmount() {
+      container.innerHTML = "";
+    },
+  };
 }
 ```
 
-No `import { MiniAppSdk } from "@lizuz/mini-app-sdk"` at runtime - the host provides the instance. Types come from <TypesPackageName /> and are erased at build.
+### What `mount` is given
 
----
+| Field | What it is |
+|---|---|
+| `container` | An empty element to render into. It is yours until `unmount` |
+| `runtime.initialPath` | Where to open, when the citizen arrived by deep link. Absent on a normal open |
+| `runtime.locale` | The citizen's language, e.g. `si-LK`. Also on `sdk.appearance` |
+| `runtime.theme` | `"light"` or `"dark"` at mount time |
 
-## 2. Entry Point (`main.tsx`)
+`window.__SEWA_SDK__` is guaranteed to be present **before** `mount` is called.
+You never wait for it, and you never poll for it.
 
-Export a `mount` function - the host calls it with a DOM container and an optional `initialPath`:
+Return an object with `unmount`. Sewa calls it when the citizen leaves, and
+anything you do not clean up there leaks for the rest of the session: timers,
+listeners, open streams.
 
-```typescript
-// src/main.tsx
-import { createRoot } from "react-dom/client";
-import type { Root } from "react-dom/client";
-import App from "./App.tsx";
+## 2. Build as an ES-module library
 
-export function mount(container: HTMLElement, runtime?: { initialPath?: string }) {
-  const root: Root = createRoot(container);
-  root.render(<App initialPath={runtime?.initialPath} />);
-  return { unmount() { root.unmount(); } };
-}
-```
-
-No direct SDK import - the provider reads `window.__GSA_SDK__` at runtime.
-
----
-
-## 3. Vite Build (`vite.config.ts`)
-
-Build as a library so the host can load your bundle as a module:
-
-```typescript
-// vite.config.ts
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "vite";
-
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
+```js
+// vite.config.js
+export default {
   build: {
-    target: "chrome89",
-    outDir: "dist",
     lib: {
-      entry: "./src/main.tsx",
-      name: "RevenueMiniApp",
+      entry: "./src/main.js",
       formats: ["es"],
       fileName: () => "[name][hash].js",
     },
-    rollupOptions: {
-      output: { format: "es", chunkFileNames: "assets/[name]-[hash].js" },
-    },
   },
-});
+};
 ```
 
-See the complete config in [`test-mini-app/vite.config.ts`](/).
+You hand Sewa the built bundle. You do not host it — see
+[Going live](/docs/going-live).
 
----
+## 3. Read the citizen
 
-## 4. Teardown
+The citizen is already signed in. You never build a login screen.
 
-The SDK instance itself does not need manual `destroy()` in normal host-injected usage - the `PlatformSDKProvider` cleans up via `AbortController` when the component unmounts. If you hold a direct reference outside React, call `sdk.destroy()` on unmount.
+```js
+const user = await sdk.auth.getUser();
+// { id: "...", name: "...", ... }  or null
+```
+
+See [sdk.auth](/docs/sdk/auth).
+
+## 4. Call your backend
+
+Your frontend does not know your backend's address. Ask for a method and a path:
+
+```js
+const res = await sdk.api.request({
+  method: "POST",
+  path: "/v1/quota",
+  body: { vehicleNumber: "WP CAB-1234" },
+});
+
+console.log(res.status, res.data);
+```
+
+Sewa looks up the backend registered for your mini app and forwards it there.
+See [sdk.api](/docs/sdk/api).
+
+## 5. Handle what you were not granted
+
+Your mini app is granted a specific set of capabilities. Anything outside it
+fails immediately rather than hanging:
+
+```js
+if (!sdk.capabilities.includes("device")) {
+  showManualAddressForm();
+  return;
+}
+```
+
+See [Handling errors](/docs/sdk/errors).
+
+## 6. Run it
+
+Open the [playground](/docs/playground), point it at your dev server and your
+backend, and press **Start testing**.
+
+:::note How the SDK reaches you
+In production Sewa injects `window.__SEWA_SDK__` before calling `mount`, so
+there is nothing to load.
+
+The playground runs your dev server in a frame instead, and cannot inject across
+origins. For local testing only, add these two tags to the page you serve:
+
+```html
+<script>
+  window.__SEWA_SDK__ = {
+    miniAppId: new URLSearchParams(location.search).get("miniAppId"),
+  };
+</script>
+<script src="https://cdn.sewa.gov/mini-app-sdk/cdn.global.js"></script>
+```
+
+Then wait for it before you use it:
+
+```js
+const sdk = await window.__SEWA_SDK_LOADER__.whenReady();
+```
+
+Never hard-code `miniAppId`. Sewa tells your app which mini app it is.
+:::
+
+## TypeScript
+
+Types are a dev dependency. The SDK runtime still comes from the platform:
+
+<InstallCommandBlock />
+
+```ts
+// src/gov-sdk.d.ts
+import type { MiniAppSdkInterface } from "<TypesPackageName />";
+
+declare global {
+  interface Window {
+    __SEWA_SDK__?: MiniAppSdkInterface;
+  }
+}
+```
+
+## Next
+
+- [Mini app backend](/docs/mini-app-backend) — what arrives, and what to return.
+- [Long-running requests](/docs/async-requests) — work that cannot finish in one call.
+- [Build your mini app](/docs/sdk/auth) — the capabilities you can use.
+- [React guide](/docs/integration/react) — provider and hooks.
+- [Going live](/docs/going-live) — submission and review.

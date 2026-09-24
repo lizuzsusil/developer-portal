@@ -6,6 +6,11 @@ sidebar_label: Transport
 
 # Transport
 
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
 The SDK is transport-agnostic. The default is `postMessage` + `CustomEvent`; other transports can be supplied at construction.
 
 ## Interface
@@ -34,7 +39,7 @@ interface Transport {
 `DefaultTransport` learns the host origin on the first valid message and pins it (`allowedOrigin`). Subsequent messages from other origins are dropped. Options:
 
 ```typescript
-import { DefaultTransport } from "@lizuz/mini-app-sdk";
+import { DefaultTransport } from "@govtech/mini-app-sdk";
 
 const transport = new DefaultTransport({
   allowedOrigin: "https://shell.sewa.gov.np", // pin upfront, or leave undefined to learn
@@ -48,7 +53,7 @@ const transport = new DefaultTransport({
 Pass any `Transport` via the SDK options (advanced):
 
 ```typescript
-// Handled internally by PlatformSDKProvider in test-mini-app;
+// Handled internally by the shell;
 // normal mini apps never construct the transport directly.
 ```
 
