@@ -16,7 +16,7 @@ Requests host-level route transitions and syncs the mini app's internal router w
 
 ## Public Methods
 
-### `navigate(target)`
+{/* ### `navigate(target)`
 
 Requests the host platform to navigate - typically to a route in another mini app.
 
@@ -27,9 +27,9 @@ Requests the host platform to navigate - typically to a route in another mini ap
 | `target.app` | `string` | Yes | - | Target mini-app id (or `"shell"` for host routes). |
 | `target.route` | `string` | Yes | - | Route path inside the target, e.g. `"/services/passport"`. |
 | `target.params` | `Record<string, string>` | No | - | Route params forwarded to the target. |
-| `target.replace` | `boolean` | No | `false` | Replace the current history entry instead of pushing. |
+| `target.replace` | `boolean` | No | `false` | Replace the current history entry instead of pushing. | */}
 
-<CodeTabs
+{/* <CodeTabs
   typescript={`await sdk.navigation.navigate({
   app: "services-mini-app",
   route: "/passport",
@@ -40,9 +40,9 @@ Requests the host platform to navigate - typically to a route in another mini ap
   route: "/passport",
   params: { purpose: "renewal" },
 });`}
-/>
+/> */}
 
-For deep-linking *into* your own mini app from outside, the host passes `{ initialPath }` to your `mount()` - see [Links](/docs/sdk/links).
+{/* For deep-linking *into* your own mini app from outside, the host passes `{ initialPath }` to your `mount()` - see [Links](/docs/sdk/links). */}
 
 ### `getCurrent()`
 

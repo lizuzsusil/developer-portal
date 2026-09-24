@@ -15,7 +15,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "sdk/auth",
         // "sdk/flags",
-        "sdk/config",
+        // "sdk/config",
         "sdk/navigation",
         "sdk/storage",
         "sdk/platform",
@@ -23,8 +23,8 @@ const sidebars: SidebarsConfig = {
         "sdk/api",
         // "sdk/ai-chat",
         "sdk/appearance",
-        "sdk/notifications",
-        "sdk/links",
+        // "sdk/notifications",
+        // "sdk/links",
       ],
     },
     {
