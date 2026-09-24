@@ -1,163 +1,122 @@
 ---
 id: api
-title: Backend API Gateway Module (sdk.api)
+title: Calling your backend (sdk.api)
 sidebar_label: sdk.api
 ---
 
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
+# Calling your backend (`sdk.api`)
 
-<LanguageProvider>
+`sdk.api.request` is the single way a mini app reaches a backend. Normal calls
+and streaming calls both go through it.
 
-# Backend API Gateway (`sdk.api.request`)
+You give a method and a path. Sewa routes the call to the backend registered
+for your mini app, so your frontend never holds its address.
 
-The `sdk.api.request("POST", { ... })` module method routes authenticated requests through the host gateway proxy. It is the **only** network entry point - unary calls, chat streaming, and file streaming all go through `request`.
+## The shape
 
+```js
+const res = await sdk.api.request("POST", {
+  path: "/v1/quota",
+  body: { vehicleNumber: "WP CAB-1234" },
+});
 
----
-
-## Public Methods
-
-### `request(method, params)`
-
-Executes an authenticated API request through the host gateway. The host concatenates the mini-app `endpoint` route with its own backend base URL and forwards method, headers, and body verbatim.
-
-**Signatures:**
-
-```typescript
-// Unary - streaming off by default (covers init + normal calls)
-request<T = unknown, B = unknown>(
-  method?: string,
-  params?: ApiRequestParams<B>,
-): Promise<ApiResult<T>>;
-
-// Streaming - returns the host stream for live consumption
-request<T = unknown, B = unknown>(
-  method: string,
-  params: ApiRequestParams<B> & { stream: true },
-): Promise<T>;
+console.log(res.status, res.data);
 ```
 
-**Parameters (`ApiRequestParams`):**
+Two positional arguments: the method, then everything else.
 
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `method` | `string` | No | `"POST"` | `GET`, `POST`, `PUT`, `PATCH`, `DELETE`. |
-| `params.path` | `string` | No | - | Mini-app route, e.g. `"/v1/taxes"`. Must be a relative path; the host joins it onto its backend base URL. |
-| `params.query` | `Record<string, string>` | No | - | URL query string. Sent on `GET` requests. |
-| `params.body` | `B` | No | - | Request payload. Serialized as JSON for non-`GET`/`DELETE` calls. Stays opaque to the SDK - no validation. |
-| `params.headers` | `Record<string, string>` | No | - | Extra headers (e.g. `x-mini-app-id`). Mini-app values win over host defaults. |
-| `params.stream` | `boolean` | No | `false` | `true` opens a live stream (SSE chat events or file bytes). The mini app interprets the chunks. |
-| `params.signal` | `AbortSignal` | No | - | Cancels the unary call or stream; cancelling a stream notifies the host (`api.cancel`). |
-| `params.onProgress` | `(p: { uploadedBytes: number; totalBytes?: number }) => void` | No | - | Upload-progress callback, mirrored from the host's `api.uploadProgress` event. |
+> **The object form no longer works.** `request({ method, path, body })`
+> throws `INVALID_PARAMS`. Pass the method first.
 
-**Returns:**
+## Parameters
 
-| Overload | Type | Description |
+| Field | Type | Notes |
 |---|---|---|
-| Unary | `Promise<ApiResult<T>>` | `{ status, data, headers }`. Non-2xx statuses resolve (not throw) - check `status` yourself. |
-| Streaming | `Promise<T>` (a `StreamBuilder`) | Consume via `iterate()` / async iteration, settle with `waitUntilDone()`, stop with `cancel()`. |
+| `path` | `string` | **Required.** The route on your backend, such as `/v1/quota`. Sewa cannot route without it. |
+| `body` | any | Sent as-is. |
+| `query` | `Record<string, string>` | Folded into `path` as a query string. |
+| `headers` | `Record<string, string>` | Extra headers for your backend. |
+| `stream` | `boolean` | `false` by default. See [Streaming](#streaming). |
+| `signal` | `AbortSignal` | Cancels a stream. |
+| `onProgress` | `(p) => void` | Upload progress, as `{ uploadedBytes, totalBytes? }`. |
 
-**Examples:**
+The method defaults to `POST`. It describes what you mean, and travels to your
+backend. `endpoint` is accepted as a deprecated alias for `path`.
 
-<CodeTabs
-  typescript={`// Unary POST (method defaults to "POST")
-const response = await sdk.api.request<{ taxDue: number }>("POST", {
-  path: "/v1/taxes",
-  headers: { "Content-Type": "application/json" },
-  body: { citizenId: "9921-0012" },
+## What comes back
+
+```ts
+interface ApiResult<T> {
+  status: number;                     // your backend's status
+  data: T;                            // your backend's body
+  headers: Record<string, string>;
+}
+```
+
+`status` is your backend's own status code. A `404` or `422` arrives as a
+normal result with that status, not as a thrown error, so check it:
+
+```js
+const res = await sdk.api.request("POST", { path: "/v1/quota", body });
+
+if (res.status >= 400) {
+  showProblem(res.data);
+  return;
+}
+render(res.data);
+```
+
+A thrown error means the call never reached your backend. See
+[Handling errors](/docs/sdk/errors).
+
+## Query strings
+
+```js
+await sdk.api.request("GET", {
+  path: "/v1/transactions",
+  query: { from: "2026-09-01", page: "2" },
 });
+// your backend sees /v1/transactions?from=2026-09-01&page=2
+```
 
-console.log("Status:", response.status);
-console.log("Tax Due:", response.data.taxDue);`}
-  javascript={`// Unary POST (method defaults to "POST")
-const response = await sdk.api.request("POST", {
-  path: "/v1/taxes",
-  headers: { "Content-Type": "application/json" },
-  body: { citizenId: "9921-0012" },
+## Uploads
+
+```js
+await sdk.api.request("POST", {
+  path: "/v1/documents",
+  body: formData,
+  onProgress: ({ uploadedBytes, totalBytes }) => {
+    setPercent(totalBytes ? (uploadedBytes / totalBytes) * 100 : 0);
+  },
 });
+```
 
-console.log("Status:", response.status);
-console.log("Tax Due:", response.data.taxDue);`}
-/>
+You can also subscribe directly with `sdk.on("api.uploadProgress", handler)`.
 
-<CodeTabs
-  typescript={`// File download over the same path - stream the bytes, assemble client-side
-const builder = await sdk.api.request("GET", {
-  path: "/v1/tax-receipt",
-  query: { citizenId: "9921-0012" },
+## Streaming
+
+Pass `stream: true` to get a live stream instead of one answer. You get back a
+`StreamBuilder` of raw bytes from your backend.
+
+```js
+const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message: "Hello" },
   stream: true,
 });
 
-const parts: Uint8Array[] = [];
-for await (const chunk of builder.iterate()) {
-  parts.push(typeof chunk === "string" ? new TextEncoder().encode(chunk) : chunk);
+for await (const event of sdk.stream.parseSseStream(stream.iterate())) {
+  if (event.type === "token") append(event.text);
 }
-await builder.waitUntilDone();`}
-  javascript={`// File download over the same path - stream the bytes, assemble client-side
-const builder = await sdk.api.request("GET", {
-  path: "/v1/tax-receipt",
-  query: { citizenId: "9921-0012" },
-  stream: true,
-});
+```
 
-const parts = [];
-for await (const chunk of builder.iterate()) {
-  parts.push(typeof chunk === "string" ? new TextEncoder().encode(chunk) : chunk);
-}
-await builder.waitUntilDone();`}
-/>
+`sdk.stream.parseSseStream` turns Server-Sent Events into objects. Your backend decides
+the event names. Starting a session is a normal call: only the streaming leg
+needs `stream: true`.
 
-<CodeTabs
-  typescript={`// Live chat stream - init is just a unary call, then stream with \`stream: true\`
-const session = await sdk.api.request("POST", {
-  path: "/citizen/v1/chat-session/start",
-  headers: { "x-mini-app-id": "my-mini-app" },
-});
+See [Streaming](/docs/sdk/stream) for cancelling and chunk handling.
 
-const builder = await sdk.api.request("POST", {
-  path: "/citizen/v1/chat-session/stream",
-  headers: { "x-mini-app-id": "my-mini-app" },
-  body: { user_id: session.data.user_id, session_id: session.data.session_id, message },
-  stream: true,
-  signal: controller.signal,
-});
+## Long-running work
 
-for await (const chunk of builder.iterate()) {
-  const event = JSON.parse(typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk));
-  if (event.type === "token") appendText(event.text);
-  if (event.type === "done") break;
-}
-await builder.waitUntilDone();`}
-  javascript={`// Live chat stream - init is just a unary call, then stream with \`stream: true\`
-const session = await sdk.api.request("POST", {
-  path: "/citizen/v1/chat-session/start",
-  headers: { "x-mini-app-id": "my-mini-app" },
-});
-
-const builder = await sdk.api.request("POST", {
-  path: "/citizen/v1/chat-session/stream",
-  headers: { "x-mini-app-id": "my-mini-app" },
-  body: { user_id: session.data.user_id, session_id: session.data.session_id, message },
-  stream: true,
-  signal: controller.signal,
-});
-
-for await (const chunk of builder.iterate()) {
-  const event = JSON.parse(typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk));
-  if (event.type === "token") appendText(event.text);
-  if (event.type === "done") break;
-}
-await builder.waitUntilDone();`}
-/>
-
-### Cancellation
-
-Pass `signal`, or call `builder.cancel()` on a stream. Cancelling notifies the host (`api.cancel`) so it stops producing. Streams are never retried automatically - re-issue the request to resume. See [Streaming](/docs/sdk/stream).
-
-### Errors
-
-- Wrong call shape (e.g. the removed object form) throws `SdkError` with `code: "INVALID_PARAMS"` before any network traffic.
-- Transport failures (timeout, unreachable host) reject with the matching `SdkError` subclass - see [Errors](/docs/sdk/errors).
-- Backend HTTP errors resolve normally on unary calls (inspect `status`); on streams they arrive as a terminal `{"type": "error", "detail": ...}` chunk.
-
-</LanguageProvider>
+If the work cannot finish inside one call, your backend answers later instead.
+See [Long-running requests](/docs/async-requests).

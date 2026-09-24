@@ -6,31 +6,49 @@ sidebar_label: Protocol & Handshake
 
 # Protocol & Handshake
 
-> **Background reading for vendors.** The handshake, wire envelope, and version constants below are
-> owned by the host and the SDK. What vendors need from this page: the SDK performs a handshake
-> carrying your `miniAppId` and requested capabilities, and calls to namespaces the host did not
-> grant throw `CAPABILITY_NOT_SUPPORTED` (see [Errors](/docs/sdk/errors)).
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
+The SDK and host speak a versioned message protocol over the transport. Every message carries a channel, protocol version, and capability negotiation on first contact.
 
 ## Constants
+
+```typescript
+import { PROTOCOL_VERSION, MESSAGE_CHANNEL, HOST_TARGET } from "@govtech/mini-app-sdk";
+// PROTOCOL_VERSION = "1.0.0"
+// MESSAGE_CHANNEL  = "gov-platform-sdk"
+// HOST_TARGET      = "shell"
+```
 
 | Constant | Value | Purpose |
 |---|---|---|
 | `PROTOCOL_VERSION` | `1.0.0` | Wire format version. Major bumps are breaking. |
 | `MESSAGE_CHANNEL` | `gov-platform-sdk` | Filters SDK traffic from unrelated `postMessage`s. |
+| `HOST_TARGET` | `shell` | `target` of every outbound request. |
 | `SDK_GLOBAL_KEY` | `__SEWA_SDK__` | `window` key the host writes and the SDK overwrites with the live instance. |
+| `PLATFORM_EVENT_NAME` | `gov-platform-event` | `CustomEvent` name for hosts that cannot send a `MessageEvent`, such as a native WebView bridge. |
+| `BROADCAST_TARGET` | `*` | `target` a host uses to reach every connected mini app at once. |
+| `HOST_DESCRIPTOR_GLOBAL_KEY` | `__SEWA_HOST_DESCRIPTOR__` | `window` key holding the static host descriptor (type, version, capabilities, sdkVersion). Read at construction. |
+
+> **Naming.** The platform SDK shipped today still uses the earlier `GSA`
+> names: `__GSA_SDK__`, `__GSA_HOST_DESCRIPTOR__` and `gsaProtocolVersion`.
+> The SDK accepts both spellings, so a mini app written against either one
+> works. New code should use the `SEWA` names shown above.
 
 ## Wire Shape - `PlatformMessage`
 
 ```typescript
 interface PlatformMessage<TPayload = unknown> {
-  channel: string;
-  requestId: string;
+  channel: string;            // "gov-platform-sdk"
+  requestId: string;          // correlation id
   type: "request" | "response" | "event" | "handshake" | "stream";
-  namespace: string;
-  action: string;
-  source: string;
-  target: string;
-  gsaProtocolVersion: string;
+  namespace: string;          // e.g. "auth", "device"
+  action: string;             // e.g. "getUser", "location"
+  source: string;             // sender miniAppId
+  target: string;             // "shell" or miniAppId
+  sewaProtocolVersion: string; // "1.0.0"
   traceId: string;
   timestamp: number;
   payload?: TPayload;
@@ -41,7 +59,7 @@ interface PlatformMessage<TPayload = unknown> {
 }
 ```
 
-`createMessage()` stamps `channel`, `protocolVersion`, `traceId`, and `timestamp`. `isValidPlatformMessage` / `hasCompatibleMajorVersion` guard inbound traffic.
+`createMessage()` stamps `channel`, `sewaProtocolVersion`, `traceId`, and `timestamp`. `isValidPlatformMessage` / `hasCompatibleMajorVersion` guard inbound traffic.
 
 ## Handshake
 
@@ -51,9 +69,9 @@ On first `sdk.auth.getUser()` (or any capability call) the SDK sends a `handshak
 interface HandshakePayload {
   miniAppId: string;
   sdkVersion: string;
-  protocolVersion: string;
-  protocolVersionRange?: string;
-  capabilities: readonly string[];
+  protocolVersion: string;          // "1.0.0"
+  protocolVersionRange?: string;    // "^1.0.0"
+  capabilities: readonly string[];  // 14 domain namespaces
 }
 
 interface HandshakeAckPayload {
@@ -61,10 +79,22 @@ interface HandshakeAckPayload {
   reason?: string;
   protocolVersion?: string;
   supportedVersions?: readonly string[];
-  capabilities?: readonly string[] | Record<string, string>;
+  capabilities?: readonly string[] | Record<string, string>; // version map
 }
 ```
 
 - `status: "rejected"` or a major version mismatch throws `HandshakeError`.
 - The granted `capabilities` list gates every subsequent `sdk.*` call - see [Errors](/docs/sdk/errors) for `CAPABILITY_NOT_SUPPORTED`.
 - `initialize()` is idempotent; concurrent callers share the same handshake promise.
+
+## Capability Gating
+
+```typescript
+// SDK_CAPABILITIES = auth, permissions, navigation, storage, platform,
+//                    device, api, http, appearance, notifications, links
+sdk.capabilities        // string[] granted by host
+sdk.capabilityVersions  // Record<string, string> | null (when host sends a version map)
+```
+
+Streaming is part of `sdk.api`, so it is covered by the `api` capability.
+There is no separate `http` or chat namespace.

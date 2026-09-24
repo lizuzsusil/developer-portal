@@ -6,29 +6,51 @@ sidebar_label: Reliability
 
 # Reliability
 
-> **Host-configured, informational for vendors.** Heartbeat, circuit breaker, and adaptive timeout
-> are tuned by the host via SDK options your mini app never passes. Read this to understand the
-> behavior you observe (`connection.lost`, `CIRCUIT_OPEN`, background retries) - not to configure it.
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
 
 Heartbeat, circuit breaker, and adaptive timeout keep the mini app resilient against host stalls.
 
 ## Heartbeat
 
-The host configures the heartbeat (defaults: ping every 30 s, expect pong within 5 s,
-`connection.lost` after 2 missed pongs):
+```typescript
+// Passed via MiniAppSdkOptions (or rely on defaults)
+{
+  heartbeat: {
+    intervalMs: 30000,  // ping every 30s
+    timeoutMs: 5000,    // expect pong within 5s
+    maxMissedPongs: 2,  // → connection.lost after 2 misses
+  }
+}
+```
 
 Events: `connection.lost` / `connection.established` - see [Events](/docs/sdk/events). On `lost`, the SDK re-handshakes with backoff; on `established`, queued work resumes.
 
 ## Circuit Breaker
 
-The host configures the circuit breaker (threshold / window / open duration). States:
-`closed → open → halfOpen`. While `open`, requests throw `CIRCUIT_OPEN` without hitting the
-transport - treat it like a retryable error (see [Errors](/docs/sdk/errors)).
+```typescript
+{
+  reliability: {
+    circuitBreaker: { threshold: 5, windowMs: 10000, openMs: 30000 }
+  }
+}
+```
+
+States: `closed → open → halfOpen`. While `open`, requests throw `CIRCUIT_OPEN` without hitting the transport.
 
 ## Adaptive Timeout
 
-The host may enable adaptive timeout, which observes past durations and proposes adjusted
-per-action timeouts within a min/max clamp.
+```typescript
+{
+  reliability: {
+    adaptiveTimeout: { enabled: true, factor: 1.5, minMs: 1000, maxMs: 15000 }
+  }
+}
+```
+
+`AdaptiveTimeout` observes observed durations and proposes adjusted timeouts per action.
 
 ## Metrics Backing
 

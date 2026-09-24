@@ -41,7 +41,7 @@ The sandbox always starts empty when you open or refresh this page - it never re
 ## Preparing your mini app
 
 1. Build as an **ES library** that exports `mount(container, runtime?)` (returning `{ unmount() }` - except Angular, which exports a separate `unmount(container)`). `runtime` is optional - accept and honor `runtime.initialPath` when the host provides it.
-   See [Getting Started](./getting-started.mdx).
+   See [Getting Started](/docs/getting-started).
 2. Emit a `manifest.json` at the build output root - the full host-discovery contract:
 
    ```json

@@ -1,88 +1,97 @@
 ---
 id: appearance
-title: Appearance Module (sdk.appearance)
+title: Language and theme (sdk.appearance)
 sidebar_label: sdk.appearance
 ---
 
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
+# Appearance Module (`sdk.appearance`)
 
-<LanguageProvider>
-
-# Appearance (`sdk.appearance`)
-
-Reads host-driven locale and theme. The host owns appearance - the mini app observes it and renders accordingly. Values hydrate during `sdk.initialize()` (from the `platform.getType` hint when the host sends one), then stay live via events.
+Follow the citizen's language and light or dark preference. They chose it once in
+Sewa; your mini app should match without asking again.
 
 ---
 
 ## Public Methods
 
-### `getLocale()`
-
-Reads the host's active locale.
-
-**Signature:** `getLocale(): Promise<LocaleState>`
-
-**Returns:** `LocaleState`
-
-| Field | Type | Description |
-|---|---|---|
-| `locale` | `string` | Full tag, e.g. `"en-LK"`, `"si-LK"`, `"ta-LK"`. |
-| `language` | `string` | Primary subtag, e.g. `"en"`, `"si"`, `"ta"`. |
-| `region` | `string?` | Region subtag, e.g. `"LK"`. |
-| `direction` | `"ltr" \| "rtl"` | Resolved text direction for the locale. |
-
 ### `getTheme()`
 
-Reads the host's active theme (preference + resolved mode).
+Fetches the active theme state.
 
-**Signature:** `getTheme(): Promise<ThemeState>`
+- **Signature**: `getTheme(): Promise<ThemeState>`
 
-**Returns:** `ThemeState`
+```typescript
+const themeState = await sdk.appearance.getTheme();
+console.log("Preference:", themeState.preference); // "system" | "light" | "dark"
+console.log("Active Mode:", themeState.mode);       // "light" | "dark"
+```
 
-| Field | Type | Available values | Description |
-|---|---|---|---|
-| `preference` | `"light" \| "dark" \| "system"` | - | User-selected preference. |
-| `mode` | `"light" \| "dark"` | - | Mode actually applied (`system` is resolved via media query). |
+### `getLocale()`
+
+Fetches the active locale state.
+
+- **Signature**: `getLocale(): Promise<LocaleState>`
+
+```typescript
+const localeState = await sdk.appearance.getLocale();
+console.log("Locale Tag:", localeState.locale);   // e.g. "ne-NP"
+console.log("Language:", localeState.language);     // e.g. "ne"
+console.log("Direction:", localeState.direction);   // "ltr" | "rtl"
+```
 
 ### `state()`
 
-Synchronous snapshot of the current locale + theme. Never blocks - use it in render paths.
+Returns a synchronous snapshot of the appearance store.
 
-**Signature:** `state(): AppearanceState` (`{ locale: LocaleState; theme: ThemeState }`)
+- **Signature**: `state(): AppearanceState`
 
 ### `subscribe(listener)`
 
-Subscribes to `appearance.locale.changed` / `appearance.theme.changed`. Returns an unsubscribe function.
+Subscribes to host appearance state updates.
 
-**Signature:** `subscribe(listener: (state: AppearanceState) => void): () => void`
+- **Signature**: `subscribe(listener: (next: AppearanceState) => void): () => void`
 
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `listener` | `(state: AppearanceState) => void` | Yes | Callback invoked on locale/theme changes |
+```typescript
+const unsubscribe = sdk.appearance.subscribe((nextState) => {
+  document.documentElement.classList.toggle("dark", nextState.theme.mode === "dark");
+});
+```
 
-**Returns:** `() => void` - unsubscribe function
 
-<CodeTabs
-  typescript={`const applyTheme = (state: AppearanceState) => {
-  document.body.dataset.theme = state.theme.mode;
-  document.body.dir = state.locale.direction;
-};
+---
 
-applyTheme(sdk.appearance.state());
-const unsubscribe = sdk.appearance.subscribe(applyTheme);
+## Languages you are expected to support
 
-// Later, to stop listening:
-unsubscribe();`}
-  javascript={`const applyTheme = (state) => {
-  document.body.dataset.theme = state.theme.mode;
-  document.body.dir = state.locale.direction;
-};
+Sewa ships in **Sinhala, Tamil and English**, and the citizen chooses. Your mini
+app is expected to follow that choice rather than impose its own.
 
-applyTheme(sdk.appearance.state());
-const unsubscribe = sdk.appearance.subscribe(applyTheme);
+```js
+const { locale } = sdk.appearance.state();
+// "si-LK" | "ta-LK" | "en-GB"
 
-// Later, to stop listening:
-unsubscribe();`}
-/>
+i18n.changeLanguage(locale.language);   // "si" | "ta" | "en"
+```
 
-</LanguageProvider>
+Subscribe, because the citizen can change it while your app is open:
+
+```js
+const stop = sdk.appearance.subscribe((next) => {
+  i18n.changeLanguage(next.locale.language);
+});
+```
+
+Do not build your own language switcher. Two switches that disagree is worse
+than one you do not control.
+
+Sinhala and Tamil are both left to right, but they set taller than Latin text.
+Give headings and buttons room to grow rather than fixing their height.
+
+## Following the theme
+
+```js
+sdk.appearance.subscribe((next) => {
+  document.documentElement.classList.toggle("dark", next.theme.mode === "dark");
+});
+```
+
+`theme.preference` is what the citizen chose, including `"system"`.
+`theme.mode` is what it resolves to right now — that is the one to render with.

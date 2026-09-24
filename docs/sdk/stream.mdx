@@ -6,55 +6,81 @@ sidebar_label: Streaming
 
 # Streaming
 
-Long-lived responses use `StreamBuilder`, returned by [`sdk.api.request`](/docs/sdk/api) with `stream: true`. Chat SSE events and file bytes share this path - the mini app interprets the chunks either way.
+A streaming call answers in pieces instead of all at once. Use it for chat
+replies, long exports and progress output.
 
-## `StreamBuilder`
+Ask for one with `stream: true`:
 
-Created by the RPC layer per streamed request; chunks arrive ordered by `streamIndex`, and the host marks the final chunk with `streamLast: true`.
+```js
+const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message: "Hello" },
+  stream: true,
+});
+```
 
-**Signature:** `request(method: string, params: ApiRequestParams & { stream: true }): Promise<StreamBuilder>`
+You get a `StreamBuilder`. It carries raw bytes from your backend, exactly as
+your backend sent them. The SDK does not interpret them.
 
-| Member | Type | Description |
-|---|---|---|
-| `iterate()` | `AsyncIterable<string \| Uint8Array>` | Yields each chunk as it arrives. Never throws - iteration simply ends. |
-| `waitUntilDone()` | `Promise<void>` | Resolves on clean completion; rejects with the terminal failure. |
-| `cancel(err?)` | `void` | Stops consumption locally and notifies the host (`api.cancel`). |
-| `isDone` | `boolean` | Whether the stream settled. |
-| `isRejected` | `boolean` | Whether it settled with failure. |
-| `receivedBytes` / `receivedChunks` | `number` | Totals observed so far. |
-| `total` | `number \| null` | Expected chunks when the host declares `streamTotal`. |
+## Reading events
 
-```typescript
-const builder = await sdk.api.request("GET", {
-  endpoint: "/v1/tax-receipt",
+Most backends send Server-Sent Events. `parseSseStream` turns those bytes into
+objects:
+
+```js
+for await (const event of sdk.stream.parseSseStream(stream.iterate())) {
+  switch (event.type) {
+    case "token": append(event.text); break;
+    case "done":  finish();           break;
+    case "error": showProblem(event); break;
+  }
+}
+```
+
+`sdk.stream.parseSseStream` is on the injected SDK, so there is nothing to
+import.
+
+Each event is `{ type, ...fields }`. The `type` comes from the SSE `event:`
+line, and the rest from its `data:` line. Your backend chooses those names.
+
+Three things worth knowing:
+
+- An event split across two chunks is reassembled for you.
+- `data:` that is not JSON arrives as `{ text: "<raw>" }`.
+- `parseSseStream` never throws. A backend `error` event is yielded last, then
+  the loop ends. Handle `error` inside the loop.
+
+## Reading raw chunks
+
+If your backend does not send SSE, read the chunks yourself:
+
+```js
+for await (const chunk of stream.iterate()) {
+  // chunk is a string or a Uint8Array
+}
+```
+
+A stream has **one consumer**. Iterate it once.
+
+## Stopping early
+
+```js
+const controller = new AbortController();
+
+const stream = await sdk.api.request("POST", {
+  path: "/v1/chat",
+  body: { message },
   stream: true,
   signal: controller.signal,
 });
 
-for await (const chunk of builder.iterate()) {
-  appendChunk(chunk); // string | Uint8Array, in order
-}
-
-await builder.waitUntilDone(); // throws only on terminal failure
+cancelButton.onclick = () => controller.abort();
 ```
 
-Ordering is by `streamIndex`; retransmissions of an already-yielded index are dropped for live consumers. Streams are never retried automatically - re-issue the request to resume.
+Aborting tells the host to stop the stream, so your backend can stop working.
+Always abort when the citizen navigates away.
 
-## Cancellation
+## Next
 
-Two ways to cancel:
-
-| Mechanism | Call | Effect |
-|---|---|---|
-| `AbortSignal` (preferred) | `controller.abort()` | Rejects with `StreamCancelledError`, notifies host |
-| Direct | `builder.cancel()` | Same - rejects locally, sends `api.cancel { requestId }` |
-
-```typescript
-const controller = new AbortController();
-const builder = await sdk.api.request("GET", { endpoint, stream: true, signal: controller.signal });
-controller.abort(); // or: builder.cancel();
-```
-
-## Wire
-
-Stream frames are `PlatformMessage` with `type: "stream"`, `streamIndex`, `streamTotal`, and `streamLast`. See [Protocol](/docs/sdk/protocol).
+- [sdk.api](/docs/sdk/api) — the call itself.
+- [Handling errors](/docs/sdk/errors) — what a thrown error means.

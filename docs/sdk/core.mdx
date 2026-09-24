@@ -1,81 +1,81 @@
 ---
 id: core
-title: SDK Core & Features
-sidebar_label: Core & Features
+title: SDK Core & Lifecycle
+sidebar_label: Core & Lifecycle
 ---
-
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
-
-<LanguageProvider>
 
 # Core SDK & Lifecycle
 
-> **Host-injected, not installed.** In production mini apps the SDK is **injected by the host** at `window.__SEWA_SDK__` - see [Getting Started](/docs/getting-started). The host loads the required SDK bundle itself via CDN, mini apps never install or import the SDK runtime. The instance exposes the lifecycle, capability, and introspection APIs documented here.
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
+In production mini apps the SDK is **injected by the host** at `window.__SEWA_SDK__` - see [Getting Started](/docs/getting-started). The instance itself exposes lifecycle, capability, and introspection APIs documented here. Direct construction via `@govtech/mini-app-sdk` is for testing and host shells.
 
 ---
 
 ## Instance
 
-<CodeTabs
-  typescript={`// Production - read the injected instance (this is the only form mini apps use)
-const sdk: MiniAppSdk = window.__SEWA_SDK__;`}
-  javascript={`// Production - read the injected instance (this is the only form mini apps use)
-const sdk = window.__SEWA_SDK__;`}
-/>
+```typescript
+// Production - read the injected instance
+const sdk: MiniAppSdk = window.__SEWA_SDK__;
+
+// Testing / host shell - direct construction
+import { createMiniAppSdk } from "@govtech/mini-app-sdk";
+const sdk = createMiniAppSdk({ miniAppId: "water-bill-app", timeout: 8000 });
+await sdk.initialize(); // handshake + hydration
+```
+
+`sdk.capabilities: string[]` - granted namespaces. `sdk.capabilityVersions`, `sdk.traceId`, `sdk.hostDescriptor`, `sdk.version`.
+
+`getMiniAppSdk()` / `initMiniAppSdk()` are legacy helpers that operate on the active global instance - prefer reading `window.__SEWA_SDK__` directly as shown in [React Guide](/docs/integration/react).
 
 ---
 
 ## Event Bus
 
-[//]: # (Covered in detail in [Events]&#40;/docs/sdk/events&#41;. Quick reference:)
+Covered in detail in [Events](/docs/sdk/events). Quick reference:
 
-<CodeTabs
-  typescript={`const off = sdk.on("appearance.theme.changed", (payload) => { /* ... */ });
+```typescript
+const off = sdk.on("appearance.theme.changed", (payload) => { /* ... */ });
 await sdk.once("navigation.back.requested");
 for await (const p of sdk.events("connection.lost")) { /* ... */ }
 await sdk.emit("myapp.ready", { version: "1.2.0" });
-sdk.addEventInterceptor((event, payload) => payload);`}
-  javascript={`const off = sdk.on("appearance.theme.changed", (payload) => { /* ... */ });
-await sdk.once("navigation.back.requested");
-for await (const p of sdk.events("connection.lost")) { /* ... */ }
-await sdk.emit("myapp.ready", { version: "1.2.0" });
-sdk.addEventInterceptor((event, payload) => payload);`}
-/>
+sdk.addEventInterceptor((event, payload) => payload);
+```
 
 ---
 
 ## RPC Escape Hatches
 
-[//]: # (See [RPC]&#40;/docs/sdk/rpc&#41; for full options.)
+See [RPC](/docs/sdk/rpc) for full options.
 
-<CodeTabs
-  typescript={`await sdk.request<T>("auth", "getUser");                    // raw RPC
-await sdk.api.request("POST", { endpoint: "/v1/taxes" });   // gateway module
+```typescript
+await sdk.request<T>("auth", "getUser");
 await sdk.requestSafe<T>("storage", "get", { key: "draft" });
-await sdk.batch([{ namespace: "storage", action: "get", payload: { key: "a" } }]);`}
-  javascript={`await sdk.request("auth", "getUser");                    // raw RPC
-await sdk.api.request("POST", { endpoint: "/v1/taxes" });   // gateway module
-await sdk.requestSafe("storage", "get", { key: "draft" });
-await sdk.batch([{ namespace: "storage", action: "get", payload: { key: "a" } }]);`}
-/>
+await sdk.batch([{ namespace: "storage", action: "get", payload: { key: "a" } }]);
+```
 
 ## Middleware
 
-[//]: # (See [RPC]&#40;/docs/sdk/rpc&#41; for full options.)
+See [RPC](/docs/sdk/rpc) and [Plugins](/docs/sdk/plugins).
 
-<CodeTabs
-  typescript={`sdk.use(async (ctx, next) => {
+```typescript
+sdk.use(async (ctx, next) => {
   const t = Date.now();
   const res = await next();
-  console.log(\`\${ctx.namespace}.\${ctx.action} \${Date.now() - t}ms\`);
+  console.log(`${ctx.namespace}.${ctx.action} ${Date.now() - t}ms`);
   return res;
-});`}
-  javascript={`sdk.use(async (ctx, next) => {
-  const t = Date.now();
-  const res = await next();
-  console.log(\`\${ctx.namespace}.\${ctx.action} \${Date.now() - t}ms\`);
-  return res;
-});`}
-/>
+});
+```
 
-</LanguageProvider>
+## Telemetry
+
+See [Observability](/docs/sdk/observability).
+
+```typescript
+sdk.getMetrics();        // totals + per-action percentiles
+sdk.debug.snapshot();    // full health dump
+sdk.debug.diagnose();    // Diagnostic[] with codes
+```

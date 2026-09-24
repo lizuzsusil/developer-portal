@@ -1,113 +1,76 @@
 ---
 id: storage
-title: Storage Module (sdk.storage)
+title: Storing data (sdk.storage)
 sidebar_label: sdk.storage
 ---
 
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
+# Storage Module (`sdk.storage`)
 
-<LanguageProvider>
-
-# Storage (`sdk.storage`)
-
-Host-backed key/value store. `get`/`set` move raw strings; `getJson`/`setJson` layer transparent JSON on top of the same wire; `scoped(prefix)` namespaces keys per feature (`prefix:key`, nestable); `getMany`/`getManyJson` batch reads in one RPC round trip.
+Keep small pieces of data on the device between visits — a half-filled form, a
+preference, a cached lookup. Storage is private to your mini app: no other mini
+app can read it.
 
 ---
 
 ## Public Methods
 
-### `get(key)` / `set(key, value, options?)` / `remove(key)`
+### `get(key)` / `getJson<T>(key)`
 
-Raw-string CRUD. `get` resolves `null` when unset.
+Reads a string or parsed JSON object from host storage.
 
-**Signatures:**
-
-```typescript
-get(key: string): Promise<string | null>;
-set(key: string, value: string, options?: StorageSetOptions): Promise<void>;
-remove(key: string): Promise<void>;
-```
-
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `key` | `string` | Yes | - | Storage key. |
-| `value` | `string` | Yes | - | Raw string to store. |
-| `options.ttlMs` | `number` | No | - | Time-to-live in ms. Best-effort: a host that honors it drops the value after expiry (later `get` → `null`); others store without expiry. |
-
-<CodeTabs
-  typescript={`await sdk.storage.set("draft:-return-2026", "in-progress", { ttlMs: 86_400_000 });
-const draft = await sdk.storage.get("draft:return-2026");`}
-  javascript={`await sdk.storage.set("draft:-return-2026", "in-progress", { ttlMs: 86_400_000 });
-const draft = await sdk.storage.get("draft:return-2026");`}
-/>
-
-### `getJson(key)` / `setJson(key, value, options?)`
-
-JSON convenience over the same wire. `getJson` resolves `null` when unset **or** when the stored string isn't valid JSON.
-
-**Signatures:**
+- **Signature**: `get(key: string): Promise<string | null>`
+- **Signature**: `getJson<T = unknown>(key: string): Promise<T | null>`
 
 ```typescript
-getJson<T = unknown>(key: string): Promise<T | null>;
-setJson(key: string, value: unknown, options?: StorageSetOptions): Promise<void>;
+const draft = await sdk.storage.getJson<{ taxYear: number }>("draft_tax");
+if (draft) {
+  console.log("Draft tax year:", draft.taxYear);
+}
 ```
 
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `key` | `string` | Yes | - | Storage key |
-| `value` | `unknown` | Yes | - | Value to serialize as JSON |
-| `options.ttlMs` | `number` | No | - | Time-to-live in ms |
+### `set(key, value, options?)` / `setJson(key, value, options?)`
 
-<CodeTabs
-  typescript={`await sdk.storage.setJson("profile", { ward: 12, household: 4 });
-const profile = await sdk.storage.getJson<{ ward: number }>("profile");`}
-  javascript={`await sdk.storage.setJson("profile", { ward: 12, household: 4 });
-const profile = await sdk.storage.getJson("profile");`}
-/>
+Stores a string or JSON-serializable object with optional time-to-live (`ttlMs`).
+
+- **Signature**: `set(key: string, value: string, options?: StorageSetOptions): Promise<void>`
+- **Signature**: `setJson(key: string, value: unknown, options?: StorageSetOptions): Promise<void>`
+
+```typescript
+// Persist for 24 hours (86,400,000 ms)
+await sdk.storage.setJson(
+  "form_cache",
+  { step: 3, values: { name: "Ram" } },
+  { ttlMs: 86400000 }
+);
+```
+
+### `remove(key)`
+
+Deletes a key from storage.
+
+- **Signature**: `remove(key: string): Promise<void>`
+
+```typescript
+await sdk.storage.remove("form_cache");
+```
+
+### `getMany(keys)` / `getManyJson<T>(keys)`
+
+Batch reads via `rpc.batch` (host `batch.execute` or parallel fallback).
+
+```typescript
+const [a, b] = await sdk.storage.getMany(["draft_tax", "user_prefs"]);
+// (string | null)[]
+const [draft, prefs] = await sdk.storage.getManyJson<unknown>(["draft_tax", "user_prefs"]);
+```
 
 ### `scoped(prefix)`
 
-Returns a sub-module with every key prefixed (`prefix:key`). Nestable (`a.scoped("b").scoped("c")` → `a:b:c:key`); `remove`/`getMany` follow the same prefixing.
+Creates a nested `StorageSdkModule` instance where all keys are automatically prefixed.
 
-**Signature:** `scoped(prefix: string): StorageSdkModule`
-
-<CodeTabs
-  typescript={`const prefs = sdk.storage.scoped("prefs");
-await prefs.set("theme", "dark");"`}
-  javascript={`const prefs = sdk.storage.scoped("prefs");
-await prefs.set("theme", "dark");"`}
-/>
-
-### `getMany(keys)` / `getManyJson(keys)`
-
-Batch reads in a single RPC. Per-key failures resolve `null` rather than rejecting.
-
-**Signatures:**
+- **Signature**: `scoped(prefix: string): StorageSdkModule`
 
 ```typescript
-getMany(keys: string[]): Promise<Array<string | null>>;
-getManyJson<T = unknown>(keys: string[]): Promise<Array<T | null>>;
+const userSettings = sdk.storage.scoped("settings");
+await userSettings.set("theme", "dark"); // Stored under "settings:theme"
 ```
-
-| Parameter | Type | Required | Description |
-|---|---|---|---|
-| `keys` | `string[]` | Yes | Array of storage keys to retrieve |
-
-**Returns:** `Array<string | null>` or `Array<T | null>` - same order as input keys, `null` for missing/failed keys
-
-<CodeTabs
-  typescript={`const [draft, profile] = await sdk.storage.getMany(["draft", "profile"]);
-// draft: string | null, profile: string | null
-
-// With JSON
-const [settings, prefs] = await sdk.storage.getManyJson<Settings>(["settings", "prefs"]);
-// settings: Settings | null, prefs: Settings | null`}
-  javascript={`const [draft, profile] = await sdk.storage.getMany(["draft", "profile"]);
-// draft: string | null, profile: string | null
-
-// With JSON
-const [settings, prefs] = await sdk.storage.getManyJson(["settings", "prefs"]);
-// settings: Settings | null, prefs: Settings | null`}
-/>
-
-</LanguageProvider>

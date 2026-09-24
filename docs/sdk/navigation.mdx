@@ -1,16 +1,14 @@
 ---
 id: navigation
-title: Navigation Module (sdk.navigation)
+title: Navigation and back (sdk.navigation)
 sidebar_label: sdk.navigation
 ---
 
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
+# Navigation Module (`sdk.navigation`)
 
-<LanguageProvider>
-
-# Navigation (`sdk.navigation`)
-
-Requests host-level route transitions and syncs the mini app's internal router with the host back button. The host owns browser history - never assign `location.hash` directly; route through your framework router (or `history.pushState` + manual notification) instead.
+Move the citizen between screens, and keep your own router in step with Sewa's
+back button. Get this right and back behaves the way the citizen expects; get it
+wrong and they get stuck.
 
 ---
 
@@ -18,98 +16,90 @@ Requests host-level route transitions and syncs the mini app's internal router w
 
 ### `navigate(target)`
 
-Requests the host platform to navigate - typically to a route in another mini app.
+Requests the host platform to perform a navigation transition.
 
-**Signature:** `navigate(target: NavigationTarget): Promise<void>`
+- **Signature**: `navigate(target: NavigationTarget): Promise<void>`
 
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `target.app` | `string` | Yes | - | Target mini-app id (or `"shell"` for host routes). |
-| `target.route` | `string` | Yes | - | Route path inside the target, e.g. `"/services/passport"`. |
-| `target.params` | `Record<string, string>` | No | - | Route params forwarded to the target. |
-| `target.replace` | `boolean` | No | `false` | Replace the current history entry instead of pushing. |
-
-<CodeTabs
-  typescript={`await sdk.navigation.navigate({
-  app: "services-mini-app",
-  route: "/passport",
-  params: { purpose: "renewal" },
-});`}
-  javascript={`await sdk.navigation.navigate({
-  app: "services-mini-app",
-  route: "/passport",
-  params: { purpose: "renewal" },
-});`}
-/>
-
-For deep-linking *into* your own mini app from outside, the host passes `{ initialPath }` to your `mount()` - see [Links](/docs/sdk/links).
+```typescript
+await sdk.navigation.navigate({
+  path: "/services/vehicle-tax",
+  params: { vehicleNo: "BA-2-PA-9918" },
+});
+```
 
 ### `getCurrent()`
 
 Queries current navigation state from the host.
 
-**Signature:** `getCurrent(): Promise<NavigationState>`
+- **Signature**: `getCurrent(): Promise<NavigationState>`
 
-**Returns:** `NavigationState`
+```typescript
+const navState = await sdk.navigation.getCurrent();
+console.log("Current Route:", navState.route);
+```
 
-| Field | Type | Description |
-|---|---|---|
-| `current` | `string` | Current route string. |
-| `history` | `string[]` | Route history stack. |
+### `router.back(consumed)`
 
-<CodeTabs
-  typescript={`const navState = await sdk.navigation.getCurrent();
-console.log("Current route:", navState.current);`}
-  javascript={`const navState = await sdk.navigation.getCurrent();
-console.log("Current route:", navState.current);`}
-/>
+Reports whether the mini app internal router handled a back-press or wants the host to exit the mini app container.
 
-### `router.back(consumed?)`
+- **Signature**: `router.back(consumed?: boolean): Promise<NavigationRouterResult>`
 
-Answers the host's held back-press: reports whether the mini app's internal router consumed it (`true`) or the host should take over (`false`, i.e. at root). Subscribe via `navigation.back.requested`.
+```typescript
+sdk.on("navigation.back.requested", async () => {
+  const hasInternalHistory = window.history.length > 1;
+  // If true, mini app handles back step. If false, host shell exits mini app.
+  await sdk.navigation.router.back(hasInternalHistory);
+});
+```
 
-**Signature:** `router.back(consumed?: boolean): Promise<NavigationRouterResult>`
+### `router.push(consumed)`
 
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `consumed` | `boolean` | No | `true` | `false` means "I'm at my root, you take over". Bare booleans and missing payloads also default to `true`. |
+Notifies the host shell that the mini app pushed an internal route step.
 
-**Returns:** `{ consumed: boolean }`
+- **Signature**: `router.push(consumed?: boolean): Promise<NavigationRouterResult>`
 
-<CodeTabs
-  typescript={`sdk.on("navigation.back.requested", async () => {
-  // Derive from your own router ("am I at root?"), not window.history.
-  const consumed = currentPath !== "/";
-  await sdk.navigation.router?.back?.(consumed);
-  if (consumed) goBackOneStep();
-});`}
-  javascript={`sdk.on("navigation.back.requested", async () => {
-  // Derive from your own router ("am I at root?"), not window.history.
-  const consumed = currentPath !== "/";
-  await sdk.navigation.router?.back?.(consumed);
-  if (consumed) goBackOneStep();
-});`}
-/>
+```typescript
+await sdk.navigation.router.push(true);
+```
 
-### `router.push(consumed?)`
 
-Tells the host the mini app pushed an internal route step, so the next back press is worth asking about.
+---
 
-**Signature:** `router.push(consumed?: boolean): Promise<NavigationRouterResult>`
+## Deep links into your mini app
 
-| Parameter | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `consumed` | `boolean` | No | `true` | Whether the push represents navigable history. |
+A citizen can arrive already pointed at a screen: from a push notification, or
+from another mini app. Sewa passes that as `runtime.initialPath` when it calls
+your `mount`:
 
-<CodeTabs
-  typescript={`await sdk.navigation.router.push(true);`}
-  javascript={`await sdk.navigation.router.push(true);`}
-/>
+```js
+export function mount(container, runtime) {
+  const startAt = runtime?.initialPath ?? "/";
+  router.replace(startAt);
+}
+```
 
-Emit `navigation.route.changed` with root-derived `canGoBack` on every route change to keep the host's back-button policy in sync. See the framework guides ([React](/docs/integration/react), [Vue](/docs/integration/vue), [Svelte](/docs/integration/svelte), [Solid](/docs/integration/solid)) for the full bidirectional pattern.
+`initialPath` is a path inside **your** app, the same shape your own router
+uses. It is absent on a normal open, so always provide a default.
 
-:::warning Raw hash writes
-Never navigate by assigning `location.hash` - in Chrome this fires a spurious `popstate` that the host shell mistakes for a back press (see the [Svelte guide](/docs/integration/svelte)).
-:::
+When your backend finishes long-running work it can set `deepLinkIntent` on the
+callback, and tapping the notification opens your mini app at that path. See
+[Long-running requests](/docs/async-requests).
 
-</LanguageProvider>
+## Keeping the back button honest
+
+The shell has one back control and your app has its own history. Tell the shell
+which of you consumed the press:
+
+```js
+sdk.on("navigation.back.requested", async () => {
+  if (router.canGoBack()) {
+    router.back();
+    await sdk.navigation.router.back(true);   // you handled it
+  } else {
+    await sdk.navigation.router.back(false);  // close the mini app
+  }
+});
+```
+
+Answer every time. Staying silent leaves the citizen pressing back with nothing
+happening.

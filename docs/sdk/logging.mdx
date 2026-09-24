@@ -6,26 +6,39 @@ sidebar_label: Logging & Dev Mode
 
 # Logging & Dev Mode
 
-> **Host-configured.** Logger, dev mode, and log level are set by the host when it constructs the
-> SDK. Mini apps get the behavior for free; the only thing vendors need to know is the
-> handler-leak warning below.
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
+Control SDK verbosity and dev-time warnings.
 
 ## Logger
 
-The SDK logs through a `Logger` interface (`debug | info | warn | error`); the host wires a
-console logger or a silencing no-op logger and picks the minimum level. There is nothing to
-import or construct in a mini app.
+```typescript
+import { ConsoleLogger, NoopLogger } from "@govtech/mini-app-sdk";
+
+const logger = new ConsoleLogger({ minLevel: "warn" }); // debug | info | warn | error
+```
+
+`Logger` is an interface; `NoopLogger` silences all output. Pass via `MiniAppSdkOptions.logger` or construct the SDK through `PlatformSDKProvider` which wires it internally.
 
 ## Dev Mode
 
-The host may enable `devMode` (plus `logLevel: "debug"`), which turns on warnings for
-unavailable capabilities (`"[dev] ... requires api capability"`). When unset, it defaults to
-`process.env.NODE_ENV !== "production"` in the host build.
+```typescript
+createMiniAppSdk({ miniAppId, devMode: true, logLevel: "debug" });
+```
 
-Handler-leak warning: >20 handlers on a single event emits a dev warning - unsubscribe (or pass
-an `AbortSignal`) when your component unmounts.
+- `devMode: true` enables warnings for unavailable capabilities (`"[dev] ... requires http capability"`) deduped via `warnedUnavailableCapabilities`.
+- When `devMode` is unset, it defaults to `process.env.NODE_ENV !== "production"`.
+- `logLevel` overrides `minLevel` on the logger.
+
+Handler-leak warning: >20 handlers on a single event emits a dev warning.
 
 ## `validateSdkOptions`
 
-Host-side helper that throws with details on a malformed SDK config (e.g. empty `miniAppId`).
-Not called from mini apps.
+```typescript
+import { validateSdkOptions } from "@govtech/mini-app-sdk";
+
+validateSdkOptions({ miniAppId: "" }); // throws with details
+```

@@ -1,16 +1,12 @@
 ---
 id: auth
-title: Authentication Module (sdk.auth)
+title: Who the citizen is (sdk.auth)
 sidebar_label: sdk.auth
 ---
 
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
+# Authentication Module (`sdk.auth`)
 
-<LanguageProvider>
-
-# Authentication (`sdk.auth`)
-
-Exposes the host's authenticated user to the mini app. Read-only - login itself happens in the host; this module only reports who is signed in and ends the session on request.
+Read who the signed-in citizen is, check whether a session is still valid, and ask Sewa to sign them out.
 
 ---
 
@@ -18,53 +14,41 @@ Exposes the host's authenticated user to the mini app. Read-only - login itself 
 
 ### `getUser()`
 
-Returns the currently authenticated user, or `null` when nobody is signed in.
+Fetches the profile of the authenticated citizen.
 
-**Signature:** `getUser(): Promise<PlatformUser | null>`
+- **Signature**: `getUser(): Promise<PlatformUser | null>`
+- **Returns**: `PlatformUser` object or `null` if user is unauthenticated.
 
-**Returns:** `Record<string, unknown> | null`. The user object is host-defined - its keys vary between shells, so don't code against a fixed field list. Read what you need defensively (`user?.name ?? "there"`) and narrow at runtime.
+```typescript
+const user = await sdk.auth.getUser();
 
-<CodeTabs
-  typescript={`const user = await sdk.auth.getUser();
-if (!user) {
-  showSignInPrompt();
-} else {
-  greet((user.name as string | undefined) ?? "Welcome, User");
-}`}
-  javascript={`const user = await sdk.auth.getUser();
-if (!user) {
-  showSignInPrompt();
-} else {
-  greet(user?.name ?? "there");
-}`}
-/>
+if (user) {
+  console.log("Citizen Name:", user.name);
+  console.log("Email:", user.email);
+  console.log("Roles:", user.roles);
+  console.log("Permissions:", user.permissions);
+}
+```
 
 ### `isAuthenticated()`
 
-Whether a user is currently signed in. Prefer this for gating UI; use `getUser()` when you need the profile.
+Checks if there is an active authenticated user session.
 
-**Signature:** `isAuthenticated(): Promise<boolean>`
+- **Signature**: `isAuthenticated(): Promise<boolean>`
 
-<CodeTabs
-  typescript={`if (await sdk.auth.isAuthenticated()) {
-        {**Do Something**}
-}`}
-  javascript={`if (await sdk.auth.isAuthenticated()) {
-        {**Do Something**}
-}`}
-/>
+```typescript
+const isAuth = await sdk.auth.isAuthenticated();
+if (!isAuth) {
+  // Prompt user to log in via host
+}
+```
 
 ### `logout()`
 
-Ends the host session. The host also emits an auth event so other mini apps can reconcile.
+Triggers host session logout.
 
-**Signature:** `logout(): Promise<void>`
+- **Signature**: `logout(): Promise<void>`
 
-<CodeTabs
-  typescript={`await sdk.auth.logout();
-{**your next action**}`}
-  javascript={`await sdk.auth.logout();
-{**your next action**}`}
-/>
-
-</LanguageProvider>
+```typescript
+await sdk.auth.logout();
+```

@@ -1,89 +1,88 @@
 ---
 id: platform
-title: Platform Module (sdk.platform)
+title: Knowing where you run (sdk.platform)
 sidebar_label: sdk.platform
 ---
 
-import {CodeTabs, LanguageProvider} from '@site/src/components/CodeTabs';
-
-<LanguageProvider>
-
 # Platform (`sdk.platform`)
 
-Reports which shell hosts the mini app. The `type` resolves during `sdk.initialize()` from the host's `platform.getType` reply (bare `"web"`/`"flutter"` string or a `{ type, appearance }` object that also hydrates locale/theme).
+Your mini app runs inside two different shells: a browser page, and the native
+Sewa app. `sdk.platform` tells you which one, so you can adjust behaviour that
+genuinely differs between them.
 
----
+Most mini apps never need it. Use CSS media queries for layout. Reach for
+`sdk.platform` only when a decision depends on the shell itself.
 
-## Public Members
+## The surface
 
-### `type`
+```js
+sdk.platform.type;        // "web" | "flutter"
 
-The resolved host type. One of `"web"` or `"flutter"`.
-
-**Signature:** `type: PlatformTypeLiteral`
-
-### `isWeb()` / `isFlutter()` / `isMobile()`
-
-Feature predicates derived from `type`. Note `isMobile()` is currently equivalent to `isFlutter()`.
-
-**Signatures:**
-
-```typescript
-isWeb(): boolean;      // type === "web"
-isFlutter(): boolean;  // type === "flutter"
-isMobile(): boolean;   // type === "flutter"
+sdk.platform.isWeb();     // running in a browser shell
+sdk.platform.isMobile();  // running in the native Sewa app
 ```
 
-<CodeTabs
-  typescript={`if (sdk.platform.isFlutter()) {
-  // native shell: prefer device.* bridges over web APIs
+`type` is a property, not a method. The two checks are the whole API.
+
+| Member | Meaning |
+|---|---|
+| `type` | `"web"` in a browser shell, `"flutter"` in the native app |
+| `isWeb()` | `type === "web"` |
+| `isMobile()` | `type === "flutter"` |
+
+> `isFlutter()` also exists and is the same check as `isMobile()`. It is named
+> after the technology the native shell is built with. Prefer `isMobile()`:
+> it describes what your code actually cares about, and it stays correct if
+> the shell is ever rebuilt on something else.
+
+There is no separate iOS or Android check, and no phone or tablet check. The
+shell reports one of two values. If you need screen size, use a media query.
+
+## When it is the right tool
+
+```js
+// Downloads behave differently: the native shell writes to device storage.
+if (sdk.platform.isMobile()) {
+  await sdk.device.download({ url: receiptUrl });
 } else {
-  // web shell
-}`}
-  javascript={`if (sdk.platform.isFlutter()) {
-  // native shell: prefer device.* bridges over web APIs
-} else {
-  // web shell
-}`}
-/>
+  window.open(receiptUrl, "_blank");
+}
+```
 
-### Usage Patterns
+Good reasons to branch:
 
-**Conditional device access:**
+- A capability exists on one shell only.
+- The native shell owns an interaction, such as saving a file or haptics.
+- You want to hide a browser-only affordance, such as "open in new tab".
 
-<CodeTabs
-  typescript={`// On Flutter, use native device APIs
-if (sdk.platform.isFlutter()) {
-    const location = await sdk.device.location();
-}`}
-  javascript={`// On Flutter, use native device APIs
-if (sdk.platform.isFlutter()) {
-    const location = await sdk.device.location();
-}`}
-/>
+## When it is the wrong tool
 
-**Platform-specific styling:**
+Do not use `sdk.platform` to guess whether a capability is available. Ask
+directly, because the answer depends on the grant your mini app was given, not
+on the shell:
 
-<CodeTabs
-  typescript={`if (sdk.platform.isMobile()) {
-  document.body.classList.add("mobile-layout");
-} else {
-  document.body.classList.add("desktop-layout");
-}`}
-  javascript={`if (sdk.platform.isMobile()) {
-  document.body.classList.add("mobile-layout");
-} else {
-  document.body.classList.add("desktop-layout");
-}`}
-/>
+```js
+if (sdk.capabilities.includes("device")) {
+  // …
+}
 
-**Check platform type:**
+if (sdk.device.isSupported("biometric")) {
+  // …
+}
+```
 
-<CodeTabs
-  typescript={`const platformType: PlatformTypeLiteral = sdk.platform.type;
-console.log(\`Running on: \${platformType}\`);`}
-  javascript={`const platformType = sdk.platform.type;
-console.log(\`Running on: \${platformType}\`);`}
-/>
+A capability your mini app was not granted stays unavailable on both shells.
 
-</LanguageProvider>
+## Layout
+
+Do not branch on platform for layout. The native shell renders your app in a
+web view, so the same CSS applies:
+
+```css
+@media (max-width: 600px) { /* narrow, on either shell */ }
+```
+
+## Next
+
+- [Device features](/docs/sdk/device) — what the native shell can do.
+- [Permissions](/docs/sdk/permissions) — what your mini app is allowed to ask for.

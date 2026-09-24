@@ -6,6 +6,11 @@ sidebar_label: Observability
 
 # Observability
 
+> **Platform internals.** This page describes how the SDK and the Sewa shell
+> talk to each other. You do not need any of it to build a mini app — see
+> [Getting Started](/docs/getting-started) for that. It is here for people
+> working on the shell or the SDK itself.
+
 In-memory metrics, diagnostics, and pluggable tracing for production debugging. The SDK does **not** send telemetry to a hosted backend - there is no analytics, no OpenTelemetry exporter, no network call. Collection is local and privacy-safe; shipping is your decision.
 
 ## Metrics - local, bounded, zero-config
@@ -19,8 +24,19 @@ const s = sdk.getMetrics();
 // s.byAction["auth.getUser"]: { count, successes, failures, timeouts, retries, totalDurationMs, averageDurationMs, percentiles }
 ```
 
-The host may configure `metrics: { maxDurationEntries, durationsWindowMs, onSnapshot }` at
-construction (mini apps never call this; defaults are fine).
+Optional tuning and export hook:
+
+```typescript
+// test apps rarely need this - defaults are fine
+createMiniAppSdk({
+  miniAppId: "tax-calc",
+  metrics: {
+    maxDurationEntries: 100,
+    durationsWindowMs: 60_000,
+    onSnapshot: (snapshot) => { /* ship to your backend */ },
+  },
+});
+```
 
 `onSnapshot` is called on every `sdk.getMetrics()` read; the recorder itself never does `fetch`. `AdaptiveTimeout` (see [Reliability](/docs/sdk/reliability)) can optionally consume `onSnapshot` to tune per-action timeouts.
 
@@ -43,9 +59,14 @@ Call `diagnose()` when `sdk.getMetrics().totalFailures` spikes or the host repor
 
 ## Tracing - opt-in `Tracer`
 
-Tracing is host-configured: the host injects a `Tracer` (default is a no-op tracer - no
-allocation, no behavior change) when bridging to OpenTelemetry/Datadog. Spans cover
-`rpc.handshake`, `rpc.request`, and `rpc.stream`, with `namespace`, `action`, `traceId`,
-`retryCount`, and `bytes` attributes. Mini apps never touch this; the useful part for vendors
-is that `traceId` is stamped on every wire message (`PlatformMessage.traceId`) for host-side
-correlation - see [Protocol](/docs/sdk/protocol).
+```typescript
+import { noopTracer } from "@govtech/mini-app-sdk";
+
+const sdk = createMiniAppSdk({ miniAppId, tracer: noopTracer /* or custom */ });
+// Spans: rpc.handshake, rpc.request, rpc.stream
+// Attrs: namespace, action, traceId, retryCount, error, bytes
+```
+
+Default is `noopTracer` (no allocation, no behavior change). Inject a `Tracer` via `MiniAppSdkDependencies` when bridging to OpenTelemetry/Datadog. Each RPC or handshake creates one span; `span.setAttribute` carries `namespace`, `action`, `traceId`, `retryCount`, and `bytes` for streams.
+
+`traceId` is also stamped on every wire message (`PlatformMessage.traceId`) for host-side correlation - see [Protocol](/docs/sdk/protocol).

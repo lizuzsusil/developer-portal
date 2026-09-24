@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Layout from "@theme/Layout";
-import { CapabilityTeaser, FinalCTA, HeroFrameworks, HowItWorks, IntegrationGrid, PlaygroundGrid } from "../components/Landing";
+import { HeroFrameworks, IntegrationGrid } from "../components/Landing";
 
 export default function Home(): ReactNode {
   return (

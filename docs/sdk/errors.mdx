@@ -1,87 +1,87 @@
 ---
 id: errors
-title: Errors
-sidebar_label: Errors
+title: Handling errors
+sidebar_label: Handling errors
 ---
 
-# Errors
+# Handling errors
 
-All SDK failures are `SdkError` subclasses carrying a machine-readable `code` and, usually, a `retryable` flag. Branch on the guards - prefer the exported helpers over string-matching `code` by hand.
+Every SDK call rejects with an error carrying a `code`. Branch on the code —
+the SDK is injected by the platform, so there is nothing to import.
 
-> Scope: this page covers only what a mini-app developer can observe through the host-injected instance (`window.__SEWA_SDK__`). Construction- and lifecycle-time failures (`initialize()` / `destroy()` / bad options) belong to the host - see [Host-only errors](#host-only-errors) at the bottom.
-
-## Hierarchy
-
-```
-SdkError                              - root: { code, message, retryable, details?, cause? }, .toJSON()
-├── TransportError        - transport send failure (the pipe itself is broken)
-├── ProtocolError         - `reason: 'malformed-message'` (don't trust what arrived) vs `'host-rejected'` (host understood and said no; host `code` preserved as-is)
-├── TimeoutError          - per-request timeout (retryable; `details: { namespace, action, timeoutMs }`)
-├── RequestCancelledError - AbortSignal aborted (never retryable - caller's choice; has `namespace` / `action`)
-├── StreamCancelledError  - StreamBuilder.cancel()
-├── HttpClientError       - mapped 4xx from proxied HTTP (not retryable; has `.status`)
-└── HttpServerError       - mapped 5xx from proxied HTTP (retryable; has `.status`)
-```
-
-`HandshakeError` is host-only (thrown from `initialize()`, which the host calls before injecting the instance) - listed under [Host-only errors](#host-only-errors).
-
-## Codes
-
-What you can catch from the injected instance:
-
-| Code | Meaning | Retryable | Typical source |
-|---|---|---|---|
-| `TRANSPORT_SEND_FAILED` | Underlying transport failed to send | Per-case | Any call |
-| `CAPABILITY_NOT_SUPPORTED` | Namespace the host did not grant - gate with `sdk.capabilities.includes('<namespace>')` first (or the module guard where one exists: `device.isSupported(action)`, `notifications.isSupported()`, `links.isSupported` property) | No | Any namespaced call |
-| `INVALID_PARAMS` | Bad call shape (e.g. removed object form, non-relative endpoint) | No | `sdk.request`, host validation |
-| `INVALID_MESSAGE` | Incoming host message failed validation (`ProtocolError`, `reason: 'malformed-message'`) | No | Any call |
-| `TIMEOUT` | Per-request timeout elapsed | Yes | Any call |
-| `REQUEST_CANCELLED` | `AbortSignal` aborted | No | Unmount / user cancel paths |
-| `STREAM_CANCELLED` | `StreamBuilder.cancel()` | No | Stream teardown |
-| `CIRCUIT_OPEN` | Circuit breaker open under load | After backoff | Any call |
-| `HTTP_CLIENT_ERROR` | Mapped 4xx from a proxied HTTP response | No | `api.request` |
-| `HTTP_SERVER_ERROR` | Mapped 5xx from a proxied HTTP response | Yes | `api.request` |
-| `AUTH_FAILED` / `AUTH_REQUIRED` / `UNAUTHENTICATED` / `FORBIDDEN` | Auth-family failures (host-defined; matched by `isAuthError()`) | No | `sdk.auth`, guarded endpoints |
-| `<host-defined>` | Any other host `code`, preserved as-is on `ProtocolError` (`reason: 'host-rejected'`) | From host | Any call |
-
-## Guards
-
-The SDK exports pure, never-throwing helpers from its entrypoint - use them instead of casting to `{ code }` by hand:
-
-```typescript
-import {
-  getErrorCode,
-  isAuthError,
-  isRetryable,
-  isSdkError,
-  isTimeout,
-  isTransportError,
-} from '@lizuz/sewa-sdk';
-
+```js
 try {
-  await sdk.auth.getUser();
+  const user = await sdk.auth.getUser();
 } catch (err) {
-  if (!isSdkError(err)) throw err;
-  const code = getErrorCode(err);
-  if (code === 'REQUEST_CANCELLED' || code === 'STREAM_CANCELLED') return;
-  if (isTimeout(err) || isRetryable(err)) { /* retry or show spinner */ }
-  if (isTransportError(err)) { /* pipe broken - check sdk.debug.diagnose() */ }
-  if (isAuthError(err)) { /* redirect to login */ }
+  console.log(err.code, err.message);
 }
 ```
 
-`CAPABILITY_NOT_SUPPORTED` is thrown when the mini app calls a namespace the host did not grant during handshake - gate such calls with `sdk.capabilities.includes('<namespace>')` first.
+## The codes you will actually see
 
-Three modules also expose their own guard: `sdk.device.isSupported(action)`, `sdk.notifications.isSupported()`, and the `sdk.links.isSupported` boolean property.
-
-## Host-only errors
-
-Thrown where the host constructs and owns the instance - never catchable from the injected `window.__SEWA_SDK__`. Listed here so you can recognize them in host logs and `sdk.debug.diagnose()` output:
-
-| Code | Meaning | Thrown from |
+| Code | What happened | What to do |
 |---|---|---|
-| `HANDSHAKE_FAILED` / `HANDSHAKE_TIMEOUT` | Host rejected or never answered the handshake (`HandshakeError`, never retryable - fatal for the instance) | `sdk.initialize()` |
-| `TRANSPORT_NOT_STARTED` | Transport not started while SDK is initialized - surfaced via `sdk.debug.diagnose()` | `initialize()` / any call |
-| `SDK_NOT_INITIALIZED` | Call before `initialize()` resolved | Any call pre-init |
-| `SDK_ALREADY_DESTROYED` | Call after `destroy()` | Post-`destroy()` |
-| `INVALID_OPTIONS` | Bad `MiniAppSdkOptions` at construction | `new MiniAppSdk()` |
+| `CAPABILITY_NOT_SUPPORTED` | You called a namespace your mini app was not granted | Offer a fallback. Check `sdk.capabilities` first |
+| `TIMEOUT` | The platform did not answer in time | Safe to retry. The SDK already retried once |
+| `REQUEST_CANCELLED` | You aborted it | Usually nothing — the citizen moved on |
+| `CIRCUIT_OPEN` | Too many recent failures, calls are paused | Show a "try again shortly" message |
+| `HANDSHAKE_FAILED` | The SDK never connected to Sewa | Your app is running outside Sewa, or is not registered |
+
+## A capability you were not granted
+
+This is the one most mini apps meet first. Your app is granted a specific set of
+namespaces, and anything outside it fails immediately, without a round trip:
+
+```js
+if (!sdk.capabilities.includes("device")) {
+  showManualAddressForm();
+  return;
+}
+
+try {
+  const loc = await sdk.device.location();
+} catch (err) {
+  if (err.code === "CAPABILITY_NOT_SUPPORTED") showManualAddressForm();
+}
+```
+
+Checking `sdk.capabilities` up front is better than catching: you can render the
+right UI instead of an error after the fact.
+
+## Retrying
+
+The SDK already retries timeouts and 5xx responses with backoff before the
+error reaches you. By the time you see one, an immediate retry will probably
+fail too. Give the citizen a button rather than looping.
+
+Your backend's own status does not throw. `sdk.api.request` returns it as
+`res.status`, so check that before using `res.data`.
+
+## Errors from your own backend
+
+Your backend's response body reaches you unchanged on success. Design it so
+your frontend can tell a business outcome from a failure:
+
+```js
+const res = await sdk.api.request({ method: "POST", path: "/v1/quota", body });
+
+if (res.data.error) {
+  showFieldErrors(res.data.errors);   // a business answer, not a failure
+  return;
+}
+render(res.data);
+```
+
+## When you are not inside Sewa
+
+Opened directly in a browser tab there is no shell to connect to, so the SDK
+never reaches `ready`. Say so plainly rather than showing a blank screen:
+
+```js
+whenSdkReady()
+  .then(start)
+  .catch(() => showMessage("Open this from the Sewa app."));
+```
+
+`whenSdkReady` is the small poll helper from
+[Getting Started](/docs/getting-started).
